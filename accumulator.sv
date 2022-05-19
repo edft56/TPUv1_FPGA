@@ -1,26 +1,44 @@
+package Acc_types;
+    typedef enum logic {NORMAL, DIAG} acc_rd_mode;
+
+    typedef logic [6:0] diag_addr_array_t [32];
+
+    function diag_addr_array_t diag_addr_LUT (input logic [6:0] addr);
+        diag_addr_array_t out_addr;
+        //something something will write when bored
+        //hope verilog will some day have compile time lut creation
+        return out_addr;
+    endfunction
+endpackage
+
 module Accumulator( input   clk_i, rst_i,
-                    input   cs_i, wr_i,
-                    input   logic [15:0] data_i,
-                    input   logic [9:0] addr_wr,
-                    input   logic [9:0] addr_rd,
+                    input   port1_rd_en_i,
+                    input   port2_wr_en_i,
+                    input   Acc_types::acc_rd_mode accumulator_read_mode,
+                    input   logic [31:0] data_i [32],
+                    input   logic [6:0] addr_wr,
+                    input   logic [6:0] addr_rd,
 
-                    output  logic [15:0] data_o
+                    output  logic [31:0] data_o [32]
                     );
+    import Acc_types::*;
 
-    logic [15:0] mem_storage_q [1024];
+    logic [31:0] accumulator_storage [128][32];
+    diag_addr_array_t diag_addr;
 
     always_ff @(posedge clk_i, posedge rst_i) begin
-        if(cs_i & wr_i) begin
-            mem_storage_q[addr_wr]  <= data_i;
-            data_o                  <= mem_storage_q[addr_rd];
+        if(port2_wr_en_i) begin
+            accumulator_storage[addr_wr][31:0]  <= data_i;
         end
-        else if (cs_i & ~wr_i) begin
-            data_o                  <= mem_storage_q[addr_rd];
+        
+        if(port1_rd_en_i) begin
+            if(accumulator_read_mode == NORMAL) data_o <= accumulator_storage[addr_rd][31:0];
+            else begin
+                diag_addr <= diag_addr_LUT(addr_rd);
+                for(int i=0; i<32; i++) data_o[i] <= accumulator_storage[diag_addr[i]][i];
+            end
+            
         end
-        else begin
-            data_o                  <= data_o;
-        end
-
     end
 
 endmodule
