@@ -90,6 +90,10 @@ module MAC_unit_shell(  input               clk_i, rst_i,
                     state   <= state;
                 end
             end
+            default: begin
+                weight_q <= weight_q;
+                state   <= WAIT;
+            end
 
         endcase
 
@@ -103,13 +107,16 @@ module MAC_systolic_array(  input clk_i,rst_i,
                             input stall_i, load_weights_i, compute_i,
                             input logic [ 7:0] mem_weight_i [32],
                             input logic [15:0] mem_act_i [32],
-                            input logic [31:0] mem_add_i [32]
+                            //input logic [31:0] mem_add_i [32],
+
+                            output logic [31:0] data_o [32]
                             );
 
     logic [ 7:0] weight_connections [32][32];
     logic [15:0] act_connections [32][32];
     logic [31:0] out_connections [32][32];
 
+    assign data_o = out_connections[0:31][31];
 
     genvar i,j;
     generate
@@ -120,7 +127,7 @@ module MAC_systolic_array(  input clk_i,rst_i,
                                             .compute_i,             
                                             .mem_weight_i(mem_weight_i[0]),
                                             .act_i(mem_act_i[0]),
-                                            .add_i(mem_add_i[0]), //maybe can be used to add bias
+                                            .add_i(/*mem_add_i[0]*/), //maybe can be used to add bias
 
                                             .out_o(out_connections[0][0]),
                                             .act_o(act_connections[0][0]),
@@ -151,7 +158,7 @@ module MAC_systolic_array(  input clk_i,rst_i,
                                             .compute_i,             
                                             .mem_weight_i(weight_connections[i-1][j]),
                                             .act_i(act_connections[i][0]),
-                                            .add_i(mem_add_i[j]), //maybe can be used to add bias
+                                            .add_i(/*mem_add_i[j]*/), //maybe can be used to add bias
 
                                             .out_o(out_connections[i][0]),
                                             .act_o(act_connections[i][0]),
