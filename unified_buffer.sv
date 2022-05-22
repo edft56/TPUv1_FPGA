@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module Bram(input   clk_i, rst_i,
             input   cs_i, wr_i,
             input   logic [15:0] data_i,
@@ -64,7 +66,13 @@ module memory_general(  input   clk_i, rst_i,
 
     logic [15:0] mem_storage_q [4096][32];
 
-    always_ff @(posedge clk_i, posedge rst_i) begin
+    initial begin
+        for(int i=0; i<4096; i++) begin
+            mem_storage_q[i] = '{default:1};
+        end
+    end
+
+    always_ff @(posedge clk_i) begin
         if(port1_wr_i) begin
             mem_storage_q[addr_wr_i]  <= data_i;
         end
@@ -162,7 +170,7 @@ endmodule
 
 // endmodule
 
-module Unified_Buffer_Test(  input clk_i,rst_i,
+module unified_buffer(  input clk_i,rst_i,
                             input read_i, write_i,
                             input logic [15:0] unified_buffer_in [32],
                             input logic [11:0] unified_buffer_addr_wr,

@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 package Acc_types;
     typedef enum logic {NORMAL, DIAG} acc_rd_mode;
 

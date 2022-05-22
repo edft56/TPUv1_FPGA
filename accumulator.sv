@@ -1,6 +1,8 @@
-`include "packages.sv"
+`timescale 1ns/1ns
 
-module Accumulator( input   clk_i, rst_i,
+//`include "packages.sv"
+
+module accumulator( input   clk_i, rst_i,
                     input   port1_rd_en_i,
                     input   port2_wr_en_i,
                     input   add_i,
@@ -50,7 +52,7 @@ module Accumulator( input   clk_i, rst_i,
 
     end
 
-    always_ff @(posedge clk_i, posedge rst_i) begin
+    always_ff @(posedge clk_i) begin
         if(port2_wr_en_i) begin
             for(int i=0; i<32; i++) begin
                 accumulator_storage[addr_wr][i]  <= adder_input[i] + data_i[i];

@@ -1,3 +1,5 @@
+`timescale 1ns/1ns
+
 module weight_fifo( input   clk_i, rst_i,
                     input   write_i,
                     input   read_i,
@@ -23,7 +25,7 @@ module weight_fifo( input   clk_i, rst_i,
         end
     end
 
-    always_ff @(posedge clk_i, posedge rst_i) begin
+    always_ff @(posedge clk_i) begin
         
         weight_fifo_storage[0:32*4-2]   <= weight_fifo_storage[1:32*4-1];
 
@@ -35,7 +37,7 @@ module weight_fifo( input   clk_i, rst_i,
         end
 
         if(read_i) begin
-            valid_o                     <= 1'(weight_fifo_storage[0][0]>>7);
+            valid_o                     <= 1'(weight_fifo_storage[0][0]>>8);
             for(int i=0; i<32; i++) begin
                 data_o[i]               <= 8'(weight_fifo_storage[0][i]);
             end  

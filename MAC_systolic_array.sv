@@ -9,8 +9,8 @@ module MAC_unit_compute(input               clk_i,rst_i,
                         output logic [31:0] out_q
                         );
 
-    always_ff @( posedge clk_i, posedge rst_i ) begin
-        if (!rst_i) begin
+    always_ff @( posedge clk_i ) begin
+        if (rst_i) begin
             out_q       <= '0;
         end
         else begin
@@ -116,9 +116,15 @@ module MAC_systolic_array(  input clk_i,rst_i,
     logic [15:0] act_connections [32][32];
     logic [31:0] out_connections [32][32];
 
-    assign data_o = out_connections[0:31][31];
+    always_comb begin
+        for(int i=0; i<32; i++) begin
+            data_o [i] = out_connections[i][31];
+        end
 
-    genvar i,j;
+    end
+
+    genvar i;
+    genvar j;
     generate
         MAC_unit_shell MAC_array_row1_col1(  .clk_i,
                                             .rst_i,
@@ -156,7 +162,7 @@ module MAC_systolic_array(  input clk_i,rst_i,
                                             .stall_i,
                                             .load_weights_i,
                                             .compute_i,             
-                                            .mem_weight_i(weight_connections[i-1][j]),
+                                            .mem_weight_i(weight_connections[i-1][0]),
                                             .act_i(act_connections[i][0]),
                                             .add_i(/*mem_add_i[j]*/), //maybe can be used to add bias
 

@@ -4,14 +4,18 @@
 module main(    input clk_i, rst_i,
                 input instruction_i,
                 input [7:0] weight_fifo_data_in [32],
+                // input accumulator_addr_rd,
+                // input accumulator_addr_wr,
 
                 output unified_buffer_in_test,
                 output unified_buffer_out_test
             );
 
+    import Acc_types::*;
+
     wire stall_compute;
     wire load_weights_to_MAC;
-    wire compute;
+    wire MAC_compute;
     wire [ 7:0] MAC_weight_input [32];
     wire [15:0] MAC_act_input [32];
     //wire [31:0] MAC_add_input [32];
@@ -32,23 +36,25 @@ module main(    input clk_i, rst_i,
     wire [6:0] accumulator_addr_wr;
 
     wire weight_fifo_write;
-    wire weight_fifo_read;
+    //wire weight_fifo_read;
     wire weight_fifo_valid_output;
     //wire [7:0] weight_fifo_data_in [32];
+
+    wire act_data_rdy;
 
 
     MAC_systolic_array MAC_Array(   .clk_i,
                                     .rst_i,
                                     .stall_i(stall_compute), 
                                     .load_weights_i(load_weights_to_MAC), 
-                                    .compute_i(compute),
+                                    .compute_i(MAC_compute),
                                     .mem_weight_i(MAC_weight_input),
                                     .mem_act_i(MAC_act_input),
                                     //.mem_add_i,
                                     .data_o(MAC_output)
                                     );
 
-    Unified_Buffer_Test Uni_Buf(.clk_i,
+    unified_buffer Uni_Buf(.clk_i,
                                 .rst_i,
                                 .read_i(unified_buffer_read), 
                                 .write_i(unified_buffer_write),
@@ -60,12 +66,14 @@ module main(    input clk_i, rst_i,
                                 );
 
     systolic_data_staging sys_stage(.clk_i,
-                                    .data_in(unified_buffer_out),
+                                    .data_i(unified_buffer_out),
+                                    .read_i(unified_buffer_read),
                                         
-                                    .data_out(MAC_act_input)
+                                    .act_data_rdy_o(act_data_rdy),
+                                    .data_o(MAC_act_input)
                                     );
 
-    Accumulator accum(  .clk_i,
+    accumulator accum(  .clk_i,
                         .rst_i,
                         .port1_rd_en_i(accumulator_read_enable),
                         .port2_wr_en_i(accumulator_write_enable),
@@ -75,13 +83,13 @@ module main(    input clk_i, rst_i,
                         .addr_wr(accumulator_addr_rd),
                         .addr_rd(accumulator_addr_wr),
 
-                        .data_o(unified_buffer_in)
+                        .data_o()//.data_o(unified_buffer_in)
                         );
 
     weight_fifo w_fifo( .clk_i,
                         .rst_i,
-                        .read_i(weight_fifo_read),
-                        .write_i(weight_fifo_write),
+                        .read_i(load_weights_to_MAC),
+                        .write_i(1'b1),//weight_fifo_write
                         .data_i(weight_fifo_data_in),
 
                         .valid_o(weight_fifo_valid_output),
@@ -92,12 +100,17 @@ module main(    input clk_i, rst_i,
                             .rst_i,
                             .instruction_i,
                             //.next_weight_tile_rdy_i,
-                            .activations_rdy_i,
+                            .activations_rdy_i(act_data_rdy),
                             .weight_fifo_valid_output,
+                            .accumulator_start_addr_wr_i(7'd32),
 
                             .load_weights_o(load_weights_to_MAC),
                             .load_activations_o(unified_buffer_read),
                             .stall_compute_o(stall_compute),
+                            .MAC_compute_o(MAC_compute),
+                            .read_accumulator_o(accumulator_read_enable),
+                            .write_accumulator_o(accumulator_write_enable),
+                            .accumulator_addr_wr_o(accumulator_addr_wr),
                             .accumulator_read_mode
                             );
 
