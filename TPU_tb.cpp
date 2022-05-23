@@ -12,7 +12,7 @@ const bool trace = true;
 void simulate_DUT(){
     Vmain* top = new Vmain;
 
-    vluint64_t sim_time = 150;
+    vluint64_t sim_time = 400;
 
     uint8_t weight_data_in[32] = {1};
     
@@ -51,6 +51,7 @@ void simulate_DUT(){
 
     
     top->final();               // Done simulating
+
     
     delete top;
 

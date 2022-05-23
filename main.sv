@@ -8,7 +8,8 @@ module main(    input clk_i, rst_i,
                 // input accumulator_addr_wr,
 
                 output unified_buffer_in_test,
-                output unified_buffer_out_test
+                output unified_buffer_out_test,
+                output done_o
             );
 
     import Acc_types::*;
@@ -45,7 +46,7 @@ module main(    input clk_i, rst_i,
 
     MAC_systolic_array MAC_Array(   .clk_i,
                                     .rst_i,
-                                    .stall_i(stall_compute), 
+                                    .stall_i(1'b0), 
                                     .load_weights_i(load_weights_to_MAC), 
                                     .compute_i(MAC_compute),
                                     .mem_weight_i(MAC_weight_input),
@@ -80,8 +81,8 @@ module main(    input clk_i, rst_i,
                         .add_i(accumulator_add),
                         .accumulator_read_mode,
                         .data_i(MAC_output),
-                        .addr_wr(accumulator_addr_rd),
-                        .addr_rd(accumulator_addr_wr),
+                        .addr_wr(accumulator_addr_wr),
+                        .addr_rd(accumulator_addr_rd),
 
                         .data_o()//.data_o(unified_buffer_in)
                         );
@@ -111,7 +112,8 @@ module main(    input clk_i, rst_i,
                             .read_accumulator_o(accumulator_read_enable),
                             .write_accumulator_o(accumulator_write_enable),
                             .accumulator_addr_wr_o(accumulator_addr_wr),
-                            .accumulator_read_mode
+                            .accumulator_read_mode,
+                            .done_o
                             );
 
 endmodule

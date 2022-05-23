@@ -33,8 +33,6 @@ module MAC_unit_shell(  input               clk_i, rst_i,
 
     logic [ 7:0] weight_q;
     logic [15:0] act_q;
-    logic [31:0] out_q;
-    enum logic [1:0] {WAIT, LOAD_WEIGHTS, COMPUTE} state;
 
 
     MAC_unit_compute MAC0(  .clk_i,
@@ -43,59 +41,28 @@ module MAC_unit_shell(  input               clk_i, rst_i,
                             .act_i,
                             .add_i,
                             
-                            .out_q
+                            .out_q(out_o)
                         );
 
     assign act_o    = act_q;
-    assign out_o    = out_q;
     assign weight_o = weight_q;
 
     always_ff @(posedge clk_i) begin
-        act_q <= act_i;
 
-        case(state)
-            WAIT: begin
-                weight_q <= weight_q;
-
-                if(!stall_i)  begin
-                    state    <= (load_weights_i) ? LOAD_WEIGHTS : ( (compute_i) ? COMPUTE : state );
-                end
-                else begin
-                    state    <= state;
-                end
-            end
-            LOAD_WEIGHTS: begin
+        if(stall_i) begin
+            act_q    <= act_q;
+            weight_q <= weight_q;
+        end
+        else begin
+            if(load_weights_i) begin
+                act_q    <= act_q;
                 weight_q <= mem_weight_i;
-
-                if(stall_i)  begin
-                    state    <= WAIT;
-                end
-                else if (compute_i) begin
-                    state    <= WAIT;
-                end
-                else begin
-                    state    <= state;
-                end
             end
-            COMPUTE: begin
+            else if(compute_i) begin
+                act_q    <= act_i;
                 weight_q <= weight_q;
-
-                if (stall_i) begin
-                    state   <= WAIT;
-                end
-                else if (load_weights_i) begin
-                    state    <= LOAD_WEIGHTS;
-                end
-                else  begin
-                    state   <= state;
-                end
             end
-            default: begin
-                weight_q <= weight_q;
-                state   <= WAIT;
-            end
-
-        endcase
+        end
 
 
     end
@@ -123,9 +90,7 @@ module MAC_systolic_array(  input clk_i,rst_i,
 
     end
 
-    genvar i;
-    genvar j;
-    generate
+    generate 
         MAC_unit_shell MAC_array_row1_col1(  .clk_i,
                                             .rst_i,
                                             .stall_i,
@@ -140,7 +105,7 @@ module MAC_systolic_array(  input clk_i,rst_i,
                                             .weight_o(weight_connections[0][0])
                                             );
 
-        for(j=1; j<32; j++) begin
+        for(genvar j=1; j<32; j++) begin : MAC_ROW1
             MAC_unit_shell MAC_array_row1(  .clk_i,
                                             .rst_i,
                                             .stall_i,
@@ -154,26 +119,26 @@ module MAC_systolic_array(  input clk_i,rst_i,
                                             .act_o(act_connections[0][j]),
                                             .weight_o(weight_connections[0][j])
                                             );
-        end
+        end : MAC_ROW1
 
-        for(i=1; i<32; i++) begin
+        for(genvar i=1; i<32; i++) begin : MAC_COL1
             MAC_unit_shell MAC_array_col1(  .clk_i,
                                             .rst_i,
                                             .stall_i,
                                             .load_weights_i,
                                             .compute_i,             
                                             .mem_weight_i(weight_connections[i-1][0]),
-                                            .act_i(act_connections[i][0]),
+                                            .act_i(act_connections[i-1][0]),
                                             .add_i(/*mem_add_i[j]*/), //maybe can be used to add bias
 
                                             .out_o(out_connections[i][0]),
                                             .act_o(act_connections[i][0]),
                                             .weight_o(weight_connections[i][0])
                                             );
-        end
+        end : MAC_COL1
 
-        for(i=1; i<32; i++) begin
-            for(j=1; j<32; j++) begin
+        for(genvar i=1; i<32; i++) begin: MAC_ROW
+            for(genvar j=1; j<32; j++) begin: MAC_COL
 
                 MAC_unit_shell MAC_array_mid(   .clk_i,
                                                 .rst_i,
@@ -189,8 +154,8 @@ module MAC_systolic_array(  input clk_i,rst_i,
                                                 .weight_o(weight_connections[i][j])
                                             );
 
-            end
-        end
+            end: MAC_COL
+        end: MAC_ROW
     endgenerate
 
 endmodule

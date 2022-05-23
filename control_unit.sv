@@ -16,6 +16,7 @@ module control_unit(input clk_i,rst_i,
                     output logic read_accumulator_o,
                     output logic write_accumulator_o,
                     output logic [6:0] accumulator_addr_wr_o,
+                    output logic done_o,
                     output Acc_types::acc_rd_mode accumulator_read_mode
                     );
     import Acc_types::*;
@@ -29,7 +30,7 @@ module control_unit(input clk_i,rst_i,
     initial state = STALL;
     
     always_ff @( posedge clk_i ) begin
-
+        done_o                  <= 1'b0;
         case(state)
             STALL: begin
                 accumulator_read_mode   <= NORMAL;
@@ -38,6 +39,7 @@ module control_unit(input clk_i,rst_i,
                 load_weights_o          <= 1'b0;
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
+                
 
                 if (instruction_i) begin
                     state <= LOAD_WEIGHTS;
@@ -85,6 +87,7 @@ module control_unit(input clk_i,rst_i,
                     //accumulator_read_mode <= DIAG;
                     read_accumulator_o <= 1'b1;
                     state <= STALL;
+                    done_o <= 1'b1;
                 end
             end
             default: begin

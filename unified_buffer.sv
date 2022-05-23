@@ -68,7 +68,7 @@ module memory_general(  input   clk_i, rst_i,
 
     initial begin
         for(int i=0; i<4096; i++) begin
-            mem_storage_q[i] = '{default:1};
+            mem_storage_q[i] = '{default:16'd1};
         end
     end
 
@@ -182,8 +182,8 @@ module unified_buffer(  input clk_i,rst_i,
     
     memory_general mem_array(   .clk_i, 
                                 .rst_i,
-                                .port1_wr_i(read_i),
-                                .port2_rd_i(write_i),
+                                .port1_wr_i(write_i),
+                                .port2_rd_i(read_i),
                                 .data_i(unified_buffer_in),
                                 .addr_wr_i(unified_buffer_addr_wr),
                                 .addr_rd_i(unified_buffer_addr_rd),
