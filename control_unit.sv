@@ -22,12 +22,14 @@ module control_unit(input clk_i,rst_i,
     import Acc_types::*;
 
     enum logic [1:0] {STALL, LOAD_WEIGHTS, LOAD_ACTIVATIONS, COMPUTE} state;
+    enum logic {NON_OVERLAP_EXEC, OVERLAP_EXEC} accum_addr_mask_state;
 
     logic [4:0] load_weights_cntr_q;
     logic [5:0] compute_time_q;
 
 
     initial state = STALL;
+    initial accum_addr_mask_mode = NON_OVERLAP_EXEC;
     
     always_ff @( posedge clk_i ) begin
         done_o                  <= 1'b0;
@@ -82,12 +84,14 @@ module control_unit(input clk_i,rst_i,
                 if (compute_time_q > 6'd31) begin
                     write_accumulator_o <= 1'b1;
                     accumulator_addr_wr_o <= compute_time_q - accumulator_start_addr_wr_i;
+                    accum_addr_mask_state <= OVERLAP_EXEC;
                 end
                 if (compute_time_q == 6'd63) begin
                     //accumulator_read_mode <= DIAG;
                     read_accumulator_o <= 1'b1;
                     state <= STALL;
                     done_o <= 1'b1;
+                    accum_addr_mask_state <= NON_OVERLAP_EXEC;
                 end
             end
             default: begin
@@ -104,3 +108,29 @@ module control_unit(input clk_i,rst_i,
 
     end
 endmodule
+
+
+module accum_addr_calc( input clk_i,
+                        input logic [5:0] compute_time_q, 
+                        input logic [6:0] accumulator_start_addr_wr_i,
+
+                        output logic [31:0] accum_addr_mask_o
+                        );
+
+    enum logic {NON_OVERLAP_EXEC, OVERLAP_EXEC} accum_addr_mask_state;
+
+    always_ff @( posedge clk_i ) begin
+
+        case(state)
+            NON_OVERLAP_EXEC: begin
+                accum_addr_mask = (compute_time_q[5]) ? 32'h8000>>>compute_time_q[4:0] : '0;;
+            end
+            OVERLAP_EXEC: begin
+                
+            end
+        endcase
+
+    end
+endmodule
+
+
