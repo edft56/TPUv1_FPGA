@@ -4,6 +4,7 @@
 module main(    input clk_i, rst_i,
                 input instruction_i,
                 input [7:0] weight_fifo_data_in [32],
+                input [15:0] lines_to_compute_i,
                 // input accumulator_addr_rd,
                 // input accumulator_addr_wr,
 
@@ -32,10 +33,10 @@ module main(    input clk_i, rst_i,
     wire accumulator_read_enable;
     wire accumulator_write_enable;
     wire accumulator_add;
-    acc_rd_mode accumulator_read_mode;
+    
     wire [6:0] accumulator_addr_rd;
     wire [6:0] accumulator_addr_wr;
-
+    wire [31:0] accum_addr_mask;
     wire weight_fifo_write;
     //wire weight_fifo_read;
     wire weight_fifo_valid_output;
@@ -79,10 +80,10 @@ module main(    input clk_i, rst_i,
                         .port1_rd_en_i(accumulator_read_enable),
                         .port2_wr_en_i(accumulator_write_enable),
                         .add_i(accumulator_add),
-                        .accumulator_read_mode,
                         .data_i(MAC_output),
-                        .addr_wr(accumulator_addr_wr),
-                        .addr_rd(accumulator_addr_rd),
+                        .addr_wr_i(accumulator_addr_wr),
+                        .addr_rd_i(accumulator_addr_rd),
+                        .accum_addr_mask_i(accum_addr_mask),
 
                         .data_o()//.data_o(unified_buffer_in)
                         );
@@ -103,7 +104,8 @@ module main(    input clk_i, rst_i,
                             //.next_weight_tile_rdy_i,
                             .activations_rdy_i(act_data_rdy),
                             .weight_fifo_valid_output,
-                            .accumulator_start_addr_wr_i(7'd32),
+                            .accumulator_start_addr_wr_i('0),
+                            .lines_to_compute_i,
 
                             .load_weights_o(load_weights_to_MAC),
                             .load_activations_o(unified_buffer_read),
@@ -112,7 +114,7 @@ module main(    input clk_i, rst_i,
                             .read_accumulator_o(accumulator_read_enable),
                             .write_accumulator_o(accumulator_write_enable),
                             .accumulator_addr_wr_o(accumulator_addr_wr),
-                            .accumulator_read_mode,
+                            .accum_addr_mask_o(accum_addr_mask),
                             .done_o
                             );
 

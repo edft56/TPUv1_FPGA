@@ -8,6 +8,7 @@ module control_unit(input clk_i,rst_i,
                     input activations_rdy_i,
                     input weight_fifo_valid_output,
                     input logic [6:0] accumulator_start_addr_wr_i,
+                    input logic [15:0] lines_to_compute_i,
 
                     output logic load_weights_o,
                     output logic load_activations_o,
@@ -16,26 +17,27 @@ module control_unit(input clk_i,rst_i,
                     output logic read_accumulator_o,
                     output logic write_accumulator_o,
                     output logic [6:0] accumulator_addr_wr_o,
-                    output logic done_o,
-                    output Acc_types::acc_rd_mode accumulator_read_mode
+                    output logic [31:0] accum_addr_mask_o,
+                    output logic done_o
                     );
-    import Acc_types::*;
 
     enum logic [1:0] {STALL, LOAD_WEIGHTS, LOAD_ACTIVATIONS, COMPUTE} state;
-    enum logic {NON_OVERLAP_EXEC, OVERLAP_EXEC} accum_addr_mask_state;
 
-    logic [4:0] load_weights_cntr_q;
-    logic [5:0] compute_time_q;
+    enum logic {NON_FULL_OUTPUT, FULL_OUTPUT} accum_addr_mask_state;
 
+    logic [ 4:0] load_weights_cntr_q;
+    logic [ 5:0] compute_time_q;
+    logic [15:0] lines_computed_q;
 
+    initial compute_time_q = 0;
+    initial lines_computed_q = 1;
     initial state = STALL;
-    initial accum_addr_mask_mode = NON_OVERLAP_EXEC;
+    initial accum_addr_mask_state = NON_FULL_OUTPUT;
     
     always_ff @( posedge clk_i ) begin
         done_o                  <= 1'b0;
         case(state)
             STALL: begin
-                accumulator_read_mode   <= NORMAL;
                 load_activations_o      <= 1'b0;
                 stall_compute_o         <= 1'b1;
                 load_weights_o          <= 1'b0;
@@ -48,7 +50,6 @@ module control_unit(input clk_i,rst_i,
                 end
             end
             LOAD_WEIGHTS: begin
-                accumulator_read_mode   <= NORMAL;
                 load_activations_o      <= 1'b0;
                 stall_compute_o         <= 1'b1;
                 load_weights_o          <= 1'b1;
@@ -61,7 +62,6 @@ module control_unit(input clk_i,rst_i,
                 end
             end
             LOAD_ACTIVATIONS: begin
-                accumulator_read_mode   <= NORMAL;
                 load_activations_o      <= 1'b1;
                 stall_compute_o         <= 1'b1;
                 load_weights_o          <= 1'b1;
@@ -73,7 +73,6 @@ module control_unit(input clk_i,rst_i,
                 end
             end
             COMPUTE: begin
-                accumulator_read_mode   <= DIAG;
                 load_activations_o      <= 1'b1;
                 stall_compute_o         <= 1'b0;
                 load_weights_o          <= 1'b0;
@@ -81,21 +80,33 @@ module control_unit(input clk_i,rst_i,
                 MAC_compute_o           <= 1'b1;
 
                 compute_time_q <= compute_time_q + 1;
-                if (compute_time_q > 6'd31) begin
-                    write_accumulator_o <= 1'b1;
-                    accumulator_addr_wr_o <= compute_time_q - accumulator_start_addr_wr_i;
-                    accum_addr_mask_state <= OVERLAP_EXEC;
-                end
-                if (compute_time_q == 6'd63) begin
-                    //accumulator_read_mode <= DIAG;
-                    read_accumulator_o <= 1'b1;
-                    state <= STALL;
-                    done_o <= 1'b1;
-                    accum_addr_mask_state <= NON_OVERLAP_EXEC;
-                end
+                
+                case(accum_addr_mask_state)
+                    NON_FULL_OUTPUT: begin
+                        accumulator_addr_wr_o   <= accumulator_start_addr_wr_i;
+                        accum_addr_mask_o       <= (compute_time_q > 'd31) ? signed'(signed'(32'h80000000)>>>compute_time_q[4:0]) : '0;
+                        write_accumulator_o     <= (compute_time_q > 'd31) ? 1'b1 : 1'b0;
+
+                        if (compute_time_q == 'd63) begin
+                            accum_addr_mask_state <= FULL_OUTPUT;
+                        end
+                    end
+                    FULL_OUTPUT: begin
+                        lines_computed_q        <= lines_computed_q + 1;
+                        accum_addr_mask_o       <= '1;
+                        accumulator_addr_wr_o   <= accumulator_start_addr_wr_i + lines_computed_q;
+                        write_accumulator_o     <= 1'b1;
+
+                        if(lines_computed_q == lines_to_compute_i) begin
+                            done_o <= 1'b1;
+                            state <= STALL;
+                            write_accumulator_o     <= 1'b0;
+                        end
+                    end
+                endcase
+                
             end
             default: begin
-                accumulator_read_mode   <= NORMAL;
                 load_activations_o      <= 1'b0;
                 stall_compute_o         <= 1'b1;
                 load_weights_o          <= 1'b0;
@@ -110,27 +121,51 @@ module control_unit(input clk_i,rst_i,
 endmodule
 
 
-module accum_addr_calc( input clk_i,
-                        input logic [5:0] compute_time_q, 
-                        input logic [6:0] accumulator_start_addr_wr_i,
+// module compute_state_control(   input clk_i,
+//                                 input logic [ 6:0] accumulator_start_addr_wr_i,
+//                                 input logic [15:0] lines_to_compute_i,
+//                                 input logic [ 1:0] state_i,
 
-                        output logic [31:0] accum_addr_mask_o
-                        );
+//                                 output logic [31:0] accum_addr_mask_o,
+//                                 output logic [ 6:0] accumulator_addr_wr_o,
+//                                 output logic        write_accumulator_o,
+//                                 output logic        done_o
+//                             );
 
-    enum logic {NON_OVERLAP_EXEC, OVERLAP_EXEC} accum_addr_mask_state;
+//     enum logic {NON_FULL_OUTPUT, FULL_OUTPUT} accum_addr_mask_state;
 
-    always_ff @( posedge clk_i ) begin
+//     logic [ 5:0] compute_time_q;
+//     logic [15:0] lines_computed_q;
 
-        case(state)
-            NON_OVERLAP_EXEC: begin
-                accum_addr_mask = (compute_time_q[5]) ? 32'h8000>>>compute_time_q[4:0] : '0;;
-            end
-            OVERLAP_EXEC: begin
-                
-            end
-        endcase
+//     initial compute_time_q=0;
+//     initial lines_computed_q=1;
 
-    end
-endmodule
+//     always_ff @( posedge clk_i ) begin
+            
+//         case(accum_addr_mask_state)
+//             NON_FULL_OUTPUT: begin
+//                 accumulator_addr_wr_o   <= accumulator_start_addr_wr_i;
+//                 accum_addr_mask_o       <= (compute_time_q > 'd31) ? 32'h8000>>>compute_time_q[4:0] : '0;
+//                 write_accumulator_o     <= (compute_time_q > 'd31) ? 1'b1 : 1'b0;
+
+//                 if (compute_time_q == 'd63) begin
+//                     accum_addr_mask_state <= FULL_OUTPUT;
+//                 end
+//             end
+//             FULL_OUTPUT: begin
+//                 lines_computed_q        <= lines_computed_q + 1;
+//                 accum_addr_mask_o       <= '1;
+//                 accumulator_addr_wr_o   <= accumulator_start_addr_wr_i + lines_computed_q;
+//                 write_accumulator_o     <= 1'b1;
+
+//                 if(lines_computed_q == lines_to_compute_i) begin
+//                     done_o <= 1'b1;
+//                     state <= STALL;
+//                 end
+//             end
+//         endcase
+
+//     end
+// endmodule
 
 
