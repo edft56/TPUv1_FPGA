@@ -28,7 +28,8 @@ void simulate_DUT(){
     top->clk_i = 0;
     top->rst_i = 0;
     top->instruction_i = 0;
-    top->lines_to_compute_i = 32;
+    top->H_DIM_i = 64;
+    top->W_DIM_i = 64;
 
     for(int i=0; i<32; i++){
         top->weight_fifo_data_in[i] = 1;

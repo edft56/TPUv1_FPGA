@@ -8,7 +8,8 @@ module control_unit(input clk_i,rst_i,
                     input activations_rdy_i,
                     input weight_fifo_valid_output,
                     input logic [6:0] accumulator_start_addr_wr_i,
-                    input logic [15:0] lines_to_compute_i,
+                    input logic [8:0] H_DIM_i,
+                    input logic [8:0] W_DIM_i,
 
                     output logic load_weights_o,
                     output logic load_activations_o,
@@ -18,6 +19,7 @@ module control_unit(input clk_i,rst_i,
                     output logic write_accumulator_o,
                     output logic [6:0] accumulator_addr_wr_o,
                     output logic [31:0] accum_addr_mask_o,
+                    output logic accumulator_add_o,
                     output logic done_o
                     );
 
@@ -27,13 +29,25 @@ module control_unit(input clk_i,rst_i,
 
     logic [ 4:0] load_weights_cntr_q;
     logic [ 5:0] compute_time_q;
-    logic [15:0] lines_computed_q;
+    logic [ 8:0] lines_computed_q;
+    logic [ 4:0] H_tiles_computed_q;
+    logic [ 3:0] W_tiles_computed_q;
+
+    logic        done_signal;
 
     initial compute_time_q = 0;
     initial lines_computed_q = 1;
     initial state = STALL;
     initial accum_addr_mask_state = NON_FULL_OUTPUT;
+    initial H_tiles_computed_q = 0;
+    initial W_tiles_computed_q = 0;
+    initial accumulator_add_o = 0;
+
+    always_comb begin
+        done_signal = (W_tiles_computed_q == 4'(W_DIM_i>>5)) & (H_tiles_computed_q == 5'(H_DIM_i>>5));
+    end
     
+
     always_ff @( posedge clk_i ) begin
         done_o                  <= 1'b0;
         case(state)
@@ -78,8 +92,13 @@ module control_unit(input clk_i,rst_i,
                 load_weights_o          <= 1'b0;
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b1;
+                accumulator_add_o       <= W_tiles_computed_q > 0;
+
 
                 compute_time_q <= compute_time_q + 1;
+
+                H_tiles_computed_q <= (H_tiles_computed_q == 5'(H_DIM_i>>5)) ? '0 : 5'(lines_computed_q >> 5);
+                W_tiles_computed_q <= (done_signal) ? '0 : ( (H_tiles_computed_q == 'd16) ? W_tiles_computed_q + 1 : W_tiles_computed_q );
                 
                 case(accum_addr_mask_state)
                     NON_FULL_OUTPUT: begin
@@ -92,12 +111,12 @@ module control_unit(input clk_i,rst_i,
                         end
                     end
                     FULL_OUTPUT: begin
-                        lines_computed_q        <= lines_computed_q + 1;
+                        lines_computed_q        <= (H_tiles_computed_q == 5'(H_DIM_i>>5)) ? '0 : lines_computed_q + 1;
                         accum_addr_mask_o       <= '1;
                         accumulator_addr_wr_o   <= accumulator_start_addr_wr_i + lines_computed_q;
                         write_accumulator_o     <= 1'b1;
 
-                        if(lines_computed_q == lines_to_compute_i) begin
+                        if(done_signal) begin
                             done_o <= 1'b1;
                             state <= STALL;
                             write_accumulator_o     <= 1'b0;
