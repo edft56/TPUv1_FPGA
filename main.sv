@@ -115,6 +115,7 @@ module main(    input clk_i, rst_i,
                             .write_accumulator_o(accumulator_write_enable),
                             .accumulator_addr_wr_o(accumulator_addr_wr),
                             .accum_addr_mask_o(accum_addr_mask),
+                            .accumulator_add_o(accumulator_add),
                             .done_o
                             );
 
