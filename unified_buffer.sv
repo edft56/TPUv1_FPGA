@@ -66,9 +66,11 @@ module memory_general(  input   clk_i, rst_i,
 
     logic [15:0] mem_storage_q [4096][32];
 
+    logic [4:0] times_read;
+
     initial begin
         for(int i=0; i<4096; i++) begin
-            mem_storage_q[i] = '{default:16'd1};
+            mem_storage_q[i] = '{default:16'(1)};//'{default:16'(i%5)};
         end
     end
 
@@ -78,7 +80,9 @@ module memory_general(  input   clk_i, rst_i,
         end
 
         if (port2_rd_i) begin
-            data_o                  <= mem_storage_q[addr_rd_i];
+            //data_o                  <= mem_storage_q[addr_rd_i];
+            data_o                  <= mem_storage_q[times_read];
+            times_read <= times_read + 1;
         end
         else begin
             data_o                  <= data_o;

@@ -6,9 +6,11 @@ module main(    input clk_i, rst_i,
                 input [7:0] weight_fifo_data_in [32],
                 input [8:0] H_DIM_i,
                 input [8:0] W_DIM_i,
+                input sending_fifo_data_i,
 
                 output unified_buffer_in_test,
                 output unified_buffer_out_test,
+                output request_fifo_data_o,
                 output done_o
             );
 
@@ -81,7 +83,7 @@ module main(    input clk_i, rst_i,
                         .add_i(accumulator_add),
                         .data_i(MAC_output),
                         .addr_wr_i(accumulator_addr_wr),
-                        .addr_rd_i(accumulator_addr_rd),
+                        .addr_rd_i(accumulator_addr_wr),
                         .accum_addr_mask_i(accum_addr_mask),
 
                         .data_o()//.data_o(unified_buffer_in)
@@ -89,10 +91,12 @@ module main(    input clk_i, rst_i,
 
     weight_fifo w_fifo( .clk_i,
                         .rst_i,
-                        .read_i(load_weights_to_MAC),
-                        .write_i(1'b1),//weight_fifo_write
+                        .read_en_i(load_weights_to_MAC),
+                        .write_en_i(1'b1),
                         .data_i(weight_fifo_data_in),
+                        .sending_data_i(sending_fifo_data_i),
 
+                        .request_data_o(request_fifo_data_o),
                         .valid_o(weight_fifo_valid_output),
                         .data_o(MAC_weight_input)
                         );

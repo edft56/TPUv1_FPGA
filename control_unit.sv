@@ -25,26 +25,40 @@ module control_unit(input clk_i,rst_i,
 
     enum logic [1:0] {STALL, LOAD_WEIGHTS, LOAD_ACTIVATIONS, COMPUTE} state;
 
-    enum logic {NON_FULL_OUTPUT, FULL_OUTPUT} accum_addr_mask_state;
+    enum logic [1:0] {NO_OUTPUT, PARTIAL_OUTPUT, FULL_OUTPUT, REVERSE_PARTIAL} compute_output_state;
 
     logic [ 4:0] load_weights_cntr_q;
-    logic [ 5:0] compute_time_q;
-    logic [ 8:0] lines_computed_q;
-    logic [ 4:0] H_tiles_computed_q;
-    logic [ 3:0] W_tiles_computed_q;
+    logic [ 9:0] compute_cntr_q;
+    logic [ 4:0] rev_partial_cntr_q;
+    //logic [ 8:0] H_tiles_computed_q;
+    logic [ 3:0] weight_tiles_x_consumed_q;
+    logic [ 3:0] weight_tiles_y_consumed_q;
 
-    logic        done_signal;
+    logic        done;
+    logic        next_weight_tile;
+    logic        done_weight_tiles_y;
+    logic        done_weight_tiles_x;
 
-    initial compute_time_q = 0;
-    initial lines_computed_q = 1;
+    initial compute_cntr_q = 0;
     initial state = STALL;
-    initial accum_addr_mask_state = NON_FULL_OUTPUT;
-    initial H_tiles_computed_q = 0;
-    initial W_tiles_computed_q = 0;
+    initial compute_output_state = NO_OUTPUT;
+    //initial H_tiles_computed_q = 0;
+    initial weight_tiles_x_consumed_q = 0;
+    initial weight_tiles_y_consumed_q = 0;
     initial accumulator_add_o = 0;
 
     always_comb begin
-        done_signal = (W_tiles_computed_q == 4'(W_DIM_i>>5)) & (H_tiles_computed_q == 5'(H_DIM_i>>5));
+        next_weight_tile   = rev_partial_cntr_q == 'd31;
+
+        done_weight_tiles_y = (weight_tiles_y_consumed_q == 4'(W_DIM_i>>5)) & next_weight_tile;
+        done_weight_tiles_x = (weight_tiles_x_consumed_q == 4'(W_DIM_i>>5)) & done_weight_tiles_y;
+
+        done        = done_weight_tiles_x;
+
+        
+        // H_tiles_computed_q = (H_tiles_computed_q == 5'(H_DIM_i>>5)) ? '0 : 5'(lines_computed_q >> 5);
+        // W_tiles_computed_q = (done_signal) ? '0 : ( (H_tiles_computed_q == 5'(W_DIM_i>>5)) ? W_tiles_computed_q + 1 : W_tiles_computed_q );
+       
     end
     
 
@@ -57,6 +71,7 @@ module control_unit(input clk_i,rst_i,
                 load_weights_o          <= 1'b0;
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
+                write_accumulator_o     <= 1'b0;
                 
 
                 if (instruction_i) begin
@@ -69,6 +84,7 @@ module control_unit(input clk_i,rst_i,
                 load_weights_o          <= 1'b1;
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
+                write_accumulator_o     <= 1'b0;
 
                 load_weights_cntr_q <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
                 if (load_weights_cntr_q == 5'd31) begin
@@ -81,6 +97,7 @@ module control_unit(input clk_i,rst_i,
                 load_weights_o          <= 1'b1;
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
+                write_accumulator_o     <= 1'b0;
 
                 if (activations_rdy_i == 1'b1) begin
                     state <= COMPUTE;
@@ -92,37 +109,78 @@ module control_unit(input clk_i,rst_i,
                 load_weights_o          <= 1'b0;
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b1;
-                accumulator_add_o       <= W_tiles_computed_q > 0;
+                accumulator_add_o       <= weight_tiles_y_consumed_q > 0;
+                read_accumulator_o      <= weight_tiles_y_consumed_q > 0;
 
-
-                compute_time_q <= compute_time_q + 1;
-
-                H_tiles_computed_q <= (H_tiles_computed_q == 5'(H_DIM_i>>5)) ? '0 : 5'(lines_computed_q >> 5);
-                W_tiles_computed_q <= (done_signal) ? '0 : ( (H_tiles_computed_q == 'd16) ? W_tiles_computed_q + 1 : W_tiles_computed_q );
                 
-                case(accum_addr_mask_state)
-                    NON_FULL_OUTPUT: begin
-                        accumulator_addr_wr_o   <= accumulator_start_addr_wr_i;
-                        accum_addr_mask_o       <= (compute_time_q > 'd31) ? signed'(signed'(32'h80000000)>>>compute_time_q[4:0]) : '0;
-                        write_accumulator_o     <= (compute_time_q > 'd31) ? 1'b1 : 1'b0;
 
-                        if (compute_time_q == 'd63) begin
-                            accum_addr_mask_state <= FULL_OUTPUT;
+                //H_tiles_computed_q <= ( 5'(lines_computed_q >> 5) == 5'(H_DIM_i>>5) ) ? '0 : ( (lines_computed_q == 'd31) ? H_tiles_computed_q + 1 : H_tiles_computed_q );
+                //W_tiles_computed_q <= (done_signal) ? '0 : ( (5'(lines_computed_q >> 5) == 5'(H_DIM_i>>5)) ? W_tiles_computed_q + 1 : W_tiles_computed_q );
+
+                //weight_tiles_consumed_q <= (done) ? '0 : ( next_weight_tile ? weight_tiles_consumed_q + 1 : weight_tiles_consumed_q );
+
+                weight_tiles_y_consumed_q <= (done_weight_tiles_y) ? '0 : ( next_weight_tile    ? weight_tiles_y_consumed_q + 1 : weight_tiles_y_consumed_q );
+                weight_tiles_x_consumed_q <= (done_weight_tiles_x) ? '0 : ( done_weight_tiles_y ? weight_tiles_x_consumed_q + 1 : weight_tiles_x_consumed_q );
+                
+                case (compute_output_state)
+                    NO_OUTPUT: begin
+                        accumulator_addr_wr_o   <= '0;
+                        accum_addr_mask_o       <= '0;
+                        write_accumulator_o     <= '0;
+
+                        compute_cntr_q <= compute_cntr_q + 1;
+
+                        if(compute_cntr_q[4:0] == 'd31) begin
+                            compute_cntr_q <= '0;
+                            compute_output_state <= PARTIAL_OUTPUT;
+                        end
+                    end
+                    PARTIAL_OUTPUT: begin
+                        accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
+                        accum_addr_mask_o       <= signed'(signed'(32'h80000000)>>>compute_cntr_q);
+                        write_accumulator_o     <= 1'b1;
+
+                        compute_cntr_q <= compute_cntr_q + 1;
+
+                        if (compute_cntr_q == 'd31) begin
+                            compute_output_state <= FULL_OUTPUT;
                         end
                     end
                     FULL_OUTPUT: begin
-                        lines_computed_q        <= (H_tiles_computed_q == 5'(H_DIM_i>>5)) ? '0 : lines_computed_q + 1;
                         accum_addr_mask_o       <= '1;
-                        accumulator_addr_wr_o   <= accumulator_start_addr_wr_i + lines_computed_q;
+                        accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;//weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + lines_computed_q + 32;
                         write_accumulator_o     <= 1'b1;
 
-                        if(done_signal) begin
-                            done_o <= 1'b1;
-                            state <= STALL;
-                            write_accumulator_o     <= 1'b0;
+                        compute_cntr_q <= compute_cntr_q + 1;
+
+                        if(compute_cntr_q == H_DIM_i) begin
+                            compute_output_state <= REVERSE_PARTIAL;
+                        end
+                    end
+                    REVERSE_PARTIAL: begin
+                        accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
+                        accum_addr_mask_o       <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+                        write_accumulator_o     <= 1'b1;
+
+                        rev_partial_cntr_q <= rev_partial_cntr_q + 1;
+                        compute_cntr_q <= compute_cntr_q + 1;
+
+                        if (rev_partial_cntr_q == 'd31) begin
+                            compute_cntr_q <= '0;
+                            rev_partial_cntr_q <= '0;
+    
+                            compute_output_state <= NO_OUTPUT;
                         end
                     end
                 endcase
+
+                if(done) begin
+                    done_o <= 1'b1;
+                    state <= STALL;
+                end
+                if(next_weight_tile) begin
+                    state <= LOAD_WEIGHTS;
+                end
                 
             end
             default: begin

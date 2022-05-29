@@ -15,17 +15,16 @@ module accumulator( input   clk_i, rst_i,
                     );
     import Acc_types::*;
 
-    logic [31:0] accumulator_storage [128][32];
+    logic [31:0] accumulator_storage [128][32] /* verilator public */; 
 
     logic [31:0] accumulator_output [32];
     logic [31:0] adder_input [32];
 
-
     always_comb begin
 
         if(port1_rd_en_i) begin
-            for(int i=0; i<32; i++) begin
-                accumulator_output[i]   = accumulator_storage[addr_rd_i][i];
+            for(int i=31; i>=0; i--) begin
+                accumulator_output[31-i]   = (accum_addr_mask_i[i]) ? accumulator_storage[i - 31 + addr_rd_i[6:0]][31-i] : 0;
             end
         end
         else begin
@@ -45,11 +44,13 @@ module accumulator( input   clk_i, rst_i,
 
     always_ff @(posedge clk_i) begin
         if(port2_wr_en_i) begin
-            for(int i=0; i<32; i++) begin
-                if (accum_addr_mask_i[31-i]) begin
-                    accumulator_storage[addr_wr_i][i]  <= adder_input[i] + data_i[i];
+            
+            for(int i=31; i>=0; i--) begin
+                if (accum_addr_mask_i[i]) begin
+                    accumulator_storage[i - 31 + addr_wr_i[6:0]][31-i]  <= adder_input[31-i] + data_i[31-i];
                 end
             end
+
         end
     end
 
