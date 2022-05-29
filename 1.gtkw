@@ -1,0 +1,103 @@
+[*]
+[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
+[*] Sun May 29 19:13:57 2022
+[*]
+[dumpfile] "/home/stefan/Desktop/Verilog/TPUv1_FPGA/top_sim.vcd"
+[dumpfile_mtime] "Sun May 29 19:03:26 2022"
+[dumpfile_size] 7307634
+[savefile] "/home/stefan/Desktop/Verilog/TPUv1_FPGA/1.gtkw"
+[timestart] 228
+[size] 1762 841
+[pos] -1 -1
+*-5.000000 328 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] TOP.
+[treeopen] TOP.main.
+[sst_width] 233
+[signals_width] 270
+[sst_expanded] 1
+[sst_vpaned_height] 228
+@24
+TOP.main.w_fifo.data_o[0][7:0]
+TOP.main.w_fifo.data_o[1][7:0]
+TOP.main.w_fifo.data_o[2][7:0]
+TOP.main.w_fifo.data_o[3][7:0]
+TOP.main.w_fifo.data_o[4][7:0]
+TOP.main.w_fifo.data_o[5][7:0]
+TOP.main.w_fifo.data_o[6][7:0]
+TOP.main.w_fifo.data_o[7][7:0]
+TOP.main.w_fifo.data_o[8][7:0]
+TOP.main.w_fifo.data_o[9][7:0]
+TOP.main.w_fifo.data_o[10][7:0]
+TOP.main.w_fifo.data_o[11][7:0]
+TOP.main.w_fifo.data_o[12][7:0]
+TOP.main.w_fifo.data_o[13][7:0]
+TOP.main.w_fifo.data_o[14][7:0]
+TOP.main.w_fifo.data_o[15][7:0]
+TOP.main.w_fifo.data_o[16][7:0]
+TOP.main.w_fifo.data_o[17][7:0]
+TOP.main.w_fifo.data_o[18][7:0]
+TOP.main.w_fifo.data_o[19][7:0]
+TOP.main.w_fifo.data_o[20][7:0]
+TOP.main.w_fifo.data_o[21][7:0]
+TOP.main.w_fifo.data_o[22][7:0]
+TOP.main.w_fifo.data_o[23][7:0]
+TOP.main.w_fifo.data_o[24][7:0]
+TOP.main.w_fifo.data_o[25][7:0]
+TOP.main.w_fifo.data_o[26][7:0]
+TOP.main.w_fifo.data_o[27][7:0]
+TOP.main.w_fifo.data_o[28][7:0]
+TOP.main.w_fifo.data_o[29][7:0]
+TOP.main.w_fifo.data_o[30][7:0]
+TOP.main.w_fifo.data_o[31][7:0]
+@25
+TOP.main.ctrl_unit.load_weights_cntr_q[4:0]
+@28
+TOP.main.w_fifo.read_en_i
+TOP.main.w_fifo.request_data_o
+TOP.main.w_fifo.sending_data_i
+TOP.main.w_fifo.shift
+TOP.main.w_fifo.valid_o
+TOP.main.w_fifo.write_en_i
+TOP.main.w_fifo.write_fifo
+TOP.main.w_fifo.fifo_full
+TOP.main.ctrl_unit.state[1:0]
+@22
+TOP.main.ctrl_unit.weight_tiles_x_consumed_q[3:0]
+TOP.main.ctrl_unit.weight_tiles_y_consumed_q[3:0]
+@28
+TOP.main.ctrl_unit.next_weight_tile
+@24
+TOP.main.MAC_Array.mem_weight_i[0][7:0]
+TOP.main.MAC_Array.mem_weight_i[1][7:0]
+TOP.main.MAC_Array.mem_weight_i[2][7:0]
+TOP.main.MAC_Array.mem_weight_i[3][7:0]
+TOP.main.MAC_Array.mem_weight_i[4][7:0]
+TOP.main.MAC_Array.mem_weight_i[5][7:0]
+TOP.main.MAC_Array.mem_weight_i[6][7:0]
+TOP.main.MAC_Array.mem_weight_i[7][7:0]
+TOP.main.MAC_Array.mem_weight_i[8][7:0]
+TOP.main.MAC_Array.mem_weight_i[9][7:0]
+TOP.main.MAC_Array.mem_weight_i[10][7:0]
+TOP.main.MAC_Array.mem_weight_i[11][7:0]
+TOP.main.MAC_Array.mem_weight_i[12][7:0]
+TOP.main.MAC_Array.mem_weight_i[13][7:0]
+TOP.main.MAC_Array.mem_weight_i[14][7:0]
+TOP.main.MAC_Array.mem_weight_i[15][7:0]
+TOP.main.MAC_Array.mem_weight_i[16][7:0]
+TOP.main.MAC_Array.mem_weight_i[17][7:0]
+TOP.main.MAC_Array.mem_weight_i[18][7:0]
+TOP.main.MAC_Array.mem_weight_i[19][7:0]
+TOP.main.MAC_Array.mem_weight_i[20][7:0]
+TOP.main.MAC_Array.mem_weight_i[21][7:0]
+TOP.main.MAC_Array.mem_weight_i[22][7:0]
+TOP.main.MAC_Array.mem_weight_i[23][7:0]
+TOP.main.MAC_Array.mem_weight_i[24][7:0]
+TOP.main.MAC_Array.mem_weight_i[25][7:0]
+TOP.main.MAC_Array.mem_weight_i[26][7:0]
+TOP.main.MAC_Array.mem_weight_i[27][7:0]
+TOP.main.MAC_Array.mem_weight_i[28][7:0]
+TOP.main.MAC_Array.mem_weight_i[29][7:0]
+TOP.main.MAC_Array.mem_weight_i[30][7:0]
+TOP.main.MAC_Array.mem_weight_i[31][7:0]
+[pattern_trace] 1
+[pattern_trace] 0

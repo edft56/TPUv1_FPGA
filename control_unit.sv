@@ -89,12 +89,13 @@ module control_unit(input clk_i,rst_i,
                 load_weights_cntr_q <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
                 if (load_weights_cntr_q == 5'd31) begin
                     state <= LOAD_ACTIVATIONS;
+                    load_weights_o          <= 1'b0;
                 end
             end
             LOAD_ACTIVATIONS: begin
                 load_activations_o      <= 1'b1;
                 stall_compute_o         <= 1'b1;
-                load_weights_o          <= 1'b1;
+                load_weights_o          <= 1'b0;
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
                 write_accumulator_o     <= 1'b0;

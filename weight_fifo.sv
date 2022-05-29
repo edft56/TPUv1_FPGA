@@ -6,6 +6,7 @@ module weight_fifo( input   clk_i, rst_i,
                     input   sending_data_i,
                     input   logic [7:0] data_i [32],
 
+                    //output  logic fifo_full_o,
                     output  request_data_o,
                     output  logic       valid_o,
                     output  logic [7:0] data_o [32]
@@ -40,6 +41,8 @@ module weight_fifo( input   clk_i, rst_i,
         request_data_o  = write_en_i & ~fifo_full;
         write_fifo      = (write_en_i & sending_data_i & ~fifo_full);
         shift           = !fifo_full;
+
+        valid_o         = (read_en_i) ? 1'(weight_fifo_storage[0][0]>>8) : '0; //check if head is valid
     end
 
     always_ff @(posedge clk_i) begin
@@ -49,7 +52,7 @@ module weight_fifo( input   clk_i, rst_i,
         //     2'b10: fifo_cntr <= (~fifo_empty) ? fifo_cntr - 1 : fifo_cntr;
         //     2'b11: fifo_cntr <= fifo_cntr;
         // endcase
-
+        //fifo_full_o <= fifo_full;
         
         weight_fifo_storage[32*4-1] <= (write_fifo) ? fifo_input : ( (shift) ? '{default:0} : weight_fifo_storage[32*4-1] );
         
@@ -58,13 +61,11 @@ module weight_fifo( input   clk_i, rst_i,
             weight_fifo_storage[0:128-2]  <= weight_fifo_storage[1:128-1]; //shift
         end
 
-        if(read_en_i) begin
-            valid_o                     <= 1'(weight_fifo_storage[0][0]>>8); //check if head is valid
+        if(read_en_i & valid_o) begin
             for(int i=0; i<32; i++) begin
                 data_o[i]               <= 8'(weight_fifo_storage[0][i]); //read head
             end  
         end
-        else valid_o                     <= '0;
     end
 
 endmodule
