@@ -18,6 +18,7 @@ module control_unit(input clk_i,rst_i,
                     output logic read_accumulator_o,
                     output logic write_accumulator_o,
                     output logic [6:0] accumulator_addr_wr_o,
+                    output logic [6:0] accumulator_addr_rd_o,
                     output logic [31:0] accum_addr_mask_o,
                     output logic accumulator_add_o,
                     output logic done_o
@@ -55,7 +56,6 @@ module control_unit(input clk_i,rst_i,
 
         done        = done_weight_tiles_x;
 
-        
         // H_tiles_computed_q = (H_tiles_computed_q == 5'(H_DIM_i>>5)) ? '0 : 5'(lines_computed_q >> 5);
         // W_tiles_computed_q = (done_signal) ? '0 : ( (H_tiles_computed_q == 5'(W_DIM_i>>5)) ? W_tiles_computed_q + 1 : W_tiles_computed_q );
        
@@ -108,10 +108,9 @@ module control_unit(input clk_i,rst_i,
                 load_activations_o      <= 1'b1;
                 stall_compute_o         <= 1'b0;
                 load_weights_o          <= 1'b0;
-                read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b1;
-                accumulator_add_o       <= weight_tiles_y_consumed_q > 0;
-                read_accumulator_o      <= weight_tiles_y_consumed_q > 0;
+                accumulator_add_o       <= (done_weight_tiles_y) ? '0 : ( (next_weight_tile) ? '1 : accumulator_add_o);
+                read_accumulator_o      <= (done_weight_tiles_y) ? '0 : ( (next_weight_tile) ? '1 : read_accumulator_o);
 
                 
 
@@ -125,6 +124,7 @@ module control_unit(input clk_i,rst_i,
                 
                 case (compute_output_state)
                     NO_OUTPUT: begin
+                        accumulator_addr_rd_o   <= '0;
                         accumulator_addr_wr_o   <= '0;
                         accum_addr_mask_o       <= '0;
                         write_accumulator_o     <= '0;
@@ -137,6 +137,7 @@ module control_unit(input clk_i,rst_i,
                         end
                     end
                     PARTIAL_OUTPUT: begin
+                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
                         accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
                         accum_addr_mask_o       <= signed'(signed'(32'h80000000)>>>compute_cntr_q);
                         write_accumulator_o     <= 1'b1;
@@ -149,7 +150,8 @@ module control_unit(input clk_i,rst_i,
                     end
                     FULL_OUTPUT: begin
                         accum_addr_mask_o       <= '1;
-                        accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;//weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + lines_computed_q + 32;
+                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
+                        accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
                         write_accumulator_o     <= 1'b1;
 
                         compute_cntr_q <= compute_cntr_q + 1;
@@ -159,6 +161,7 @@ module control_unit(input clk_i,rst_i,
                         end
                     end
                     REVERSE_PARTIAL: begin
+                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
                         accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
                         accum_addr_mask_o       <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
                         write_accumulator_o     <= 1'b1;

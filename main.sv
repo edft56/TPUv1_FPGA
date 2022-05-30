@@ -78,12 +78,12 @@ module main(    input clk_i, rst_i,
 
     accumulator accum(  .clk_i,
                         .rst_i,
-                        .port1_rd_en_i(accumulator_read_enable),
+                        .port1_rd_en_i(1'b1),
                         .port2_wr_en_i(accumulator_write_enable),
                         .add_i(accumulator_add),
                         .data_i(MAC_output),
                         .addr_wr_i(accumulator_addr_wr),
-                        .addr_rd_i(accumulator_addr_wr),
+                        .addr_rd_i(accumulator_addr_rd),
                         .accum_addr_mask_i(accum_addr_mask),
 
                         .data_o()//.data_o(unified_buffer_in)
@@ -118,6 +118,7 @@ module main(    input clk_i, rst_i,
                             .read_accumulator_o(accumulator_read_enable),
                             .write_accumulator_o(accumulator_write_enable),
                             .accumulator_addr_wr_o(accumulator_addr_wr),
+                            .accumulator_addr_rd_o(accumulator_addr_rd),
                             .accum_addr_mask_o(accum_addr_mask),
                             .accumulator_add_o(accumulator_add),
                             .done_o
