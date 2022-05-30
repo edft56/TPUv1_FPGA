@@ -34,17 +34,22 @@ void clock_tick(Vmain* top, vluint64_t& time, VerilatedVcdC* tfp){
 
 void handle_inputs(Vmain* top, uint64_t& positive_edges, uint32_t* U_matrix, uint32_t ITER_DIM, uint32_t U_DIM){
     static int tile_x = 0;
-    static int line = 0;
+    static int tile_y = 0;
+    static int col = 0;
 
     if (positive_edges>2 && top->request_fifo_data_o){
         top->sending_fifo_data_i = 1;
 
         for(int i=0; i<32; i++){
-            top->weight_fifo_data_in[i] = U_matrix[tile_x*32 + line*U_DIM + i];
+            top->weight_fifo_data_in[i] = U_matrix[tile_y*32*U_DIM + i*U_DIM + tile_x*32 + col];
             //top->weight_fifo_data_in[i] = 1;
         }
-        line = (line!=ITER_DIM-1) ? line+1 : 0;
-        tile_x = (tile_x == (U_DIM/32)-1 && line==ITER_DIM-1) ? 0 : ( (line==ITER_DIM-1) ? tile_x + 1 : tile_x);
+        bool tile_y_up = ((col+1) % (32) == 0);
+        bool tile_x_up = (tile_y == (ITER_DIM/32)-1) && tile_y_up;
+        col = (col+1) % (32);
+        tile_y = ( tile_y == (ITER_DIM/32)-1 && tile_y_up ) ? 0 : ( tile_y_up ? tile_y + 1 : tile_y );
+        tile_x = ( tile_x == (U_DIM/32)-1 && tile_x_up) ? 0 : ( tile_x_up ? tile_x + 1 : tile_x );
+
     }
 }
 
@@ -132,7 +137,7 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM){
 int main() {
     uint32_t* V_matrix = (uint32_t*) malloc(V_DIM*ITER_DIM*sizeof(uint32_t));
     uint32_t* U_matrix = (uint32_t*) malloc(U_DIM*ITER_DIM*sizeof(uint32_t));
-    uint32_t* out_matrix = (uint32_t*) malloc(V_DIM*U_DIM*sizeof(uint32_t));
+    uint32_t* out_matrix = (uint32_t*) calloc(V_DIM*U_DIM,sizeof(uint32_t));
 
     generate_inputs(V_matrix,U_matrix,V_DIM,U_DIM,ITER_DIM);
     matrix_multiply(V_matrix,U_matrix,out_matrix,V_DIM,U_DIM,ITER_DIM);
