@@ -141,6 +141,7 @@ module control_unit(input clk_i,rst_i,
                         if(compute_cntr_q[4:0] == 'd31) begin
                             compute_cntr_q <= '0;
                             compute_output_state <= PARTIAL_OUTPUT;
+                            accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
                         end
                     end
                     PARTIAL_OUTPUT: begin
