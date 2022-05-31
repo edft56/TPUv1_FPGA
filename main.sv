@@ -115,7 +115,6 @@ module main(    input clk_i, rst_i,
                             .W_DIM_i,
                             .fifo_full_i(weight_fifo_full),
                         
-                            .load_fifo_o(load_fifo),
                             .load_weights_o(load_weights_to_MAC),
                             .load_activations_o(unified_buffer_read),
                             .stall_compute_o(stall_compute),

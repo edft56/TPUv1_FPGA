@@ -22,15 +22,6 @@ module accumulator( input   clk_i, rst_i,
 
     always_comb begin
 
-        if(port1_rd_en_i | add_i) begin
-            for(int i=31; i>=0; i--) begin
-                accumulator_output[31-i]   = accumulator_storage[i - 31 + addr_rd_i[6:0]][31-i];
-            end
-        end
-        else begin
-            accumulator_output = '{default:0};
-        end
-
         if(add_i) begin
             adder_input = accumulator_output;
             data_o      = '{default:0};
@@ -43,6 +34,15 @@ module accumulator( input   clk_i, rst_i,
     end
 
     always_ff @(posedge clk_i) begin
+        if(port1_rd_en_i | add_i) begin
+            for(int i=31; i>=0; i--) begin
+                accumulator_output[31-i]   = accumulator_storage[i - 31 + addr_rd_i[6:0]][31-i];
+            end
+        end
+        else begin
+            accumulator_output = '{default:0};
+        end
+
         if(port2_wr_en_i) begin
             
             for(int i=31; i>=0; i--) begin

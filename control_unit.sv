@@ -31,7 +31,7 @@ module control_unit(input clk_i,rst_i,
 
     logic [ 4:0] load_weights_cntr_q;
     logic [ 9:0] compute_cntr_q;
-    logic [ 4:0] rev_partial_cntr_q;
+    logic [ 5:0] rev_partial_cntr_q;
     //logic [ 8:0] H_tiles_computed_q;
     logic [ 3:0] weight_tiles_x_consumed_q;
     logic [ 3:0] weight_tiles_y_consumed_q;
@@ -76,12 +76,13 @@ module control_unit(input clk_i,rst_i,
                 
 
                 if (instruction_i) begin
-                    state <= LOAD_WEIGHTS;
+                    state <= LOAD_WEIGHT_FIFO;
                 end
             end
             LOAD_WEIGHT_FIFO: begin
                 if (fifo_full_i) begin
                     load_weights_o          <= 1'b1;
+                    state <= LOAD_WEIGHTS;
                 end
             end
             LOAD_WEIGHTS: begin
@@ -94,8 +95,8 @@ module control_unit(input clk_i,rst_i,
 
                 load_weights_cntr_q <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
                 if (load_weights_cntr_q == 5'd31) begin
-                    state <= LOAD_ACTIVATIONS;
-                    //load_weights_o          <= 1'b0;
+                    state           <= (weight_fifo_valid_output) ? LOAD_ACTIVATIONS : state;
+                    load_weights_o  <= (weight_fifo_valid_output) ? 1'b0 : load_weights_o;
                 end
             end
             LOAD_ACTIVATIONS: begin
@@ -175,12 +176,12 @@ module control_unit(input clk_i,rst_i,
                         rev_partial_cntr_q <= rev_partial_cntr_q + 1;
                         compute_cntr_q <= compute_cntr_q + 1;
 
-                        if (rev_partial_cntr_q == 'd31) begin
-                            compute_cntr_q <= '0;
-                            rev_partial_cntr_q <= '0;
+                        // if (rev_partial_cntr_q == 'd31) begin
+                        //     compute_cntr_q <= '0;
+                        //     rev_partial_cntr_q <= '0;
     
-                            compute_output_state <= NO_OUTPUT;
-                        end
+                        //     compute_output_state <= NO_OUTPUT;
+                        // end
                     end
                 endcase
 
@@ -189,7 +190,12 @@ module control_unit(input clk_i,rst_i,
                     state <= STALL;
                 end
                 if(next_weight_tile) begin
+                    load_weights_o          <= 1'b1;
                     state <= LOAD_WEIGHTS;
+                    compute_cntr_q <= '0;
+                    rev_partial_cntr_q <= '0;
+
+                    compute_output_state <= NO_OUTPUT;
                 end
                 
             end

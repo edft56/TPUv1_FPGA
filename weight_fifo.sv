@@ -62,15 +62,17 @@ module weight_fifo( input   clk_i, rst_i,
             weight_fifo_storage[0:128-2]  <= weight_fifo_storage[1:128-1]; //shift
         end
 
+        valid_o         <= 1'(weight_fifo_storage[0][0]>>8); //check if head is valid
+
         if(read_en_i) begin
-            valid_o         <= 1'(weight_fifo_storage[0][0]>>8); //check if head is valid
+            //valid_o         <= 1'(weight_fifo_storage[0][0]>>8); //check if head is valid
             for(int i=0; i<32; i++) begin
                 data_o[i]               <= 8'(weight_fifo_storage[0][i]); //read head
             end  
         end
-        else begin
-            valid_o         <= '0;
-        end
+        // else begin
+        //     valid_o         <= '0;
+        // end
     end
 
 endmodule
