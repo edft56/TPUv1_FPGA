@@ -82,6 +82,7 @@ module MAC_systolic_array(  input clk_i,rst_i,
     logic [ 7:0] weight_connections [34][32];
     logic [15:0] act_connections [34][32];
     logic [31:0] out_connections [34][32];
+    logic read_en_lag;
 
     // always_comb begin
     //     for(int i=0; i<32; i++) begin
@@ -169,6 +170,10 @@ module MAC_systolic_array(  input clk_i,rst_i,
 
     end
 
+    always_ff @(posedge clk_i) begin
+        read_en_lag <= load_weights_i;
+    end
+
     
 
     generate 
@@ -179,7 +184,7 @@ module MAC_systolic_array(  input clk_i,rst_i,
                 MAC_unit_shell MAC_array_mid(   .clk_i,
                                                 .rst_i,
                                                 .stall_i,
-                                                .load_weights_i,
+                                                .load_weights_i(read_en_lag),
                                                 .compute_i,   
                                                 .mem_weight_i(weight_connections[i+1][j]),   
                                                 .act_i(act_connections[i-1][j]),

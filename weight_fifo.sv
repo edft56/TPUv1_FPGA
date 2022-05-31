@@ -6,7 +6,7 @@ module weight_fifo( input   clk_i, rst_i,
                     input   sending_data_i,
                     input   logic [7:0] data_i [32],
 
-                    //output  logic fifo_full_o,
+                    output  logic fifo_full_o,
                     output  request_data_o,
                     output  logic       valid_o,
                     output  logic [7:0] data_o [32]
@@ -52,7 +52,8 @@ module weight_fifo( input   clk_i, rst_i,
         //     2'b10: fifo_cntr <= (~fifo_empty) ? fifo_cntr - 1 : fifo_cntr;
         //     2'b11: fifo_cntr <= fifo_cntr;
         // endcase
-        //fifo_full_o <= fifo_full;
+        
+        fifo_full_o <= fifo_full;
         
         weight_fifo_storage[32*4-1] <= (write_fifo) ? fifo_input : ( (shift) ? '{default:0} : weight_fifo_storage[32*4-1] );
         
@@ -66,6 +67,9 @@ module weight_fifo( input   clk_i, rst_i,
             for(int i=0; i<32; i++) begin
                 data_o[i]               <= 8'(weight_fifo_storage[0][i]); //read head
             end  
+        end
+        else begin
+            valid_o         <= '0;
         end
     end
 

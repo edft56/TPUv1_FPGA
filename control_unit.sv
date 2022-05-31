@@ -10,6 +10,7 @@ module control_unit(input clk_i,rst_i,
                     input logic [6:0] accumulator_start_addr_wr_i,
                     input logic [8:0] H_DIM_i,
                     input logic [8:0] W_DIM_i,
+                    input fifo_full_i,
 
                     output logic load_weights_o,
                     output logic load_activations_o,
@@ -24,7 +25,7 @@ module control_unit(input clk_i,rst_i,
                     output logic done_o
                     );
 
-    enum logic [1:0] {STALL, LOAD_WEIGHTS, LOAD_ACTIVATIONS, COMPUTE} state;
+    enum logic [2:0] {STALL, LOAD_WEIGHT_FIFO, LOAD_WEIGHTS, LOAD_ACTIVATIONS, COMPUTE} state;
 
     enum logic [1:0] {NO_OUTPUT, PARTIAL_OUTPUT, FULL_OUTPUT, REVERSE_PARTIAL} compute_output_state;
 
@@ -78,6 +79,11 @@ module control_unit(input clk_i,rst_i,
                     state <= LOAD_WEIGHTS;
                 end
             end
+            LOAD_WEIGHT_FIFO: begin
+                if (fifo_full_i) begin
+                    load_weights_o          <= 1'b1;
+                end
+            end
             LOAD_WEIGHTS: begin
                 load_activations_o      <= 1'b0;
                 stall_compute_o         <= 1'b1;
@@ -89,7 +95,7 @@ module control_unit(input clk_i,rst_i,
                 load_weights_cntr_q <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
                 if (load_weights_cntr_q == 5'd31) begin
                     state <= LOAD_ACTIVATIONS;
-                    load_weights_o          <= 1'b0;
+                    //load_weights_o          <= 1'b0;
                 end
             end
             LOAD_ACTIVATIONS: begin

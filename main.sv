@@ -39,7 +39,9 @@ module main(    input clk_i, rst_i,
     wire [6:0] accumulator_addr_wr;
     wire [31:0] accum_addr_mask;
     wire weight_fifo_write;
+
     //wire weight_fifo_read;
+    wire weight_fifo_full;
     wire weight_fifo_valid_output;
     //wire [7:0] weight_fifo_data_in [32];
 
@@ -95,7 +97,8 @@ module main(    input clk_i, rst_i,
                         .write_en_i(1'b1),
                         .data_i(weight_fifo_data_in),
                         .sending_data_i(sending_fifo_data_i),
-
+                        
+                        .fifo_full_o(weight_fifo_full),
                         .request_data_o(request_fifo_data_o),
                         .valid_o(weight_fifo_valid_output),
                         .data_o(MAC_weight_input)
@@ -110,7 +113,9 @@ module main(    input clk_i, rst_i,
                             .accumulator_start_addr_wr_i('0),
                             .H_DIM_i,
                             .W_DIM_i,
-
+                            .fifo_full_i(weight_fifo_full),
+                        
+                            .load_fifo_o(load_fifo),
                             .load_weights_o(load_weights_to_MAC),
                             .load_activations_o(unified_buffer_read),
                             .stall_compute_o(stall_compute),
