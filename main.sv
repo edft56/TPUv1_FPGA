@@ -1,9 +1,15 @@
 `timescale 1ns/1ns
-`include "packages.sv"
 
-module main(    input clk_i, rst_i,
+`ifndef TPU_PACK  // guard
+    `define TPU_PACK
+    `include "tpu_package.sv"
+`endif   // guard
+
+module main
+            import tpu_package::*;
+            (   input clk_i, rst_i,
                 input instruction_i,
-                input [7:0] weight_fifo_data_in [32],
+                input [W_WIDTH:0] weight_fifo_data_in [32],
                 input [8:0] H_DIM_i,
                 input [8:0] W_DIM_i,
                 input sending_fifo_data_i,
@@ -14,13 +20,11 @@ module main(    input clk_i, rst_i,
                 output done_o
             );
 
-    import Acc_types::*;
-
     wire stall_compute;
     wire load_weights_to_MAC;
     wire MAC_compute;
-    wire [ 7:0] MAC_weight_input [32];
-    wire [15:0] MAC_act_input [32];
+    wire [W_WIDTH:0] MAC_weight_input [32];
+    wire [ACT_WIDTH:0] MAC_act_input [32];
     //wire [31:0] MAC_add_input [32];
     wire [31:0] MAC_output [32];
 
@@ -28,8 +32,8 @@ module main(    input clk_i, rst_i,
     wire unified_buffer_write;
     wire [11:0] unified_buffer_addr_wr;
     wire [11:0] unified_buffer_addr_rd;
-    wire [15:0] unified_buffer_in [32];
-    wire [15:0] unified_buffer_out [32];
+    wire [ACT_WIDTH:0] unified_buffer_in [32];
+    wire [ACT_WIDTH:0] unified_buffer_out [32];
 
     wire accumulator_read_enable;
     wire accumulator_write_enable;

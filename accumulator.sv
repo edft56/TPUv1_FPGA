@@ -1,36 +1,32 @@
 `timescale 1ns/1ns
 
-//`include "packages.sv"
+`ifndef TPU_PACK  // guard
+    `define TPU_PACK
+    `include "tpu_package.sv"
+`endif   // guard
 
-module accumulator( input   clk_i, rst_i,
+module accumulator
+                    import tpu_package::*;    
+                  ( input   clk_i, rst_i,
                     input   port1_rd_en_i,
                     input   port2_wr_en_i,
                     input   add_i,
-                    input   logic [31:0] data_i [32],
+                    input   logic [RES_WIDTH:0] data_i [32],
                     input   logic [6:0] addr_wr_i,
                     input   logic [6:0] addr_rd_i,
                     input   logic [31:0] accum_addr_mask_i,
 
-                    output  logic [31:0] data_o [32]
+                    output  logic [RES_WIDTH:0] data_o [32]
                     );
-    import Acc_types::*;
 
-    logic [31:0] accumulator_storage [128][32] /* verilator public */; 
+    logic [RES_WIDTH:0] accumulator_storage [128][32] /* verilator public */;  //acc size should be 1024*32. enough to double buffer a 128x128 tile
 
-    logic [31:0] accumulator_output [32];
-    logic [31:0] adder_input [32];
+    logic [RES_WIDTH:0] accumulator_output [32];
+    logic [RES_WIDTH:0] adder_input [32];
 
     always_comb begin
-
-        if(add_i) begin
-            adder_input = accumulator_output;
-            data_o      = '{default:0};
-        end
-        else begin
-            adder_input = '{default:0};
-            data_o      = accumulator_output;
-        end
-
+        adder_input = (add_i) ? accumulator_output : '{default:0};
+        data_o      = (add_i) ? '{default:0} : accumulator_output;
     end
 
     always_ff @(posedge clk_i) begin
@@ -44,7 +40,6 @@ module accumulator( input   clk_i, rst_i,
         end
 
         if(port2_wr_en_i) begin
-            
             for(int i=31; i>=0; i--) begin
                 if (accum_addr_mask_i[i]) begin
                     accumulator_storage[i - 31 + addr_wr_i[6:0]][31-i]  <= adder_input[31-i] + data_i[31-i];

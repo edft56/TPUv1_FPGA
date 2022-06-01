@@ -4,7 +4,6 @@
 
 module control_unit(input clk_i,rst_i,
                     input instruction_i,
-                    //input next_weight_tile_rdy_i,
                     input activations_rdy_i,
                     input weight_fifo_valid_output,
                     input logic [6:0] accumulator_start_addr_wr_i,
@@ -32,7 +31,6 @@ module control_unit(input clk_i,rst_i,
     logic [ 4:0] load_weights_cntr_q;
     logic [ 9:0] compute_cntr_q;
     logic [ 5:0] rev_partial_cntr_q;
-    //logic [ 8:0] H_tiles_computed_q;
     logic [ 3:0] weight_tiles_x_consumed_q;
     logic [ 3:0] weight_tiles_y_consumed_q;
 
@@ -44,7 +42,6 @@ module control_unit(input clk_i,rst_i,
     initial compute_cntr_q = 0;
     initial state = STALL;
     initial compute_output_state = NO_OUTPUT;
-    //initial H_tiles_computed_q = 0;
     initial weight_tiles_x_consumed_q = 0;
     initial weight_tiles_y_consumed_q = 0;
     initial accumulator_add_o = 0;
@@ -56,10 +53,6 @@ module control_unit(input clk_i,rst_i,
         done_weight_tiles_x = (weight_tiles_x_consumed_q == 4'(W_DIM_i>>5)) & done_weight_tiles_y;
 
         done        = done_weight_tiles_x;
-
-        // H_tiles_computed_q = (H_tiles_computed_q == 5'(H_DIM_i>>5)) ? '0 : 5'(lines_computed_q >> 5);
-        // W_tiles_computed_q = (done_signal) ? '0 : ( (H_tiles_computed_q == 5'(W_DIM_i>>5)) ? W_tiles_computed_q + 1 : W_tiles_computed_q );
-       
     end
     
 
@@ -120,11 +113,6 @@ module control_unit(input clk_i,rst_i,
                 read_accumulator_o      <= (done_weight_tiles_y) ? '0 : ( (next_weight_tile) ? '1 : read_accumulator_o);
 
                 
-
-                //H_tiles_computed_q <= ( 5'(lines_computed_q >> 5) == 5'(H_DIM_i>>5) ) ? '0 : ( (lines_computed_q == 'd31) ? H_tiles_computed_q + 1 : H_tiles_computed_q );
-                //W_tiles_computed_q <= (done_signal) ? '0 : ( (5'(lines_computed_q >> 5) == 5'(H_DIM_i>>5)) ? W_tiles_computed_q + 1 : W_tiles_computed_q );
-
-                //weight_tiles_consumed_q <= (done) ? '0 : ( next_weight_tile ? weight_tiles_consumed_q + 1 : weight_tiles_consumed_q );
 
                 weight_tiles_y_consumed_q <= (done_weight_tiles_y) ? '0 : ( next_weight_tile    ? weight_tiles_y_consumed_q + 1 : weight_tiles_y_consumed_q );
                 weight_tiles_x_consumed_q <= (done_weight_tiles_x) ? '0 : ( done_weight_tiles_y ? weight_tiles_x_consumed_q + 1 : weight_tiles_x_consumed_q );
