@@ -20,7 +20,7 @@ module MAC_unit_compute
             out_q       <= '0;
         end
         else begin
-            out_q       <= RES_WIDTH'( RES_WIDTH'(act_i * weight_i) + RES_WIDTH'(add_i) ); //size casting unsigned so should add 0s
+            out_q       <= (RES_WIDTH+1)'( (RES_WIDTH+1)'(act_i * weight_i) + (RES_WIDTH+1)'(add_i) ); //size casting unsigned so should add 0s
         end
     end
 
@@ -82,26 +82,25 @@ module MAC_systolic_array
                         import tpu_package::*;    
                         (  input clk_i,rst_i,
                             input stall_i, load_weights_i, compute_i,
-                            input logic [W_WIDTH:0] mem_weight_i [32],
-                            input logic [ACT_WIDTH:0] mem_act_i [32],
-                            //input logic [31:0] mem_add_i [32],
+                            input logic [   W_WIDTH:0] mem_weight_i [MUL_SIZE],
+                            input logic [ ACT_WIDTH:0] mem_act_i    [MUL_SIZE],
 
-                            output logic [RES_WIDTH:0] data_o [32]
+                            output logic [RES_WIDTH:0] data_o       [MUL_SIZE]
                             );
 
-    logic [W_WIDTH:0] weight_connections [34][32];
-    logic [ACT_WIDTH:0] act_connections [34][32];
-    logic [RES_WIDTH:0] out_connections [34][32];
+    logic [  W_WIDTH:0] weight_connections [MUL_SIZE+2][MUL_SIZE];
+    logic [ACT_WIDTH:0] act_connections    [MUL_SIZE+2][MUL_SIZE];
+    logic [RES_WIDTH:0] out_connections    [MUL_SIZE+2][MUL_SIZE];
     logic read_en_lag;
 
 
     always_comb begin
-        weight_connections[33] = mem_weight_i;
+        weight_connections[MUL_SIZE+1] = mem_weight_i;
         act_connections[0] = mem_act_i;
 
 
-        for(int i=1; i<33; i++) begin
-            data_o [i-1] = out_connections[i][31];
+        for(int i=1; i<MUL_SIZE+1; i++) begin
+            data_o [i-1] = out_connections[i][MUL_SIZE-1];
         end
 
     end
@@ -114,8 +113,8 @@ module MAC_systolic_array
 
     generate 
 
-        for(genvar i=1; i<33; i++) begin: MAC_ROW
-            for(genvar j=0; j<32; j++) begin: MAC_COL
+        for(genvar i=1; i<MUL_SIZE+1; i++) begin: MAC_ROW
+            for(genvar j=0; j<MUL_SIZE; j++) begin: MAC_COL
 
                 MAC_unit_shell MAC_array_mid(   .clk_i,
                                                 .rst_i,

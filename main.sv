@@ -9,7 +9,7 @@ module main
             import tpu_package::*;
             (   input clk_i, rst_i,
                 input instruction_i,
-                input [W_WIDTH:0] weight_fifo_data_in [32],
+                input [W_WIDTH:0] weight_fifo_data_in [MUL_SIZE],
                 input [8:0] H_DIM_i,
                 input [8:0] W_DIM_i,
                 input sending_fifo_data_i,
@@ -23,17 +23,16 @@ module main
     wire stall_compute;
     wire load_weights_to_MAC;
     wire MAC_compute;
-    wire [W_WIDTH:0] MAC_weight_input [32];
-    wire [ACT_WIDTH:0] MAC_act_input [32];
-    //wire [31:0] MAC_add_input [32];
-    wire [31:0] MAC_output [32];
+    wire [W_WIDTH:0] MAC_weight_input [MUL_SIZE];
+    wire [ACT_WIDTH:0] MAC_act_input [MUL_SIZE];
+    wire [RES_WIDTH:0] MAC_output [MUL_SIZE];
 
     wire unified_buffer_read;
     wire unified_buffer_write;
     wire [11:0] unified_buffer_addr_wr;
     wire [11:0] unified_buffer_addr_rd;
-    wire [ACT_WIDTH:0] unified_buffer_in [32];
-    wire [ACT_WIDTH:0] unified_buffer_out [32];
+    wire [ACT_WIDTH:0] unified_buffer_in [MUL_SIZE];
+    wire [ACT_WIDTH:0] unified_buffer_out [MUL_SIZE];
 
     wire accumulator_read_enable;
     wire accumulator_write_enable;
@@ -44,10 +43,8 @@ module main
     wire [31:0] accum_addr_mask;
     wire weight_fifo_write;
 
-    //wire weight_fifo_read;
     wire weight_fifo_full;
     wire weight_fifo_valid_output;
-    //wire [7:0] weight_fifo_data_in [32];
 
     wire act_data_rdy;
 
@@ -59,7 +56,6 @@ module main
                                     .compute_i(MAC_compute),
                                     .mem_weight_i(MAC_weight_input),
                                     .mem_act_i(MAC_act_input),
-                                    //.mem_add_i,
                                     .data_o(MAC_output)
                                     );
 
@@ -111,7 +107,6 @@ module main
     control_unit ctrl_unit( .clk_i,
                             .rst_i,
                             .instruction_i,
-                            //.next_weight_tile_rdy_i,
                             .activations_rdy_i(act_data_rdy),
                             .weight_fifo_valid_output,
                             .accumulator_start_addr_wr_i('0),

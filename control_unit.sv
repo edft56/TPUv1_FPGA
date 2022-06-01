@@ -1,8 +1,14 @@
 `timescale 1ns/1ns
 
-//`include "packages.sv"
+`ifndef TPU_PACK  // guard
+    `define TPU_PACK
+    `include "tpu_package.sv"
+`endif   // guard
 
-module control_unit(input clk_i,rst_i,
+
+module control_unit
+                    import tpu_package::*;    
+                  (input clk_i,rst_i,
                     input instruction_i,
                     input activations_rdy_i,
                     input weight_fifo_valid_output,
@@ -19,7 +25,7 @@ module control_unit(input clk_i,rst_i,
                     output logic write_accumulator_o,
                     output logic [6:0] accumulator_addr_wr_o,
                     output logic [6:0] accumulator_addr_rd_o,
-                    output logic [31:0] accum_addr_mask_o,
+                    output logic [MUL_SIZE-1:0] accum_addr_mask_o,
                     output logic accumulator_add_o,
                     output logic done_o
                     );
@@ -47,7 +53,7 @@ module control_unit(input clk_i,rst_i,
     initial accumulator_add_o = 0;
 
     always_comb begin
-        next_weight_tile   = rev_partial_cntr_q == 'd31;
+        next_weight_tile   = rev_partial_cntr_q == MUL_SIZE-1;
 
         done_weight_tiles_y = (weight_tiles_y_consumed_q == 4'(W_DIM_i>>5)) & next_weight_tile;
         done_weight_tiles_x = (weight_tiles_x_consumed_q == 4'(W_DIM_i>>5)) & done_weight_tiles_y;
@@ -87,7 +93,7 @@ module control_unit(input clk_i,rst_i,
                 write_accumulator_o     <= 1'b0;
 
                 load_weights_cntr_q <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
-                if (load_weights_cntr_q == 5'd31) begin
+                if (load_weights_cntr_q == MUL_SIZE-1) begin
                     state           <= (weight_fifo_valid_output) ? LOAD_ACTIVATIONS : state;
                     load_weights_o  <= (weight_fifo_valid_output) ? 1'b0 : load_weights_o;
                 end
@@ -126,7 +132,7 @@ module control_unit(input clk_i,rst_i,
 
                         compute_cntr_q <= compute_cntr_q + 1;
 
-                        if(compute_cntr_q[4:0] == 'd31) begin
+                        if(compute_cntr_q[4:0] == (MUL_SIZE-1)) begin
                             compute_cntr_q <= '0;
                             compute_output_state <= PARTIAL_OUTPUT;
                             accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
@@ -140,7 +146,7 @@ module control_unit(input clk_i,rst_i,
 
                         compute_cntr_q <= compute_cntr_q + 1;
 
-                        if (compute_cntr_q == 'd31) begin
+                        if (compute_cntr_q == (MUL_SIZE-1)) begin
                             compute_output_state <= FULL_OUTPUT;
                         end
                     end
@@ -164,13 +170,6 @@ module control_unit(input clk_i,rst_i,
 
                         rev_partial_cntr_q <= rev_partial_cntr_q + 1;
                         compute_cntr_q <= compute_cntr_q + 1;
-
-                        // if (rev_partial_cntr_q == 'd31) begin
-                        //     compute_cntr_q <= '0;
-                        //     rev_partial_cntr_q <= '0;
-    
-                        //     compute_output_state <= NO_OUTPUT;
-                        // end
                     end
                 endcase
 
@@ -201,53 +200,4 @@ module control_unit(input clk_i,rst_i,
 
     end
 endmodule
-
-
-// module compute_state_control(   input clk_i,
-//                                 input logic [ 6:0] accumulator_start_addr_wr_i,
-//                                 input logic [15:0] lines_to_compute_i,
-//                                 input logic [ 1:0] state_i,
-
-//                                 output logic [31:0] accum_addr_mask_o,
-//                                 output logic [ 6:0] accumulator_addr_wr_o,
-//                                 output logic        write_accumulator_o,
-//                                 output logic        done_o
-//                             );
-
-//     enum logic {NON_FULL_OUTPUT, FULL_OUTPUT} accum_addr_mask_state;
-
-//     logic [ 5:0] compute_time_q;
-//     logic [15:0] lines_computed_q;
-
-//     initial compute_time_q=0;
-//     initial lines_computed_q=1;
-
-//     always_ff @( posedge clk_i ) begin
-            
-//         case(accum_addr_mask_state)
-//             NON_FULL_OUTPUT: begin
-//                 accumulator_addr_wr_o   <= accumulator_start_addr_wr_i;
-//                 accum_addr_mask_o       <= (compute_time_q > 'd31) ? 32'h8000>>>compute_time_q[4:0] : '0;
-//                 write_accumulator_o     <= (compute_time_q > 'd31) ? 1'b1 : 1'b0;
-
-//                 if (compute_time_q == 'd63) begin
-//                     accum_addr_mask_state <= FULL_OUTPUT;
-//                 end
-//             end
-//             FULL_OUTPUT: begin
-//                 lines_computed_q        <= lines_computed_q + 1;
-//                 accum_addr_mask_o       <= '1;
-//                 accumulator_addr_wr_o   <= accumulator_start_addr_wr_i + lines_computed_q;
-//                 write_accumulator_o     <= 1'b1;
-
-//                 if(lines_computed_q == lines_to_compute_i) begin
-//                     done_o <= 1'b1;
-//                     state <= STALL;
-//                 end
-//             end
-//         endcase
-
-//     end
-// endmodule
-
 
