@@ -29,13 +29,17 @@ module memory_general
         //         mem_storage_q[i][j] = j%4;
         //     end
         // end
+        $readmemh("V_matrix.dat", mem_storage_q);
 
-        fd = $fopen( "mem.data", "r");
-        for (int i=0; i<4; i++) begin
-            for (int j=0; j<3; j++) begin
-                status = $fscanf(fd, "%b", mem_storage_q[i][j]);
-            end
-        end
+        // int fd;
+
+        // fd = $fopen("V_matrix.dat", "rb");
+        // for (int i=0; i<64; i++) begin
+        //     for (int j=0; j<64; j++) begin
+        //         $fscanf(fd, "%b", mem_storage_q[i][j]);
+        //     end
+        // end
+        // $fclose(fd);
     end
 
     always_ff @(posedge clk_i) begin
