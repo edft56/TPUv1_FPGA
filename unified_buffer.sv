@@ -23,8 +23,18 @@ module memory_general
     logic [4:0] times_read;
 
     initial begin
-        for(int i=0; i<4096; i++) begin
-            mem_storage_q[i] = '{default:(ACT_WIDTH+1)'(1)};//'{default:16'(i%5)};
+        // for(int i=0; i<4096; i++) begin
+        //     //mem_storage_q[i] = '{default:(ACT_WIDTH+1)'(1)};//'{default:16'(i%5)};
+        //     for(int j=0; j<32; j++) begin
+        //         mem_storage_q[i][j] = j%4;
+        //     end
+        // end
+
+        fd = $fopen( "mem.data", "r");
+        for (int i=0; i<4; i++) begin
+            for (int j=0; j<3; j++) begin
+                status = $fscanf(fd, "%b", mem_storage_q[i][j]);
+            end
         end
     end
 
@@ -34,9 +44,9 @@ module memory_general
         end
 
         if (port2_rd_i) begin
-            //data_o                  <= mem_storage_q[addr_rd_i];
-            data_o                  <= mem_storage_q[times_read];
-            times_read <= times_read + 1;
+            data_o                  <= mem_storage_q[addr_rd_i];
+            //data_o                  <= mem_storage_q[times_read];
+            //times_read <= times_read + 1;
         end
         else begin
             data_o                  <= data_o;

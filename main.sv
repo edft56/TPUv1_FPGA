@@ -65,7 +65,7 @@ module main
                                 .write_i(unified_buffer_write),
                                 .unified_buffer_in,
                                 .unified_buffer_addr_wr(unified_buffer_addr_wr),
-                                .unified_buffer_addr_rd(unified_buffer_addr_rd),
+                                .unified_buffer_addr_rd('0),
 
                                 .unified_buffer_out
                                 );

@@ -5,6 +5,7 @@
 #include "Vmain_main.h"
 #include "Vmain_accumulator.h"
 #include <iomanip>
+#include <fstream>
 
 #include <cmath>
 #include <bitset>
@@ -54,16 +55,22 @@ void handle_inputs(Vmain* top, uint64_t& positive_edges, uint32_t* U_matrix, uin
 }
 
 void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uint32_t U_DIM, uint32_t ITER_DIM ){
-    for(int i=0; i<ITER_DIM; i++){
-        for(int j=0; j<V_DIM; j++){
-            V_matrix[i*V_DIM + j] = 1;//(i+1)%5;
+    std::ofstream OutFile;
+    OutFile.open("V_matrix.dat", std::ios::out | std::ios::binary);
+
+    for(int i=0; i<V_DIM; i++){
+        for(int j=0; j<ITER_DIM; j++){
+            //V_matrix[i*ITER_DIM + j] = 1;
+            V_matrix[i*ITER_DIM + j] = (j)%4;
+            OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
         }
     }
+    OutFile.close();
 
     for(int i=0; i<ITER_DIM; i++){
         for(int j=0; j<U_DIM; j++){
-            //U_matrix[i*U_DIM + j] = 1;
-            U_matrix[i*U_DIM + j] = j;
+            U_matrix[i*U_DIM + j] = 1;
+            //U_matrix[i*U_DIM + j] = j;
         }
     }
 }
@@ -148,6 +155,14 @@ int main() {
         std::cout<<"\n";
     }
     std::cout<<"\n";
+
+    // for(int i=0; i<V_DIM; i++){
+    //     for(int j=0; j<ITER_DIM; j++){
+    //         std::cout<<V_matrix[i*V_DIM + j]<<" ";
+    //     }
+    //     std::cout<<"\n";
+    // }
+    // std::cout<<"\n";
 
     simulate_DUT(U_matrix,U_DIM,ITER_DIM);    
 
