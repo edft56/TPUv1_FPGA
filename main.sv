@@ -65,7 +65,7 @@ module main
                                 .write_i(unified_buffer_write),
                                 .unified_buffer_in,
                                 .unified_buffer_addr_wr(unified_buffer_addr_wr),
-                                .unified_buffer_addr_rd('0),
+                                .unified_buffer_addr_rd(unified_buffer_addr_rd),
 
                                 .unified_buffer_out
                                 );
@@ -113,7 +113,9 @@ module main
                             .H_DIM_i,
                             .W_DIM_i,
                             .fifo_full_i(weight_fifo_full),
+                            .unified_buffer_start_addr_rd_i('0),
                         
+                            .unified_buffer_addr_rd_o(unified_buffer_addr_rd),
                             .load_weights_o(load_weights_to_MAC),
                             .load_activations_o(unified_buffer_read),
                             .stall_compute_o(stall_compute),

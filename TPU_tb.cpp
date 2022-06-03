@@ -61,8 +61,17 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
     for(int i=0; i<V_DIM; i++){
         for(int j=0; j<ITER_DIM; j++){
             //V_matrix[i*ITER_DIM + j] = 1;
-            V_matrix[i*ITER_DIM + j] = (j)%4;
-            OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
+            V_matrix[i*ITER_DIM + j] = (j)%5;
+            //OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
+        }
+    }
+
+    
+    for(int j=0; j<ITER_DIM/32; j++){
+        for(int i=0; i<V_DIM; i++){
+            for(int k=0; k<32; k++){
+                OutFile << V_matrix[i*ITER_DIM + j*32 + k] <<std::endl;
+            }
         }
     }
     OutFile.close();
@@ -148,6 +157,16 @@ int main() {
 
     generate_inputs(V_matrix,U_matrix,V_DIM,U_DIM,ITER_DIM);
     matrix_multiply(V_matrix,U_matrix,out_matrix,V_DIM,U_DIM,ITER_DIM);
+
+    for(int i=0; i<V_DIM; i++){
+        for(int j=0; j<ITER_DIM; j++){
+            std::cout<<V_matrix[i*V_DIM + j]<<" ";
+        }
+        std::cout<<"\n";
+    }
+    std::cout<<"\n";
+
+
     for(int i=0; i<V_DIM; i++){
         for(int j=0; j<U_DIM; j++){
             std::cout<<out_matrix[i*U_DIM + j]<<" ";
@@ -156,13 +175,7 @@ int main() {
     }
     std::cout<<"\n";
 
-    // for(int i=0; i<V_DIM; i++){
-    //     for(int j=0; j<ITER_DIM; j++){
-    //         std::cout<<V_matrix[i*V_DIM + j]<<" ";
-    //     }
-    //     std::cout<<"\n";
-    // }
-    // std::cout<<"\n";
+    
 
     simulate_DUT(U_matrix,U_DIM,ITER_DIM);    
 
