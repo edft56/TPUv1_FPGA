@@ -61,7 +61,8 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
     for(int i=0; i<V_DIM; i++){
         for(int j=0; j<ITER_DIM; j++){
             //V_matrix[i*ITER_DIM + j] = 1;
-            V_matrix[i*ITER_DIM + j] = (j)%5;
+            //V_matrix[i*ITER_DIM + j] = (j)%5;
+            V_matrix[i*ITER_DIM + j] = rand()%10;
             //OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
         }
     }
@@ -78,8 +79,9 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 
     for(int i=0; i<ITER_DIM; i++){
         for(int j=0; j<U_DIM; j++){
-            U_matrix[i*U_DIM + j] = 1;
+            //U_matrix[i*U_DIM + j] = 1;
             //U_matrix[i*U_DIM + j] = j;
+            U_matrix[i*U_DIM + j] = rand()%10;
         }
     }
 }
@@ -158,13 +160,13 @@ int main() {
     generate_inputs(V_matrix,U_matrix,V_DIM,U_DIM,ITER_DIM);
     matrix_multiply(V_matrix,U_matrix,out_matrix,V_DIM,U_DIM,ITER_DIM);
 
-    for(int i=0; i<V_DIM; i++){
-        for(int j=0; j<ITER_DIM; j++){
-            std::cout<<V_matrix[i*V_DIM + j]<<" ";
-        }
-        std::cout<<"\n";
-    }
-    std::cout<<"\n";
+    // for(int i=0; i<V_DIM; i++){
+    //     for(int j=0; j<ITER_DIM; j++){
+    //         std::cout<<V_matrix[i*V_DIM + j]<<" ";
+    //     }
+    //     std::cout<<"\n";
+    // }
+    // std::cout<<"\n";
 
 
     for(int i=0; i<V_DIM; i++){

@@ -41,6 +41,9 @@ module control_unit
     logic [ 5:0] rev_partial_cntr_q;
     logic [ 3:0] weight_tiles_x_consumed_q;
     logic [ 3:0] weight_tiles_y_consumed_q;
+    logic [ 9:0] unified_buffer_cntr_q;
+
+    logic [ 9:0] next_compute_cntr;
 
     logic        done;
     logic        next_weight_tile;
@@ -53,12 +56,16 @@ module control_unit
     initial weight_tiles_x_consumed_q = 0;
     initial weight_tiles_y_consumed_q = 0;
     initial accumulator_add_o = 0;
+    initial unified_buffer_cntr_q = 0;
+    initial next_compute_cntr = 0;
 
     always_comb begin
         next_weight_tile   = rev_partial_cntr_q == MUL_SIZE-1;
 
         done_weight_tiles_y = (weight_tiles_y_consumed_q == 4'(H_DIM_i>>5)) & next_weight_tile;
         done_weight_tiles_x = (weight_tiles_x_consumed_q == 4'(W_DIM_i>>5)) & done_weight_tiles_y;
+
+        next_compute_cntr = (next_weight_tile) ? '0 : compute_cntr_q + 1;
 
         done        = done_weight_tiles_x;
     end
@@ -68,7 +75,7 @@ module control_unit
         done_o                   <= 1'b0;
 
         //assume tiles are written to unified buffer in the required order. assume read is disabled during reverse partial state.
-        unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
+        //unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5) + unified_buffer_cntr_q;
 
         case(state)
             STALL: begin
@@ -78,6 +85,8 @@ module control_unit
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
                 write_accumulator_o     <= 1'b0;
+
+                unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
                 
 
                 if (instruction_i) begin
@@ -85,6 +94,8 @@ module control_unit
                 end
             end
             LOAD_WEIGHT_FIFO: begin
+                unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
+
                 if (fifo_full_i) begin
                     load_weights_o          <= 1'b1;
                     state <= LOAD_WEIGHTS;
@@ -97,6 +108,8 @@ module control_unit
                 read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
                 write_accumulator_o     <= 1'b0;
+
+                unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
 
                 load_weights_cntr_q <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
                 if (load_weights_cntr_q == MUL_SIZE-1) begin
@@ -113,10 +126,11 @@ module control_unit
                 MAC_compute_o           <= 1'b0;
                 write_accumulator_o     <= 1'b0;
 
-                
-                if (activations_rdy_i == 1'b1) begin
+                unified_buffer_addr_rd_o <= unified_buffer_addr_rd_o + 1;
+                //if (activations_rdy_i == 1'b1) begin
                     state <= COMPUTE;
-                end
+                    //MAC_compute_o           <= 1'b1;
+                //end
             end
             COMPUTE: begin
                 //load_activations_o      <= 1'b1;
@@ -126,7 +140,7 @@ module control_unit
                 accumulator_add_o       <= (done_weight_tiles_y) ? '0 : ( (next_weight_tile) ? '1 : accumulator_add_o);
                 read_accumulator_o      <= (done_weight_tiles_y) ? '0 : ( (next_weight_tile) ? '1 : read_accumulator_o);
 
-                
+                unified_buffer_addr_rd_o <= unified_buffer_addr_rd_o + 1;
 
                 weight_tiles_y_consumed_q <= (done_weight_tiles_y) ? '0 : ( next_weight_tile    ? weight_tiles_y_consumed_q + 1 : weight_tiles_y_consumed_q );
                 weight_tiles_x_consumed_q <= (done_weight_tiles_x) ? '0 : ( done_weight_tiles_y ? weight_tiles_x_consumed_q + 1 : weight_tiles_x_consumed_q );
@@ -145,12 +159,12 @@ module control_unit
                         if(compute_cntr_q[4:0] == (MUL_SIZE-1)) begin
                             compute_cntr_q <= '0;
                             compute_output_state <= PARTIAL_OUTPUT;
-                            accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
+                            accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5);
                         end
                     end
                     PARTIAL_OUTPUT: begin
                         load_activations_o      <= 1'b1;
-                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
+                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + next_compute_cntr;
                         accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
                         accum_addr_mask_o       <= signed'(signed'(32'h80000000)>>>compute_cntr_q);
                         write_accumulator_o     <= 1'b1;
@@ -159,12 +173,13 @@ module control_unit
 
                         if (compute_cntr_q == (MUL_SIZE-1)) begin
                             compute_output_state <= FULL_OUTPUT;
+                            load_activations_o      <= 1'b0;
                         end
                     end
                     FULL_OUTPUT: begin
-                        load_activations_o      <= 1'b1;
+                        load_activations_o      <= 1'b0;
                         accum_addr_mask_o       <= '1;
-                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
+                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + next_compute_cntr;
                         accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
                         write_accumulator_o     <= 1'b1;
 
@@ -176,7 +191,8 @@ module control_unit
                         end
                     end
                     REVERSE_PARTIAL: begin
-                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q + 1;
+                        load_activations_o      <= 1'b0;
+                        accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + next_compute_cntr;
                         accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
                         accum_addr_mask_o       <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
                         write_accumulator_o     <= 1'b1;
@@ -195,6 +211,8 @@ module control_unit
                     state <= LOAD_WEIGHTS;
                     compute_cntr_q <= '0;
                     rev_partial_cntr_q <= '0;
+                    //MAC_compute_o           <= 1'b0;
+                    //unified_buffer_cntr_q <= '0;
 
                     compute_output_state <= NO_OUTPUT;
                 end
