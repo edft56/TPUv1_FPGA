@@ -29,7 +29,8 @@ endmodule
 module MAC_unit_shell
                         import tpu_package::*;    
                         (  input               clk_i, rst_i,
-                        input               stall_i, load_weights_i, compute_i,        
+                        input               stall_i, load_weights_i, compute_i,  
+                        input  compute_weight_sel_i,      
                         input  logic [W_WIDTH:0] mem_weight_i,
                         input  logic [ACT_WIDTH:0] act_i,
                         input  logic [RES_WIDTH:0] add_i,
@@ -39,13 +40,13 @@ module MAC_unit_shell
                         output logic [W_WIDTH:0] weight_o
                         );
 
-    logic [W_WIDTH:0] weight_q;
+    logic [W_WIDTH:0] weight_q [2];
     logic [ACT_WIDTH:0] act_q;
 
 
     MAC_unit_compute MAC0(  .clk_i,
                             .rst_i,
-                            .weight_i(weight_q),
+                            .weight_i(weight_q[compute_weight_sel_i]),
                             .act_i,
                             .add_i,
                             
@@ -53,7 +54,7 @@ module MAC_unit_shell
                         );
 
     assign act_o    = act_q;
-    assign weight_o = weight_q;
+    assign weight_o = weight_q[~compute_weight_sel_i];
 
     always_ff @(posedge clk_i) begin
 
@@ -63,12 +64,10 @@ module MAC_unit_shell
         end
         else begin
             if(load_weights_i) begin
-                act_q    <= act_q;
-                weight_q <= mem_weight_i;
+                weight_q[~compute_weight_sel_i] <= mem_weight_i;
             end
-            else if(compute_i) begin
-                act_q    <= act_i;
-                weight_q <= weight_q;
+            if(compute_i) begin
+                act_q                           <= act_i;
             end
         end
 
@@ -82,6 +81,7 @@ module MAC_systolic_array
                         import tpu_package::*;    
                         (  input clk_i,rst_i,
                             input stall_i, load_weights_i, compute_i,
+                            input next_weight_tile_i,
                             input logic [   W_WIDTH:0] mem_weight_i [MUL_SIZE],
                             input logic [ ACT_WIDTH:0] mem_act_i    [MUL_SIZE],
 
@@ -93,6 +93,9 @@ module MAC_systolic_array
     logic [RES_WIDTH:0] out_connections    [MUL_SIZE+2][MUL_SIZE];
     logic read_en_lag;
 
+    logic compute_weight_sel_q;
+
+    initial compute_weight_sel_q = 0;
 
     always_comb begin
         weight_connections[MUL_SIZE+1] = mem_weight_i;
@@ -107,6 +110,8 @@ module MAC_systolic_array
 
     always_ff @(posedge clk_i) begin
         read_en_lag <= load_weights_i;
+
+        if(next_weight_tile_i) compute_weight_sel_q <= ~compute_weight_sel_q;
     end
 
     
@@ -121,6 +126,7 @@ module MAC_systolic_array
                                                 .stall_i,
                                                 .load_weights_i(read_en_lag),
                                                 .compute_i,   
+                                                .compute_weight_sel_i(compute_weight_sel_q),
                                                 .mem_weight_i(weight_connections[i+1][j]),   
                                                 .act_i(act_connections[i-1][j]),
                                                 .add_i((j-1>=0) ? out_connections[i][j-1] : 0),
