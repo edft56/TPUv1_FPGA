@@ -12,7 +12,6 @@ module control_unit
                     input instruction_i,
                     input activations_rdy_i,
                     input weight_fifo_valid_output,
-                    input logic [6:0] accumulator_start_addr_wr_i,
                     input logic [8:0] H_DIM_i,
                     input logic [8:0] W_DIM_i,
                     input fifo_full_i,
@@ -32,10 +31,11 @@ module control_unit
                     output logic done_o
                     );
 
-    enum logic [2:0] {STALL, LOAD_WEIGHT_FIFO, LOAD_WEIGHTS, LOAD_ACTIVATIONS, COMPUTE} state;
+    enum logic [2:0] {STALL, LOAD_WEIGHT_FIFO, LOAD_WEIGHTS, LOAD_ACTIVATIONS, COMPUTE} compute_state;
 
     enum logic [1:0] {NO_OUTPUT, PARTIAL_OUTPUT, FULL_OUTPUT, REVERSE_PARTIAL} compute_output_state;
 
+    
     logic [ 4:0] load_weights_cntr_q;
     logic [ 9:0] compute_cntr_q;
     logic [ 5:0] rev_partial_cntr_q;
@@ -50,9 +50,10 @@ module control_unit
     logic        done_weight_tiles_x;
     logic [11:0] unified_buffer_addr_rd;
 
-    initial compute_cntr_q = 0;
-    initial state = STALL;
+    initial compute_state = STALL;
     initial compute_output_state = NO_OUTPUT;
+    
+    initial compute_cntr_q = 0;
     initial weight_tiles_x_consumed_q = 0;
     initial weight_tiles_y_consumed_q = 0;
     initial accumulator_add_o = 0;
@@ -66,7 +67,7 @@ module control_unit
 
         next_compute_cntr = (next_weight_tile) ? '0 : compute_cntr_q + 1;
 
-        unified_buffer_addr_rd = (state == LOAD_ACTIVATIONS | state == COMPUTE) ? unified_buffer_addr_rd_o + 1 : unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
+        unified_buffer_addr_rd = (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) ? unified_buffer_addr_rd_o + 1 : unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
 
         done        = done_weight_tiles_x;
     end
@@ -84,7 +85,7 @@ module control_unit
         weight_tiles_y_consumed_q <= (done_weight_tiles_y) ? '0 : ( next_weight_tile    ? weight_tiles_y_consumed_q + 1 : weight_tiles_y_consumed_q );
         weight_tiles_x_consumed_q <= (done_weight_tiles_x) ? '0 : ( done_weight_tiles_y ? weight_tiles_x_consumed_q + 1 : weight_tiles_x_consumed_q );
 
-        case(state)
+        case(compute_state)
             STALL: begin
                 load_activations_o      <= 1'b0;
                 stall_compute_o         <= 1'b1;
@@ -95,14 +96,14 @@ module control_unit
                 
 
                 if (instruction_i) begin
-                    state <= LOAD_WEIGHT_FIFO;
+                    compute_state <= LOAD_WEIGHT_FIFO;
                 end
             end
             LOAD_WEIGHT_FIFO: begin
 
                 if (fifo_full_i) begin
                     load_weights_o          <= 1'b1;
-                    state <= LOAD_WEIGHTS;
+                    compute_state <= LOAD_WEIGHTS;
                 end
             end
             LOAD_WEIGHTS: begin
@@ -116,7 +117,7 @@ module control_unit
                 load_weights_cntr_q <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
 
                 if (load_weights_cntr_q == MUL_SIZE-1) begin
-                    state               <= (weight_fifo_valid_output) ? LOAD_ACTIVATIONS : state;
+                    compute_state               <= (weight_fifo_valid_output) ? LOAD_ACTIVATIONS : compute_state;
                     load_weights_o      <= (weight_fifo_valid_output) ? 1'b0 : load_weights_o;
                     load_activations_o  <= (weight_fifo_valid_output) ? 1'b1 : '0;
                 end
@@ -130,7 +131,7 @@ module control_unit
                 write_accumulator_o     <= 1'b0;
 
                 //if (activations_rdy_i == 1'b1) begin
-                    state <= COMPUTE;
+                    compute_state <= COMPUTE;
                     //MAC_compute_o           <= 1'b1;
                 //end
             end
@@ -202,11 +203,11 @@ module control_unit
 
                 if(done) begin
                     done_o <= 1'b1;
-                    state <= STALL;
+                    compute_state <= STALL;
                 end
                 if(next_weight_tile) begin
                     load_weights_o          <= 1'b1;
-                    state <= LOAD_WEIGHTS;
+                    compute_state <= LOAD_WEIGHTS;
                     compute_cntr_q <= '0;
                     rev_partial_cntr_q <= '0;
                     //MAC_compute_o           <= 1'b0;

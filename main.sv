@@ -109,7 +109,6 @@ module main
                             .instruction_i,
                             .activations_rdy_i(act_data_rdy),
                             .weight_fifo_valid_output,
-                            .accumulator_start_addr_wr_i('0),
                             .H_DIM_i,
                             .W_DIM_i,
                             .fifo_full_i(weight_fifo_full),
