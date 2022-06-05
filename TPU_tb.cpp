@@ -6,15 +6,32 @@
 #include "Vmain_accumulator.h"
 #include <iomanip>
 #include <fstream>
+#include <stdexcept>
 
 #include <cmath>
 #include <bitset>
 
-const bool trace = true;
+//const bool trace = true;
+const bool trace = false;
 
 const uint32_t V_DIM = 64; 
 const uint32_t U_DIM = 64; 
 const uint32_t ITER_DIM = 64; 
+
+
+void check_correct(uint32_t* out_cpu, uint32_t* out_tpu, uint32_t V_DIM, uint32_t U_DIM){
+    for(int i=0; i<U_DIM/32; i++){
+        for(int j=0; j<V_DIM; j++){
+            for(int k=0; k<32; k++){
+                if (out_cpu[j*U_DIM + i*32 + k] != out_tpu[i*32*V_DIM + j*32 + k]) {
+                    std::cout<<out_cpu[j*U_DIM + i*32 + k]<<" != "<<out_tpu[i*32*V_DIM + j*32 + k]<<"\n";
+                    throw std::logic_error("Incorrect result. \n");
+                }
+            }
+        }
+    }
+}
+
 
 void matrix_multiply(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t* out_matrix, uint32_t V_DIM, uint32_t U_DIM, uint32_t ITER_DIM ){
     for(int i=0; i<ITER_DIM; i++){
@@ -88,7 +105,7 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 
 
 
-void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM){
+void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t* out_cpu){
     Vmain* top = new Vmain;
 
     vluint64_t sim_time = 800;
@@ -133,17 +150,19 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM){
     
     top->final();               // Done simulating
 
-    //std::cout<<(unsigned char)(top->main->accum->__PVT__port2_wr_en_i);
-    std::cout<<"\n";
-    for(int i=0; i<128; i++){
-        std::cout<<std::setw(3)<<i<<": ";
-        for(int j=0; j<32; j++){
-            std::cout<<(uint32_t)(top->main->accum->accumulator_storage[i][j])<<" ";
-        }
-        std::cout<<"\n";
-    }
+    
+    // std::cout<<"\n";
+    // for(int i=0; i<128; i++){
+    //     std::cout<<std::setw(3)<<i<<": ";
+    //     for(int j=0; j<32; j++){
+    //         std::cout<<(uint32_t)(top->main->accum->accumulator_storage[i][j])<<" ";
+    //     }
+    //     std::cout<<"\n";
+    // }
     
     //std::cout<<(top->H_DIM_i);
+
+    check_correct(out_cpu, (uint32_t*)(&(top->main->accum->accumulator_storage[0][0])), V_DIM, U_DIM);
 
     delete top;
     
@@ -169,17 +188,17 @@ int main() {
     // std::cout<<"\n";
 
 
-    for(int i=0; i<V_DIM; i++){
-        for(int j=0; j<U_DIM; j++){
-            std::cout<<out_matrix[i*U_DIM + j]<<" ";
-        }
-        std::cout<<"\n";
-    }
-    std::cout<<"\n";
+    // for(int i=0; i<V_DIM; i++){
+    //     for(int j=0; j<U_DIM; j++){
+    //         std::cout<<out_matrix[i*U_DIM + j]<<" ";
+    //     }
+    //     std::cout<<"\n";
+    // }
+    // std::cout<<"\n";
 
     
 
-    simulate_DUT(U_matrix,U_DIM,ITER_DIM);    
+    simulate_DUT(U_matrix,U_DIM,ITER_DIM,out_matrix);
 
     return 0;
 }
