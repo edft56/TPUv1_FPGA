@@ -46,7 +46,7 @@ module MAC_unit_shell
 
     MAC_unit_compute MAC0(  .clk_i,
                             .rst_i,
-                            .weight_i(weight_q[compute_weight_sel_i]),
+                            .weight_i( (compute_weight_sel_i) ? weight_q[1] : weight_q[0]),
                             .act_i,
                             .add_i,
                             
@@ -95,11 +95,13 @@ module MAC_systolic_array
     logic [RES_WIDTH:0] out_connections    [MUL_SIZE+2][MUL_SIZE];
     logic read_en_lag;
 
+    logic first_pass_q;
     logic compute_weight_sel_q;
     logic next_weight_tile_flag_q;
 
     initial compute_weight_sel_q = 0;
     initial next_weight_tile_flag_q = 0;
+    initial first_pass_q = 0;
 
     always_comb begin
         weight_connections[MUL_SIZE+1] = mem_weight_i;
@@ -114,6 +116,10 @@ module MAC_systolic_array
 
     always_ff @(posedge clk_i) begin
         read_en_lag <= load_weights_i;
+
+        first_pass_q <= (compute_weights_rdy_i) ? '1 : first_pass_q;
+
+        compute_weight_sel_q <= (compute_weights_rdy_i & !first_pass_q) ? ~compute_weight_sel_q : compute_weight_sel_q;
 
         if (next_weight_tile_i) begin
             if (compute_weights_buffered_i) begin

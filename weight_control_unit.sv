@@ -60,7 +60,6 @@ module weight_control_unit
 
                 if (load_weights_cntr_q == MUL_SIZE-1) begin
                     weight_state                <= (weight_fifo_valid_output) ? DOUBLE_BUFFER : weight_state;
-                    load_weights_o              <= (weight_fifo_valid_output) ? '0 : load_weights_o;
                 end
             end
             DOUBLE_BUFFER: begin

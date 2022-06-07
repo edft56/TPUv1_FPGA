@@ -65,7 +65,11 @@ module compute_control_unit
 
         next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
 
-        unified_buffer_addr_rd = (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) ? unified_buffer_addr_rd_o + 1 : unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
+        if(next_weight_tile_o) unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
+        else if (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) unified_buffer_addr_rd = unified_buffer_addr_rd_o + 1;
+        else unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
+
+        //unified_buffer_addr_rd = (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) ? unified_buffer_addr_rd_o + 1 : unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
 
         done        = done_weight_tiles_x;
     end
@@ -78,7 +82,7 @@ module compute_control_unit
         unified_buffer_addr_rd_o <= unified_buffer_addr_rd;
 
         accumulator_add_o       <= (done_weight_tiles_y) ? '0 : ( (next_weight_tile_o) ? '1 : accumulator_add_o);
-        read_accumulator_o      <= (done_weight_tiles_y) ? '0 : ( (next_weight_tile_o) ? '1 : read_accumulator_o);
+        read_accumulator_o      <= compute_output_state != NO_OUTPUT & (done_weight_tiles_y) ? '0 : ( (next_weight_tile_o) ? '1 : read_accumulator_o);
 
         weight_tiles_y_consumed_q <= (done_weight_tiles_y) ? '0 : ( next_weight_tile_o    ? weight_tiles_y_consumed_q + 1 : weight_tiles_y_consumed_q );
         weight_tiles_x_consumed_q <= (done_weight_tiles_x) ? '0 : ( done_weight_tiles_y ? weight_tiles_x_consumed_q + 1 : weight_tiles_x_consumed_q );
@@ -87,7 +91,7 @@ module compute_control_unit
             STALL: begin
                 load_activations_o      <= 1'b0;
                 stall_compute_o         <= 1'b1;
-                read_accumulator_o      <= 1'b0;
+                //read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
                 write_accumulator_o     <= 1'b0;
                 
@@ -100,7 +104,7 @@ module compute_control_unit
             LOAD_ACTIVATIONS: begin
                 load_activations_o      <= 1'b1;
                 stall_compute_o         <= 1'b1;
-                read_accumulator_o      <= 1'b0;
+                //read_accumulator_o      <= 1'b0;
                 MAC_compute_o           <= 1'b0;
                 write_accumulator_o     <= 1'b0;
 
