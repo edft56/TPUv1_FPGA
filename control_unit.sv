@@ -15,7 +15,11 @@ module control_unit
                         input [8:0] H_DIM_i,
                         input [8:0] W_DIM_i,
                         input weight_fifo_valid_output,
+                        input [11:0] unified_buffer_start_addr_rd_i,
                         
+                        output compute_weights_buffered_o,
+                        output compute_weights_rdy_o,
+                        output next_weight_tile_o,
                         output logic [11:0] unified_buffer_addr_rd_o,
                         output logic load_activations_o,
                         output logic stall_compute_o,
@@ -30,9 +34,6 @@ module control_unit
                         output logic done_o
                     );
 
-    wire compute_weights_rdy;
-    wire compute_weights_buffered;
-    wire next_weight_tile;
 
     compute_control_unit comp_ctrl_unit(
                                         .clk_i,
@@ -40,8 +41,9 @@ module control_unit
                                         .instruction_i,
                                         .H_DIM_i,
                                         .W_DIM_i,
-                                        .compute_weights_rdy_i(compute_weights_rdy),
-                                        .compute_weights_buffered_i(compute_weights_buffered),
+                                        .compute_weights_rdy_i(compute_weights_rdy_o),
+                                        .compute_weights_buffered_i(compute_weights_buffered_o),
+                                        .unified_buffer_start_addr_rd_i,
                                     
                                         .unified_buffer_addr_rd_o,
                                         .load_activations_o,
@@ -53,7 +55,7 @@ module control_unit
                                         .accumulator_addr_rd_o,
                                         .accum_addr_mask_o,
                                         .accumulator_add_o,
-                                        .next_weight_tile_o(next_weight_tile),
+                                        .next_weight_tile_o,
                                         .done_o
                                         );
 
@@ -62,11 +64,11 @@ module control_unit
                                             .rst_i,
                                             .instruction_i,
                                             .weight_fifo_valid_output,
-                                            .next_weight_tile_i(next_weight_tile),
+                                            .next_weight_tile_i(next_weight_tile_o),
                                             .done_i(done_o),
 
-                                            .compute_weights_rdy_o(compute_weights_rdy),
-                                            .compute_weights_buffered_o(compute_weights_buffered),
+                                            .compute_weights_rdy_o,
+                                            .compute_weights_buffered_o,
                                             .load_weights_o
                                         );
 

@@ -50,7 +50,7 @@ module weight_control_unit
                 end
             end
             LOAD_WEIGHTS: begin
-                load_weights_o                  <= 1'b1;
+                load_weights_o                  <= '1;
 
                 load_weights_cntr_q             <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
 

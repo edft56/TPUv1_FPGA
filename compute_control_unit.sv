@@ -10,10 +10,11 @@ module compute_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
                     input instruction_i,
-                    input logic [8:0] H_DIM_i,
-                    input logic [8:0] W_DIM_i,
+                    input [8:0] H_DIM_i,
+                    input [8:0] W_DIM_i,
                     input compute_weights_rdy_i,
                     input compute_weights_buffered_i,
+                    input [11:0] unified_buffer_start_addr_rd_i,
 
                     output logic [11:0] unified_buffer_addr_rd_o,
                     output logic load_activations_o,

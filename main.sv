@@ -48,6 +48,10 @@ module main
 
     wire act_data_rdy;
 
+    wire next_weight_tile;
+    wire compute_weights_buffered;
+    wire compute_weights_rdy;
+
 
     MAC_systolic_array MAC_Array(   .clk_i,
                                     .rst_i,
@@ -56,6 +60,10 @@ module main
                                     .compute_i(MAC_compute),
                                     .mem_weight_i(MAC_weight_input),
                                     .mem_act_i(MAC_act_input),
+                                    .compute_weights_buffered_i(compute_weights_buffered),
+                                    .compute_weights_rdy_i(compute_weights_rdy),
+                                    .next_weight_tile_i(next_weight_tile),
+
                                     .data_o(MAC_output)
                                     );
 
@@ -107,13 +115,14 @@ module main
     control_unit ctrl_unit( .clk_i,
                             .rst_i,
                             .instruction_i,
-                            .activations_rdy_i(act_data_rdy),
                             .weight_fifo_valid_output,
                             .H_DIM_i,
                             .W_DIM_i,
-                            .fifo_full_i(weight_fifo_full),
                             .unified_buffer_start_addr_rd_i('0),
-                        
+
+                            .compute_weights_buffered_o(compute_weights_buffered),
+                            .compute_weights_rdy_o(compute_weights_rdy),
+                            .next_weight_tile_o(next_weight_tile),
                             .unified_buffer_addr_rd_o(unified_buffer_addr_rd),
                             .load_weights_o(load_weights_to_MAC),
                             .load_activations_o(unified_buffer_read),

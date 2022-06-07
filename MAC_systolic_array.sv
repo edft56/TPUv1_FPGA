@@ -84,6 +84,8 @@ module MAC_systolic_array
                             input next_weight_tile_i,
                             input logic [   W_WIDTH:0] mem_weight_i [MUL_SIZE],
                             input logic [ ACT_WIDTH:0] mem_act_i    [MUL_SIZE],
+                            input compute_weights_buffered_i,
+                            input compute_weights_rdy_i,
 
                             output logic [RES_WIDTH:0] data_o       [MUL_SIZE]
                             );
@@ -94,8 +96,10 @@ module MAC_systolic_array
     logic read_en_lag;
 
     logic compute_weight_sel_q;
+    logic next_weight_tile_flag_q;
 
     initial compute_weight_sel_q = 0;
+    initial next_weight_tile_flag_q = 0;
 
     always_comb begin
         weight_connections[MUL_SIZE+1] = mem_weight_i;
@@ -111,7 +115,21 @@ module MAC_systolic_array
     always_ff @(posedge clk_i) begin
         read_en_lag <= load_weights_i;
 
-        if(next_weight_tile_i) compute_weight_sel_q <= ~compute_weight_sel_q;
+        if (next_weight_tile_i) begin
+            if (compute_weights_buffered_i) begin
+                compute_weight_sel_q <= ~compute_weight_sel_q;
+            end
+            else begin
+                next_weight_tile_flag_q <= '1;
+            end
+        end
+
+        if(next_weight_tile_flag_q) begin
+            if(compute_weights_rdy_i) begin
+                compute_weight_sel_q <= ~compute_weight_sel_q;
+                next_weight_tile_flag_q <= '0;
+            end
+        end
     end
 
     
