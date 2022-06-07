@@ -148,7 +148,7 @@ module MAC_systolic_array
                 MAC_unit_shell MAC_array_mid(   .clk_i,
                                                 .rst_i,
                                                 .stall_i,
-                                                .load_weights_i(read_en_lag),
+                                                .load_weights_i(load_weights_i),
                                                 .compute_i,   
                                                 .compute_weight_sel_i(compute_weight_sel_q),
                                                 .mem_weight_i(weight_connections[i+1][j]),   

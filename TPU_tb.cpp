@@ -77,8 +77,8 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 
     for(int i=0; i<V_DIM; i++){
         for(int j=0; j<ITER_DIM; j++){
-            V_matrix[i*ITER_DIM + j] = 1;
-            //V_matrix[i*ITER_DIM + j] = (j)%5;
+            //V_matrix[i*ITER_DIM + j] = 1;
+            V_matrix[i*ITER_DIM + j] = (j)%5;
             //V_matrix[i*ITER_DIM + j] = rand()%10;
             //OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
         }

@@ -83,6 +83,7 @@ module weight_control_unit
             FULL: begin
                 if(next_weight_tile_i) begin
                     weight_state                <= DOUBLE_BUFFER;
+                    load_weights_o                  <= '1;
                 end
                 if(done_i) begin
                     weight_state                <= STALL;
