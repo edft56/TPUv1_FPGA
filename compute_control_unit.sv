@@ -16,6 +16,7 @@ module compute_control_unit
                     input compute_weights_buffered_i,
                     input [11:0] unified_buffer_start_addr_rd_i,
 
+                    output logic [MUL_SIZE-1 : 0] compute_weight_sel_o [MUL_SIZE],
                     output logic [11:0] unified_buffer_addr_rd_o,
                     output logic load_activations_o,
                     output logic stall_compute_o,
@@ -58,6 +59,7 @@ module compute_control_unit
     initial weight_tiles_y_consumed_q = 0;
     initial accumulator_add_o = 0;
     initial next_compute_cntr = 0;
+    initial compute_weight_sel_o = '{default:'0};
 
     always_comb begin
         next_weight_tile_o  = rev_partial_cntr_q == MUL_SIZE-1;
@@ -104,6 +106,9 @@ module compute_control_unit
                 if (instruction_i & compute_weights_rdy_i) begin
                     load_activations_o  <= 1'b1;
                     compute_state       <= LOAD_ACTIVATIONS;
+                    for(int i=0; i<32; i++) begin
+                        compute_weight_sel_o[i] <= ~compute_weight_sel_o[i];
+                    end
                 end
             end
             LOAD_ACTIVATIONS: begin
@@ -169,11 +174,17 @@ module compute_control_unit
                         if(compute_cntr_q == H_DIM_i) begin
                             compute_output_state <= REVERSE_PARTIAL;
                             load_activations_o   <= 1'b0;
+                            compute_weight_sel_o[0]       <= (32'h7FFFFFFF);
                         end
                     end
                     REVERSE_PARTIAL: begin
                         load_activations_o      <= 1'b0;
                         write_accumulator_o     <= 1'b1;
+
+                        compute_weight_sel_o[0]       <= (32'h3FFFFFFF)>>rev_partial_cntr_q;
+                        for(int i=1; i<32; i++) begin
+                            compute_weight_sel_o[i] <= compute_weight_sel_o[i-1];
+                        end
 
                         accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + next_compute_cntr;
                         accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;

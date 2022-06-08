@@ -86,20 +86,19 @@ module MAC_systolic_array
                             input logic [ ACT_WIDTH:0] mem_act_i    [MUL_SIZE],
                             input compute_weights_buffered_i,
                             input compute_weights_rdy_i,
+                            input logic [MUL_SIZE-1 : 0] compute_weight_sel_i [MUL_SIZE],
 
                             output logic [RES_WIDTH:0] data_o       [MUL_SIZE]
                             );
 
-    logic [  W_WIDTH:0] weight_connections [MUL_SIZE+2][MUL_SIZE];
-    logic [ACT_WIDTH:0] act_connections    [MUL_SIZE+2][MUL_SIZE];
-    logic [RES_WIDTH:0] out_connections    [MUL_SIZE+2][MUL_SIZE];
+    logic [  W_WIDTH : 0] weight_connections [MUL_SIZE+2][MUL_SIZE];
+    logic [ACT_WIDTH : 0] act_connections    [MUL_SIZE+2][MUL_SIZE];
+    logic [RES_WIDTH : 0] out_connections    [MUL_SIZE+2][MUL_SIZE];
     logic read_en_lag;
 
     logic first_pass_q;
-    logic compute_weight_sel_q;
     logic next_weight_tile_flag_q;
 
-    initial compute_weight_sel_q = 0;
     initial next_weight_tile_flag_q = 0;
     initial first_pass_q = 0;
 
@@ -115,27 +114,27 @@ module MAC_systolic_array
     end
 
     always_ff @(posedge clk_i) begin
-        read_en_lag <= load_weights_i;
+        //read_en_lag <= load_weights_i;
 
-        first_pass_q <= (compute_weights_rdy_i) ? '1 : first_pass_q;
+        //first_pass_q <= (compute_weights_rdy_i) ? '1 : first_pass_q;
 
-        compute_weight_sel_q <= (compute_weights_rdy_i & !first_pass_q) ? ~compute_weight_sel_q : compute_weight_sel_q;
+        // compute_weight_sel_q <= (compute_weights_rdy_i & !first_pass_q) ? ~compute_weight_sel_q : compute_weight_sel_q;
 
-        if (next_weight_tile_i) begin
-            if (compute_weights_buffered_i) begin
-                compute_weight_sel_q <= ~compute_weight_sel_q;
-            end
-            else begin
-                next_weight_tile_flag_q <= '1;
-            end
-        end
+        // if (next_weight_tile_i) begin
+        //     if (compute_weights_buffered_i) begin
+        //         compute_weight_sel_q <= ~compute_weight_sel_q;
+        //     end
+        //     else begin
+        //         next_weight_tile_flag_q <= '1;
+        //     end
+        // end
 
-        if(next_weight_tile_flag_q) begin
-            if(compute_weights_rdy_i) begin
-                compute_weight_sel_q <= ~compute_weight_sel_q;
-                next_weight_tile_flag_q <= '0;
-            end
-        end
+        // if(next_weight_tile_flag_q) begin
+        //     if(compute_weights_rdy_i) begin
+        //         compute_weight_sel_q <= ~compute_weight_sel_q;
+        //         next_weight_tile_flag_q <= '0;
+        //     end
+        // end
     end
 
     
@@ -150,7 +149,7 @@ module MAC_systolic_array
                                                 .stall_i,
                                                 .load_weights_i(load_weights_i),
                                                 .compute_i,   
-                                                .compute_weight_sel_i(compute_weight_sel_q),
+                                                .compute_weight_sel_i(compute_weight_sel_i[i-1][j]),
                                                 .mem_weight_i(weight_connections[i+1][j]),   
                                                 .act_i(act_connections[i-1][j]),
                                                 .add_i((j-1>=0) ? out_connections[i][j-1] : 0),

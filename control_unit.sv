@@ -17,6 +17,7 @@ module control_unit
                         input weight_fifo_valid_output,
                         input [11:0] unified_buffer_start_addr_rd_i,
                         
+                        output [MUL_SIZE-1 : 0] compute_weight_sel_o [MUL_SIZE],
                         output compute_weights_buffered_o,
                         output compute_weights_rdy_o,
                         output next_weight_tile_o,
@@ -44,7 +45,8 @@ module control_unit
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
                                         .compute_weights_buffered_i(compute_weights_buffered_o),
                                         .unified_buffer_start_addr_rd_i,
-                                    
+
+                                        .compute_weight_sel_o,
                                         .unified_buffer_addr_rd_o,
                                         .load_activations_o,
                                         .stall_compute_o,

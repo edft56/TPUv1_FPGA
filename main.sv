@@ -26,6 +26,7 @@ module main
     wire [W_WIDTH:0] MAC_weight_input [MUL_SIZE];
     wire [ACT_WIDTH:0] MAC_act_input [MUL_SIZE];
     wire [RES_WIDTH:0] MAC_output [MUL_SIZE];
+    wire [MUL_SIZE-1 : 0] compute_weight_sel [MUL_SIZE];
 
     wire unified_buffer_read;
     wire unified_buffer_write;
@@ -63,6 +64,7 @@ module main
                                     .compute_weights_buffered_i(compute_weights_buffered),
                                     .compute_weights_rdy_i(compute_weights_rdy),
                                     .next_weight_tile_i(next_weight_tile),
+                                    .compute_weight_sel_i(compute_weight_sel),
 
                                     .data_o(MAC_output)
                                     );
@@ -120,6 +122,7 @@ module main
                             .W_DIM_i,
                             .unified_buffer_start_addr_rd_i('0),
 
+                            .compute_weight_sel_o(compute_weight_sel),
                             .compute_weights_buffered_o(compute_weights_buffered),
                             .compute_weights_rdy_o(compute_weights_rdy),
                             .next_weight_tile_o(next_weight_tile),
