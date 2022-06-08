@@ -39,6 +39,8 @@ module compute_control_unit
     logic [ 5:0] rev_partial_cntr_q;
     logic [ 3:0] weight_tiles_x_consumed_q;
     logic [ 3:0] weight_tiles_y_consumed_q;
+    logic [ 3:0] weight_tiles_x_consumed;
+    logic [ 3:0] weight_tiles_y_consumed;
 
 
     logic [ 9:0] next_compute_cntr;
@@ -63,9 +65,12 @@ module compute_control_unit
         done_weight_tiles_y = (weight_tiles_y_consumed_q == 4'(H_DIM_i>>5)) & next_weight_tile_o;
         done_weight_tiles_x = (weight_tiles_x_consumed_q == 4'(W_DIM_i>>5)) & done_weight_tiles_y;
 
+        weight_tiles_y_consumed = (done_weight_tiles_y) ? '0 : ( next_weight_tile_o    ? weight_tiles_y_consumed_q + 1 : weight_tiles_y_consumed_q );
+        weight_tiles_x_consumed = (done_weight_tiles_x) ? '0 : ( done_weight_tiles_y ? weight_tiles_x_consumed_q + 1 : weight_tiles_x_consumed_q );
+
         next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
 
-        if(next_weight_tile_o) unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
+        if(next_weight_tile_o) unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + (weight_tiles_y_consumed)*(((H_DIM_i>>5)+1)<<5);
         else if (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) unified_buffer_addr_rd = unified_buffer_addr_rd_o + 1;
         else unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
 
@@ -84,8 +89,8 @@ module compute_control_unit
         accumulator_add_o       <= (done_weight_tiles_y) ? '0 : ( (next_weight_tile_o) ? '1 : accumulator_add_o);
         read_accumulator_o      <= compute_output_state != NO_OUTPUT & (done_weight_tiles_y) ? '0 : ( (next_weight_tile_o) ? '1 : read_accumulator_o);
 
-        weight_tiles_y_consumed_q <= (done_weight_tiles_y) ? '0 : ( next_weight_tile_o    ? weight_tiles_y_consumed_q + 1 : weight_tiles_y_consumed_q );
-        weight_tiles_x_consumed_q <= (done_weight_tiles_x) ? '0 : ( done_weight_tiles_y ? weight_tiles_x_consumed_q + 1 : weight_tiles_x_consumed_q );
+        weight_tiles_y_consumed_q <= weight_tiles_y_consumed;
+        weight_tiles_x_consumed_q <= weight_tiles_x_consumed;
 
         case(compute_state)
             STALL: begin
@@ -145,9 +150,10 @@ module compute_control_unit
 
                         compute_cntr_q <= compute_cntr_q + 1;
 
+                        if (compute_cntr_q >= (MUL_SIZE-2)) load_activations_o   <= 1'b0;
+
                         if (compute_cntr_q == (MUL_SIZE-1)) begin
                             compute_output_state <= FULL_OUTPUT;
-                            load_activations_o   <= 1'b0;
                         end
                     end
                     FULL_OUTPUT: begin
