@@ -108,7 +108,7 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t* out_cpu){
     Vmain* top = new Vmain;
 
-    vluint64_t sim_time = 300;
+    vluint64_t sim_time = 330;
     
     Verilated::traceEverOn(true);
     VerilatedVcdC* tfp = new VerilatedVcdC;

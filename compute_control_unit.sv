@@ -33,9 +33,9 @@ module compute_control_unit
 
     enum logic [1:0] {STALL, LOAD_ACTIVATIONS, COMPUTE} compute_state;
 
-    enum logic [1:0] {NO_OUTPUT, PARTIAL_OUTPUT, FULL_OUTPUT, REVERSE_PARTIAL} compute_output_state;
+    enum logic [2:0] {NO_OUTPUT, PARTIAL_OUTPUT, FULL_OUTPUT, FULL_OUTPUT_WEIGHT_CHANGE, REVERSE_PARTIAL} compute_output_state;
 
-
+    logic [ 5:0] weight_change_cntr_q;
     logic [ 9:0] compute_cntr_q;
     logic [ 5:0] rev_partial_cntr_q;
     logic [ 3:0] weight_tiles_x_consumed_q;
@@ -162,7 +162,7 @@ module compute_control_unit
                         end
                     end
                     FULL_OUTPUT: begin
-                        load_activations_o      <= 1'b0;
+                        load_activations_o      <= 1'b1;
                         write_accumulator_o     <= 1'b1;
 
                         accum_addr_mask_o       <= '1;
@@ -172,26 +172,40 @@ module compute_control_unit
                         compute_cntr_q <= compute_cntr_q + 1;
 
                         if(compute_cntr_q == H_DIM_i) begin
-                            compute_output_state <= REVERSE_PARTIAL;
-                            load_activations_o   <= 1'b0;
-                            compute_weight_sel_o[0]       <= (32'h7FFFFFFF);
+                            compute_output_state <= FULL_OUTPUT_WEIGHT_CHANGE;
+                            compute_weight_sel_o[0]       <= compute_weight_sel_o[0] ^ (~(32'h7FFFFFFF)>>rev_partial_cntr_q);
+                        end
+                    end
+                    FULL_OUTPUT_WEIGHT_CHANGE: begin
+                        weight_change_cntr_q <= weight_change_cntr_q + 1;
+
+                        compute_cntr_q <= compute_cntr_q + 1;
+
+                        compute_weight_sel_o[0]       <= compute_weight_sel_o[0] ^ (~(32'h3FFFFFFF)>>rev_partial_cntr_q);
+                        for(int i=1; i<32; i++) begin
+                            compute_weight_sel_o[i] <= compute_weight_sel_o[i-1];
+                        end
+
+                        if(weight_change_cntr_q == MUL_SIZE-1) begin
+                            compute_output_state <= FULL_OUTPUT;
                         end
                     end
                     REVERSE_PARTIAL: begin
                         load_activations_o      <= 1'b0;
                         write_accumulator_o     <= 1'b1;
 
-                        compute_weight_sel_o[0]       <= (32'h3FFFFFFF)>>rev_partial_cntr_q;
-                        for(int i=1; i<32; i++) begin
-                            compute_weight_sel_o[i] <= compute_weight_sel_o[i-1];
-                        end
+                        
 
                         accumulator_addr_rd_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + next_compute_cntr;
                         accumulator_addr_wr_o   <= weight_tiles_x_consumed_q*(((H_DIM_i>>5)+1)<<5) + compute_cntr_q;
-                        accum_addr_mask_o       <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+                        //accum_addr_mask_o       <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+                        accum_addr_mask_o       <= (32'hFFFFFFFF)>>rev_partial_cntr_q;
 
                         rev_partial_cntr_q      <= rev_partial_cntr_q + 1;
                         compute_cntr_q          <= compute_cntr_q + 1;
+                    end
+                    default: begin
+
                     end
                 endcase
 
