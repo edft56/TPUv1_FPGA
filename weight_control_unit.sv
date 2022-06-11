@@ -24,6 +24,7 @@ module weight_control_unit
     enum logic [1:0] {STALL, LOAD_WEIGHTS, DOUBLE_BUFFER, FULL} weight_state;
 
     logic [ 4:0] load_weights_cntr_q;
+    logic        next_tile_flag_q;
 
     initial weight_state = STALL;
 
@@ -82,9 +83,18 @@ module weight_control_unit
             end
             FULL: begin
                 if(next_weight_tile_i) begin
-                    weight_state                <= DOUBLE_BUFFER;
-                    load_weights_o                  <= '1;
+                    next_tile_flag_q            <= 1;
+                    load_weights_cntr_q         <= load_weights_cntr_q + 1;
                 end
+
+                if(next_tile_flag_q) begin
+                    load_weights_cntr_q         <= load_weights_cntr_q + 1;
+                    if (load_weights_cntr_q == MUL_SIZE-1) begin
+                        weight_state            <= DOUBLE_BUFFER;
+                        load_weights_o          <= 1;
+                    end
+                end
+
                 if(done_i) begin
                     weight_state                <= STALL;
                 end

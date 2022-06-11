@@ -8,14 +8,14 @@ module systolic_data_staging(   input clk_i,
                                 output logic [15:0] data_o [32]
                                 );
     
-    logic [15:0] register_array [32][32]; //half of them are used
+    logic [15:0] register_array [31][31]; //half of them are used
     logic write_en_q;
     //logic        valid_bit;
 
     //logic act_cnt_q;
 
     initial begin
-        for(int i=0; i<32; i++) begin
+        for(int i=0; i<31; i++) begin
             register_array[i] = '{default:0};
         end
 
@@ -23,16 +23,17 @@ module systolic_data_staging(   input clk_i,
     end
 
     always_comb begin
-        for(int i=0; i<32; i++) begin
-            data_o[i] = register_array[0][i];
+        for(int i=0; i<31; i++) begin
+            data_o[i+1] = register_array[0][i];
         end
+        data_o[0] = data_i[0];
     end
 
     always_ff @(posedge clk_i) begin
         write_en_q <= read_i;
 
-        for(int i=0; i<32; i++) begin
-            register_array[i][i] <= (write_en_q) ? data_i[i] :  'd0;
+        for(int i=0; i<31; i++) begin
+            register_array[i][i] <= (write_en_q) ? data_i[i+1] :  'd0;
             //valid_bits[i][i]     <= (read_i) ? 1'b1       : 1'b0;
         end
         //valid_bit <= (read_i) ? 1'b1 :  1'b0;
@@ -40,8 +41,8 @@ module systolic_data_staging(   input clk_i,
         //act_data_rdy_o <= (read_i) ? 1'b1 : 1'b0;
         
 
-        for(int i=0; i<31; i++) begin
-            for(int j=i; j<32; j++) begin
+        for(int i=0; i<30; i++) begin
+            for(int j=i; j<31; j++) begin
                 if(i!=j) begin
                     register_array[i][j] <= register_array[i+1][j]; //shift
                 end

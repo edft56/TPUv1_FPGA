@@ -14,11 +14,4 @@ package tpu_package;
     typedef logic [ 8:0] weight_valid_t;
     typedef logic [15:0] act_t;
     typedef logic [31:0] res_t;
-
-    function diag_addr_array_t diag_addr_LUT (input logic [6:0] addr);
-        diag_addr_array_t out_addr;
-        //something something will write when bored
-        //hope verilog will some day have compile time lut creation
-        return out_addr;
-    endfunction
 endpackage

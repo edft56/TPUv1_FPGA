@@ -54,30 +54,23 @@ module control_unit
                                         .done_o
                                         );
 
-    // compute_control_unit comp_ctrl_unit(
-    //                                     .clk_i,
-    //                                     .rst_i,
-    //                                     .instruction_i,
-    //                                     .H_DIM_i,
-    //                                     .W_DIM_i,
-    //                                     .compute_weights_rdy_i(compute_weights_rdy_o),
-    //                                     .compute_weights_buffered_i(compute_weights_buffered_o),
-    //                                     .unified_buffer_start_addr_rd_i,
+    accumulator_control_unit accum_ctrl_unit(
+                                        .clk_i,
+                                        .rst_i,
+                                        .H_DIM_i,
+                                        .W_DIM_i,
+                                        .compute_weights_rdy_i(compute_weights_rdy_o),
+                                        .compute_weights_buffered_i(compute_weights_buffered_o),
+                                        .MAC_compute_i(MAC_compute_o),
+                                        .load_activations_i(load_activations_o),
 
-    //                                     .compute_weight_sel_o,
-    //                                     .unified_buffer_addr_rd_o,
-    //                                     .load_activations_o,
-    //                                     .stall_compute_o,
-    //                                     .MAC_compute_o,
-    //                                     .read_accumulator_o,
-    //                                     .write_accumulator_o,
-    //                                     .accumulator_addr_wr_o,
-    //                                     .accumulator_addr_rd_o,
-    //                                     .accum_addr_mask_o,
-    //                                     .accumulator_add_o,
-    //                                     .next_weight_tile_o,
-    //                                     .done_o
-    //                                     );
+                                        .read_accumulator_o,
+                                        .write_accumulator_o,
+                                        .accumulator_addr_wr_o,
+                                        .accumulator_addr_rd_o,
+                                        .accum_addr_mask_o,
+                                        .accumulator_add_o
+                                        );
 
     weight_control_unit weight_ctrl_unit(   
                                             .clk_i,

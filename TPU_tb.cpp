@@ -53,18 +53,20 @@ void clock_tick(Vmain* top, vluint64_t& time, VerilatedVcdC* tfp){
 void handle_inputs(Vmain* top, uint64_t& positive_edges, uint32_t* U_matrix, uint32_t ITER_DIM, uint32_t U_DIM){
     static int tile_x = 0;
     static int tile_y = 0;
-    static int col = 0;
+    static int col = 31;
+    static int col_cnt = 0;
 
     if (positive_edges>2 && top->request_fifo_data_o){
         top->sending_fifo_data_i = 1;
 
         for(int i=0; i<32; i++){
-            top->weight_fifo_data_in[i] = U_matrix[tile_y*32*U_DIM + i*U_DIM + tile_x*32 + col];
+            top->weight_fifo_data_in[i] = U_matrix[tile_y*32*U_DIM + i*U_DIM + tile_x*32 + col]; //read each tile in reverse
             //top->weight_fifo_data_in[i] = 1;
         }
-        bool tile_y_up = ((col+1) % (32) == 0);
+        bool tile_y_up = ((col_cnt+1) % (32) == 0);
         bool tile_x_up = (tile_y == (ITER_DIM/32)-1) && tile_y_up;
-        col = (col+1) % (32);
+        col_cnt = (col_cnt+1) % (32);
+        col = 31 - col_cnt;
         tile_y = ( tile_y == (ITER_DIM/32)-1 && tile_y_up ) ? 0 : ( tile_y_up ? tile_y + 1 : tile_y );
         tile_x = ( tile_x == (U_DIM/32)-1 && tile_x_up) ? 0 : ( tile_x_up ? tile_x + 1 : tile_x );
 
@@ -108,7 +110,7 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t* out_cpu){
     Vmain* top = new Vmain;
 
-    vluint64_t sim_time = 330;
+    vluint64_t sim_time = 300;
     
     Verilated::traceEverOn(true);
     VerilatedVcdC* tfp = new VerilatedVcdC;

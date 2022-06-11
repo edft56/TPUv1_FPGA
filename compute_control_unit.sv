@@ -27,7 +27,7 @@ module compute_control_unit
 
     enum logic [1:0] {STALL, LOAD_ACTIVATIONS, COMPUTE, COMPUTE_WEIGHT_CHANGE} compute_state;
 
-    logic [ 4:0] weight_change_cntr_q;
+    logic [ 5:0] weight_change_cntr_q;
     logic [ 9:0] compute_cntr_q;
     logic [ 5:0] rev_partial_cntr_q;
     logic [ 3:0] weight_tiles_x_consumed_q;
@@ -42,6 +42,9 @@ module compute_control_unit
     logic        done_weight_tiles_y;
     logic        done_weight_tiles_x;
     logic [11:0] unified_buffer_addr_rd;
+
+    logic [2*MUL_SIZE-1 : 0] xor_value;
+    logic [ 5:0] next_weight_change_cntr;
 
     initial compute_state = STALL;
     initial weight_change_cntr_q = 0;
@@ -68,7 +71,9 @@ module compute_control_unit
 
         //unified_buffer_addr_rd = (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) ? unified_buffer_addr_rd_o + 1 : unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
 
-        done_compute        = done_weight_tiles_x;
+        done_compute            = done_weight_tiles_x;
+        next_weight_change_cntr = weight_change_cntr_q + 1;
+        xor_value               = (64'h8000000000000000 >> next_weight_change_cntr);
     end
     
 
@@ -125,7 +130,9 @@ module compute_control_unit
                 end
                 if(compute_cntr_q == H_DIM_i) begin
                     compute_state           <= COMPUTE_WEIGHT_CHANGE;
-                    compute_weight_sel_o[0] <= compute_weight_sel_o[0] ^ ((~32'h7FFFFFFF)>>weight_change_cntr_q);
+                    compute_weight_sel_o[0] <= compute_weight_sel_o[0] ^ (32'h80000000);
+                    weight_change_cntr_q    <= weight_change_cntr_q + 1;
+                    compute_cntr_q          <= '0;
                 end
             end
             COMPUTE_WEIGHT_CHANGE: begin
@@ -133,12 +140,11 @@ module compute_control_unit
 
                 compute_cntr_q              <= next_compute_cntr;
 
-                compute_weight_sel_o[0]     <= compute_weight_sel_o[0] ^ ((~32'h3FFFFFFF)>>weight_change_cntr_q); //need to negate 1 value at a time
-                for(int i=1; i<32; i++) begin
-                    compute_weight_sel_o[i] <= compute_weight_sel_o[i-1];
-                end
+                compute_weight_sel_o[0]     <= compute_weight_sel_o[0] ^ (32'h80000000 >> weight_change_cntr_q);
+                compute_weight_sel_o[1:31]  <= compute_weight_sel_o[0:30];
+                
 
-                if(weight_change_cntr_q == MUL_SIZE-1) begin
+                if(weight_change_cntr_q == (MUL_SIZE<<2)-1) begin
                     compute_state           <= COMPUTE;
                 end
             end

@@ -59,6 +59,7 @@ module main
                                     .stall_i(1'b0), 
                                     .load_weights_i(load_weights_to_MAC), 
                                     .compute_i(MAC_compute),
+                                    .load_activations_i(unified_buffer_read),
                                     .mem_weight_i(MAC_weight_input),
                                     .mem_act_i(MAC_act_input),
                                     .compute_weights_buffered_i(compute_weights_buffered),
