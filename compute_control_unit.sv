@@ -17,12 +17,11 @@ module compute_control_unit
                     input [11:0] unified_buffer_start_addr_rd_i,
 
                     output logic [MUL_SIZE-1 : 0] compute_weight_sel_o [MUL_SIZE],
-                    output logic [11:0] unified_buffer_addr_rd_o,
-                    output logic load_activations_o,
+                    //output logic [11:0] unified_buffer_addr_rd_o,
+                    output logic load_activations_to_MAC_o,
                     output logic stall_compute_o,
                     output logic MAC_compute_o,
-                    output logic next_weight_tile_o,
-                    output logic done_o
+                    output logic next_weight_tile_o
                     );
 
     enum logic [1:0] {STALL, LOAD_ACTIVATIONS, COMPUTE, COMPUTE_WEIGHT_CHANGE} compute_state;
@@ -45,6 +44,7 @@ module compute_control_unit
 
     logic [2*MUL_SIZE-1 : 0] xor_value;
     logic [ 5:0] next_weight_change_cntr;
+    logic wait_act_q;
 
     initial compute_state = STALL;
     initial weight_change_cntr_q = 0;
@@ -53,6 +53,7 @@ module compute_control_unit
     initial weight_tiles_y_consumed_q = 0;
     initial next_compute_cntr = 0;
     initial compute_weight_sel_o = '{default:'0};
+    initial wait_act_q = 0;
 
     always_comb begin
         next_weight_tile_o = compute_cntr_q == H_DIM_i;
@@ -65,9 +66,13 @@ module compute_control_unit
 
         next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
 
-        if(next_weight_tile_o) unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + (weight_tiles_y_consumed)*(((H_DIM_i>>5)+1)<<5);
-        else if (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) unified_buffer_addr_rd = unified_buffer_addr_rd_o + 1;
-        else unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
+        // if(next_weight_tile_o) unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + (weight_tiles_y_consumed)*(((H_DIM_i>>5)+1)<<5);
+        // else if (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) unified_buffer_addr_rd = unified_buffer_addr_rd_o + 1;
+        // else unified_buffer_addr_rd = unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
+
+        // unified_buffer_addr_rd = (unified_buffer_addr_rd_o == H_DIM_i) ?
+        //                           unified_buffer_start_addr_rd_i + (weight_tiles_x_consumed+1)*(((H_DIM_i>>5)+1)<<5) : 
+        //                           ( (compute_state != STALL) ? unified_buffer_addr_rd_o + 1 : unified_buffer_addr_rd_o);
 
         //unified_buffer_addr_rd = (compute_state == LOAD_ACTIVATIONS | compute_state == COMPUTE) ? unified_buffer_addr_rd_o + 1 : unified_buffer_start_addr_rd_i + weight_tiles_y_consumed_q*(((H_DIM_i>>5)+1)<<5);
 
@@ -78,23 +83,23 @@ module compute_control_unit
     
 
     always_ff @( posedge clk_i ) begin
-        done_o                   <= 1'b0;
+        //done_o                   <= 1'b0;
 
         //assume tiles are written to unified buffer in the required order. assume read is disabled during reverse partial state.
-        unified_buffer_addr_rd_o <= unified_buffer_addr_rd;
+        // unified_buffer_addr_rd_o <= unified_buffer_addr_rd;
 
         weight_tiles_y_consumed_q <= weight_tiles_y_consumed;
         weight_tiles_x_consumed_q <= weight_tiles_x_consumed;
 
         case(compute_state)
             STALL: begin
-                load_activations_o      <= 1'b0;
+                load_activations_to_MAC_o      <= 1'b0;
                 stall_compute_o         <= 1'b1;
                 MAC_compute_o           <= 1'b0;
                 
 
                 if (instruction_i & compute_weights_rdy_i) begin
-                    load_activations_o  <= 1'b1;
+                    load_activations_to_MAC_o  <= 1'b1;
                     compute_state       <= LOAD_ACTIVATIONS;
                     for(int i=0; i<32; i++) begin
                         compute_weight_sel_o[i] <= ~compute_weight_sel_o[i];
@@ -102,17 +107,20 @@ module compute_control_unit
                 end
             end
             LOAD_ACTIVATIONS: begin
-                load_activations_o      <= 1'b1;
+                load_activations_to_MAC_o      <= 1'b1;
                 stall_compute_o         <= 1'b1;
                 MAC_compute_o           <= 1'b0;
+                
+                //compute_state <= COMPUTE;
+                wait_act_q <= '1;
 
-                //if (activations_rdy_i == 1'b1) begin
+                if(wait_act_q) begin
                     compute_state <= COMPUTE;
-                    //MAC_compute_o           <= 1'b1;
-                //end
+                    wait_act_q <= '0;
+                end
             end
             COMPUTE: begin
-                load_activations_o          <= 1'b1;
+                load_activations_to_MAC_o          <= 1'b1;
                 stall_compute_o             <= 1'b0;
                 MAC_compute_o               <= 1'b1;
 
@@ -125,7 +133,7 @@ module compute_control_unit
                 end
 
                 if(done_compute) begin
-                    done_o                  <= 1'b1;
+                    //done_o                  <= 1'b1;
                     compute_state           <= STALL;
                 end
                 if(compute_cntr_q == H_DIM_i) begin

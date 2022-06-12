@@ -17,7 +17,7 @@ module weight_control_unit
 
                             output logic compute_weights_rdy_o,
                             output logic compute_weights_buffered_o,
-                            output logic load_weights_o
+                            output logic [MUL_SIZE-1:0] load_weights_o
                         );
 
 
@@ -61,10 +61,11 @@ module weight_control_unit
 
                 if (load_weights_cntr_q == MUL_SIZE-1) begin
                     weight_state                <= (weight_fifo_valid_output) ? DOUBLE_BUFFER : weight_state;
+                    load_weights_o                  <= signed'(signed'(32'h80000000)>>>5'(load_weights_cntr_q + 1));
                 end
             end
             DOUBLE_BUFFER: begin
-                load_weights_o                  <= '1;
+                load_weights_o                  <= signed'(signed'(32'h80000000)>>>load_weights_cntr_q + 1);
 
                 load_weights_cntr_q             <= (weight_fifo_valid_output) ? load_weights_cntr_q + 1 : load_weights_cntr_q;
 
@@ -82,6 +83,8 @@ module weight_control_unit
                 end
             end
             FULL: begin
+                load_weights_o                  <= '0;
+
                 if(next_weight_tile_i) begin
                     next_tile_flag_q            <= 1;
                     load_weights_cntr_q         <= load_weights_cntr_q + 1;
@@ -89,9 +92,10 @@ module weight_control_unit
 
                 if(next_tile_flag_q) begin
                     load_weights_cntr_q         <= load_weights_cntr_q + 1;
+
                     if (load_weights_cntr_q == MUL_SIZE-1) begin
                         weight_state            <= DOUBLE_BUFFER;
-                        load_weights_o          <= 1;
+                        load_weights_o                  <= signed'(signed'(32'h80000000)>>>5'(load_weights_cntr_q + 1));
                     end
                 end
 
@@ -105,4 +109,3 @@ module weight_control_unit
 
     end
 endmodule
-

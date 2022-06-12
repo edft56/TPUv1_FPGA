@@ -63,8 +63,11 @@ void handle_inputs(Vmain* top, uint64_t& positive_edges, uint32_t* U_matrix, uin
             top->weight_fifo_data_in[i] = U_matrix[tile_y*32*U_DIM + i*U_DIM + tile_x*32 + col]; //read each tile in reverse
             //top->weight_fifo_data_in[i] = 1;
         }
-        bool tile_y_up = ((col_cnt+1) % (32) == 0);
-        bool tile_x_up = (tile_y == (ITER_DIM/32)-1) && tile_y_up;
+        // bool tile_y_up = ((col_cnt+1) % (32) == 0);
+        // bool tile_x_up = (tile_y == (ITER_DIM/32)-1) && tile_y_up;
+        bool tile_x_up = ((col_cnt+1) % (32) == 0);
+        bool tile_y_up = (tile_x == (ITER_DIM/32)-1) && tile_x_up;
+        
         col_cnt = (col_cnt+1) % (32);
         col = 31 - col_cnt;
         tile_y = ( tile_y == (ITER_DIM/32)-1 && tile_y_up ) ? 0 : ( tile_y_up ? tile_y + 1 : tile_y );
@@ -79,9 +82,9 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 
     for(int i=0; i<V_DIM; i++){
         for(int j=0; j<ITER_DIM; j++){
-            V_matrix[i*ITER_DIM + j] = 1;
+            //V_matrix[i*ITER_DIM + j] = 1;
             //V_matrix[i*ITER_DIM + j] = (j)%5;
-            //V_matrix[i*ITER_DIM + j] = rand()%10;
+            V_matrix[i*ITER_DIM + j] = rand()%10;
             //OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
         }
     }
@@ -98,8 +101,8 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 
     for(int i=0; i<ITER_DIM; i++){
         for(int j=0; j<U_DIM; j++){
-            //U_matrix[i*U_DIM + j] = 1;
-            U_matrix[i*U_DIM + j] = j;
+            U_matrix[i*U_DIM + j] = 1;
+            //U_matrix[i*U_DIM + j] = j;
             //U_matrix[i*U_DIM + j] = rand()%10;
         }
     }
@@ -110,7 +113,7 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t* out_cpu){
     Vmain* top = new Vmain;
 
-    vluint64_t sim_time = 300;
+    vluint64_t sim_time = 490;
     
     Verilated::traceEverOn(true);
     VerilatedVcdC* tfp = new VerilatedVcdC;
@@ -129,6 +132,8 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
     top->instruction_i = 0;
     top->H_DIM_i = 63;
     top->W_DIM_i = 63;
+    top->HEIGHT = 64;
+    top->WIDTH = 64;
 
     for(int i=0; i<32; i++){
         top->weight_fifo_data_in[i] = 1;
@@ -164,7 +169,7 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
     
     //std::cout<<(top->H_DIM_i);
 
-    //check_correct(out_cpu, (uint32_t*)(&(top->main->accum->accumulator_storage[0][0])), V_DIM, U_DIM);
+    check_correct(out_cpu, (uint32_t*)(&(top->main->accum->accumulator_storage[0][0])), V_DIM, U_DIM);
 
     delete top;
     

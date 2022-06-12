@@ -1,21 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sat Jun 11 17:51:10 2022
+[*] Sun Jun 12 09:51:24 2022
 [*]
 [dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.vcd"
-[dumpfile_mtime] "Sat Jun 11 17:44:17 2022"
-[dumpfile_size] 5189464
+[dumpfile_mtime] "Sun Jun 12 08:52:38 2022"
+[dumpfile_size] 4302773
 [savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/1.gtkw"
-[timestart] 409
+[timestart] 482
 [size] 2560 1322
-[pos] -51 -51
-*-4.000000 458 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -39 -39
+*-3.000000 520 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
-[treeopen] TOP.main.MAC_Array.
-[treeopen] TOP.main.MAC_Array.MAC_ROW[1].
 [treeopen] TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].
+[treeopen] TOP.main.MAC_Array.MAC_ROW[32].
+[treeopen] TOP.main.MAC_Array.MAC_ROW[32].MAC_COL[1].
+[treeopen] TOP.main.MAC_Array.MAC_ROW[32].MAC_COL[1].MAC_array_mid.
 [sst_width] 361
 [signals_width] 270
 [sst_expanded] 1
@@ -24,8 +25,6 @@
 TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[1:0]
 @22
 TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_cntr_q[4:0]
-@28
-TOP.main.MAC_Array.load_weights_i
 @24
 TOP.main.MAC_Array.mem_weight_i[0][7:0]
 TOP.main.MAC_Array.mem_weight_i[1][7:0]
@@ -123,8 +122,9 @@ TOP.main.accum.data_i[28][31:0]
 TOP.main.accum.data_i[29][31:0]
 TOP.main.accum.data_i[30][31:0]
 TOP.main.accum.data_i[31][31:0]
-@22
 TOP.main.accum.addr_wr_i[6:0]
+@29
+TOP.main.ctrl_unit.weight_ctrl_unit.next_weight_tile_i
 @28
 TOP.main.ctrl_unit.accum_ctrl_unit.MAC_compute_i
 @24
@@ -176,13 +176,47 @@ TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.act_i[15:0]
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.act_q[15:0]
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.compute_i
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.load_activations_i
-TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.load_weights_i
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.mem_weight_i[7:0]
+@28
+TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.load_weights_i
+@24
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.out_o[31:0]
-@29
+@28
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.compute_weight_sel_i
 @24
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.weight_q[0][7:0]
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[0].MAC_array_mid.weight_q[1][7:0]
+@200
+-
+@24
+TOP.main.MAC_Array.MAC_ROW[32].MAC_COL[1].MAC_array_mid.compute_weight_sel_i
+TOP.main.MAC_Array.MAC_ROW[32].MAC_COL[1].MAC_array_mid.load_weights_i
+TOP.main.MAC_Array.MAC_ROW[32].MAC_COL[1].MAC_array_mid.mem_weight_i[7:0]
+TOP.main.MAC_Array.MAC_ROW[32].MAC_COL[1].MAC_array_mid.weight_q[0][7:0]
+TOP.main.MAC_Array.MAC_ROW[32].MAC_COL[1].MAC_array_mid.weight_q[1][7:0]
+@200
+-
+@22
+TOP.main.MAC_Array.load_weights_i[31:0]
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_o[31:0]
+@28
+TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[1:0]
+TOP.main.ctrl_unit.weight_ctrl_unit.next_tile_flag_q
+@22
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_cntr_q[4:0]
+@200
+-
+-
+-
+@24
+TOP.main.ctrl_unit.weight_ctrl_unit.compute_weights_buffered_o
+TOP.main.ctrl_unit.weight_ctrl_unit.compute_weights_rdy_o
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_cntr_q[4:0]
+@22
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_o[31:0]
+@24
+TOP.main.ctrl_unit.weight_ctrl_unit.next_tile_flag_q
+TOP.main.ctrl_unit.weight_ctrl_unit.next_weight_tile_i
+TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[1:0]
 [pattern_trace] 1
 [pattern_trace] 0

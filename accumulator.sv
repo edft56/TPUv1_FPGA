@@ -12,9 +12,11 @@ module accumulator
                     input   port2_wr_en_i,
                     input   add_i,
                     input   logic [RES_WIDTH:0] data_i [MUL_SIZE],
-                    input   logic [6:0] addr_wr_i,
-                    input   logic [6:0] addr_rd_i,
+                    input   logic [9:0] addr_wr_i,
+                    input   logic [9:0] addr_rd_i,
                     input   logic [MUL_SIZE-1:0] accum_addr_mask_i,
+                    input   logic [8:0] HEIGHT,
+                    input   logic [8:0] WIDTH,
 
                     output  logic [RES_WIDTH:0] data_o [MUL_SIZE]
                     );
@@ -23,10 +25,13 @@ module accumulator
 
     logic [RES_WIDTH:0] accumulator_output [MUL_SIZE];
     logic [RES_WIDTH:0] adder_input [MUL_SIZE];
+    logic [8:0] upper_bound;
+    logic [9:0] acc_addr_wr;
 
     always_comb begin
         adder_input = (add_i) ? accumulator_output : '{default:0};
         data_o      = (add_i) ? '{default:0} : accumulator_output;
+        upper_bound = ( (HEIGHT>>5) * (WIDTH>>5) ) << 5;
     end
 
     always_ff @(posedge clk_i) begin
@@ -42,7 +47,8 @@ module accumulator
         if(port2_wr_en_i) begin
             for(int i=MUL_SIZE-1; i>=0; i--) begin
                 if (accum_addr_mask_i[i]) begin
-                    accumulator_storage[i - (MUL_SIZE-1) + addr_wr_i[6:0]][MUL_SIZE-1-i]  <= adder_input[MUL_SIZE-1-i] + data_i[MUL_SIZE-1-i];
+                    //acc_addr_wr = (i - (MUL_SIZE-1) + addr_wr_i[6:0] >= upper_bound) ? i - (MUL_SIZE-1) + addr_wr_i[6:0] - upper_bound : i - (MUL_SIZE-1) + addr_wr_i[6:0];
+                    accumulator_storage[i - (MUL_SIZE-1) + addr_wr_i[6:0]][MUL_SIZE-1-i]  <= adder_input[MUL_SIZE-1-i] + data_i[MUL_SIZE-1-i]; //HARDCODED 6 WILL CAUSE PROBLEMS LATER
                 end
             end
 

@@ -10,16 +10,12 @@ module systolic_data_staging(   input clk_i,
     
     logic [15:0] register_array [31][31]; //half of them are used
     logic write_en_q;
-    //logic        valid_bit;
-
-    //logic act_cnt_q;
 
     initial begin
         for(int i=0; i<31; i++) begin
             register_array[i] = '{default:0};
         end
 
-        //valid_bit = 1'b0;
     end
 
     always_comb begin
@@ -33,12 +29,8 @@ module systolic_data_staging(   input clk_i,
         write_en_q <= read_i;
 
         for(int i=0; i<31; i++) begin
-            register_array[i][i] <= (write_en_q) ? data_i[i+1] :  'd0;
-            //valid_bits[i][i]     <= (read_i) ? 1'b1       : 1'b0;
+            register_array[i][i] <= (read_i) ? data_i[i+1] :  'd0;
         end
-        //valid_bit <= (read_i) ? 1'b1 :  1'b0;
-        //act_cnt_q <= (!read_i) ? '0 : ( (read_i & !act_cnt_q) ? '1 : act_cnt_q );
-        //act_data_rdy_o <= (read_i) ? 1'b1 : 1'b0;
         
 
         for(int i=0; i<30; i++) begin
