@@ -65,9 +65,6 @@ module main
                                     .load_activations_i(load_activations_to_MAC),
                                     .mem_weight_i(MAC_weight_input),
                                     .mem_act_i(MAC_act_input),
-                                    .compute_weights_buffered_i(compute_weights_buffered),
-                                    .compute_weights_rdy_i(compute_weights_rdy),
-                                    .next_weight_tile_i(next_weight_tile),
                                     .compute_weight_sel_i(compute_weight_sel),
 
                                     .data_o(MAC_output)

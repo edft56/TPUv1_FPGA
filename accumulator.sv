@@ -25,13 +25,13 @@ module accumulator
 
     logic [RES_WIDTH:0] accumulator_output [MUL_SIZE];
     logic [RES_WIDTH:0] adder_input [MUL_SIZE];
-    logic [8:0] upper_bound;
-    logic [9:0] acc_addr_wr;
+    //logic [8:0] upper_bound;
+    //logic [9:0] acc_addr_wr;
 
     always_comb begin
         adder_input = (add_i) ? accumulator_output : '{default:0};
         data_o      = (add_i) ? '{default:0} : accumulator_output;
-        upper_bound = ( (HEIGHT>>5) * (WIDTH>>5) ) << 5;
+        //upper_bound = ( (HEIGHT>>5) * (WIDTH>>5) ) << 5;
     end
 
     always_ff @(posedge clk_i) begin

@@ -13,8 +13,6 @@ module accumulator_control_unit
                     input [8:0] W_DIM_i,
                     input [8:0] HEIGHT,
                     input [8:0] WIDTH,
-                    input compute_weights_rdy_i,
-                    input compute_weights_buffered_i,
                     input MAC_compute_i,
                     input load_activations_to_MAC_i,
 
@@ -34,28 +32,14 @@ module accumulator_control_unit
 
     logic [ 9:0] accum_cntr_q;
     logic [ 5:0] rev_partial_cntr_q;
-    logic [ 3:0] weight_tiles_x_consumed_q;
-    logic [ 3:0] weight_tiles_y_consumed_q;
-    logic [ 3:0] weight_tiles_x_consumed;
-    logic [ 3:0] weight_tiles_y_consumed;
-
-
-    logic [ 9:0] next_accum_cntr;
-    logic        done;
-    //logic        next_weight_tile;
-    logic        done_weight_tiles_y;
-    logic        done_weight_tiles_x;
-    logic [11:0] unified_buffer_addr_rd;
+    
 
     logic [8:0] upper_bound;
 
     initial accum_output_state = STALL;
     
     initial accum_cntr_q = 0;
-    initial weight_tiles_x_consumed_q = 0;
-    initial weight_tiles_y_consumed_q = 0;
     initial accumulator_add_o = 0;
-    initial next_accum_cntr = 0;
 
     
 
@@ -63,8 +47,6 @@ module accumulator_control_unit
         //next_accum_cntr = (next_weight_tile_o) ? '0 : accum_cntr_q + 1;
 
         upper_bound = ( (HEIGHT>>5) * (WIDTH>>5) ) << 5;
-
-        done        = done_weight_tiles_x;
     end
     
 

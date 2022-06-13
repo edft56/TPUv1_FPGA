@@ -45,11 +45,8 @@ module control_unit
                                         .H_DIM_i,
                                         .W_DIM_i,
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
-                                        .compute_weights_buffered_i(compute_weights_buffered_o),
-                                        .unified_buffer_start_addr_rd_i,
 
                                         .compute_weight_sel_o,
-                                        //.unified_buffer_addr_rd_o,
                                         .load_activations_to_MAC_o,
                                         .stall_compute_o,
                                         .MAC_compute_o,
@@ -63,8 +60,6 @@ module control_unit
                                         .W_DIM_i,
                                         .HEIGHT,
                                         .WIDTH,
-                                        .compute_weights_rdy_i(compute_weights_rdy_o),
-                                        .compute_weights_buffered_i(compute_weights_buffered_o),
                                         .MAC_compute_i(MAC_compute_o),
                                         .load_activations_to_MAC_i(load_activations_to_MAC_o),
 

@@ -26,7 +26,6 @@ module unified_buffer_control_unit
     logic next_tile;
     logic done_tiles_y;
     logic done_tiles_x;
-    logic [11:0] unified_buffer_addr_rd;
 
     logic [1:0] tile_x_q;
     logic [1:0] tile_y_q;
@@ -43,13 +42,6 @@ module unified_buffer_control_unit
 
         tile_y = (done_tiles_y) ? '0 : ( next_tile    ? tile_y_q + 1 : tile_y_q );
         tile_x = (done_tiles_x) ? '0 : ( done_tiles_y ? tile_x_q + 1 : tile_x_q );
-        
-
-        // unified_buffer_addr_rd = (unified_buffer_addr_rd_o == H_DIM_i) ?
-        //                           unified_buffer_start_addr_rd_i + (tile_x+1)*(((H_DIM_i>>5)+1)<<5) : 
-        //                           ( (compute_state != STALL) ? unified_buffer_addr_rd_o + 1 : unified_buffer_addr_rd_o);
-
-    
     end
     
 
