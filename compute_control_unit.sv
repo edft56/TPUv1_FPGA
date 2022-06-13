@@ -112,11 +112,12 @@ module compute_control_unit
                 MAC_compute_o           <= 1'b0;
                 
                 //compute_state <= COMPUTE;
-                wait_act_q <= '1;
+                wait_act_q <= 1;
 
                 if(wait_act_q) begin
                     compute_state <= COMPUTE;
                     wait_act_q <= '0;
+                    compute_cntr_q              <= next_compute_cntr;
                 end
             end
             COMPUTE: begin

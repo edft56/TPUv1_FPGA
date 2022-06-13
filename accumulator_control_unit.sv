@@ -73,7 +73,7 @@ module accumulator_control_unit
         
         case (accum_output_state)
             STALL: begin
-                if(MAC_compute_i) begin
+                if(load_activations_to_MAC_i) begin
                     accum_output_state <= NO_OUTPUT;
                     accum_cntr_q <= accum_cntr_q + 1;
                 end

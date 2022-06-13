@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sun Jun 12 18:33:37 2022
+[*] Mon Jun 13 08:32:01 2022
 [*]
 [dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.vcd"
-[dumpfile_mtime] "Sun Jun 12 18:23:14 2022"
-[dumpfile_size] 2556394
+[dumpfile_mtime] "Mon Jun 13 08:21:40 2022"
+[dumpfile_size] 3588543
 [savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/2.gtkw"
-[timestart] 352
+[timestart] 325
 [size] 2560 1322
 [pos] -39 -39
-*-4.000000 650 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-4.000000 354 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
@@ -17,9 +17,9 @@
 [treeopen] TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[1].
 [treeopen] TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[31].
 [sst_width] 328
-[signals_width] 254
+[signals_width] 270
 [sst_expanded] 1
-[sst_vpaned_height] 265
+[sst_vpaned_height] 513
 @22
 TOP.main.Uni_Buf.unified_buffer_out[0][15:0]
 TOP.main.Uni_Buf.unified_buffer_out[1][15:0]
@@ -57,7 +57,21 @@ TOP.main.Uni_Buf.unified_buffer_out[31][15:0]
 TOP.main.Uni_Buf.unified_buffer_addr_rd[11:0]
 @28
 TOP.main.Uni_Buf.read_i
+@200
+-
+-
+@24
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_cntr_q[9:0]
+@28
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_state[1:0]
+@200
+-
+@28
+TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[1].MAC_array_mid.compute_weight_sel_i
 @22
+TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[1].MAC_array_mid.weight_o[7:0]
+TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[1].MAC_array_mid.weight_q[0][7:0]
+TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[1].MAC_array_mid.weight_q[1][7:0]
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[1].MAC_array_mid.act_i[15:0]
 TOP.main.MAC_Array.MAC_ROW[1].MAC_COL[1].MAC_array_mid.act_q[15:0]
 @28
@@ -100,7 +114,51 @@ TOP.main.sys_stage.data_i[1][15:0]
 TOP.main.sys_stage.data_i[2][15:0]
 @28
 TOP.main.sys_stage.read_i
+@200
+-
+-
+-
+@29
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_state[1:0]
+@22
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[0][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[1][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[2][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[3][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[4][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[5][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[6][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[7][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[8][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[9][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[10][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[11][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[12][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[13][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[14][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[15][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[16][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[17][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[18][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[19][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[20][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[21][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[22][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[23][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[24][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[25][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[26][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[27][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[28][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[29][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[30][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[31][31:0]
+@200
+-
 @24
+TOP.main.MAC_Array.mem_weight_i[0][7:0]
+TOP.main.MAC_Array.mem_weight_i[1][7:0]
+TOP.main.MAC_Array.mem_weight_i[2][7:0]
 TOP.main.MAC_Array.data_o[0][31:0]
 TOP.main.MAC_Array.data_o[1][31:0]
 TOP.main.MAC_Array.data_o[2][31:0]
@@ -144,9 +202,7 @@ TOP.main.accum.port1_rd_en_i
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_output_state[2:0]
 @24
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_cntr_q[9:0]
-@25
 TOP.main.ctrl_unit.accum_ctrl_unit.upper_bound[8:0]
-@24
 TOP.main.accum.adder_input[0][31:0]
 TOP.main.accum.adder_input[1][31:0]
 TOP.main.accum.adder_input[2][31:0]
