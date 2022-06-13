@@ -9,6 +9,7 @@ package tpu_package;
     localparam ACT_WIDTH = 15;
     localparam RES_WIDTH = 31;
     localparam MUL_SIZE = 32;
+    localparam INSTR_SIZE = 49;
 
     typedef logic [ 7:0] weight_t;
     typedef logic [ 8:0] weight_valid_t;

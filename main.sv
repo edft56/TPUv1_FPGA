@@ -8,16 +8,12 @@
 module main
             import tpu_package::*;
             (   input clk_i, rst_i,
-                input instruction_i,
+                input [INSTR_SIZE-1:0] instruction_i,
+                input write_instruction_i,
                 input [W_WIDTH:0] weight_fifo_data_in [MUL_SIZE],
-                input [8:0] HEIGHT,
-                input [8:0] WIDTH,
-                input [8:0] H_DIM_i,
-                input [8:0] W_DIM_i,
                 input sending_fifo_data_i,
 
-                output unified_buffer_in_test,
-                output unified_buffer_out_test,
+                output instruction_queue_full_o,
                 output request_fifo_data_o,
                 output done_o
             );
@@ -30,6 +26,7 @@ module main
     wire [RES_WIDTH:0] MAC_output [MUL_SIZE];
     wire [MUL_SIZE-1 : 0] compute_weight_sel [MUL_SIZE];
     wire load_activations_to_MAC;
+    wire [2:0] MAC_op;
 
     wire unified_buffer_read;
     wire unified_buffer_write;
@@ -56,6 +53,45 @@ module main
     wire compute_weights_buffered;
     wire compute_weights_rdy;
 
+    wire [INSTR_SIZE-1:0] instruction_q;
+    wire [6:0] V_dim;
+    wire [6:0] U_dim;
+    wire [6:0] ITER_dim;
+    wire [6:0] V_dim1;
+    wire [6:0] U_dim1;
+    wire [6:0] ITER_dim1;
+    wire [11:0] unified_buffer_addr_start_wr;
+    wire [11:0] unified_buffer_addr_start_rd;
+
+
+    instruction_queue instruction_queue 
+                        (
+                            .clk_i,
+                            .rst_i,
+                            .instruction_i,
+                            .write_i(write_instruction_i),
+                            .read_i(done_o),
+
+                            .iq_full_o(instruction_queue_full_o),
+                            .instruction_o(instruction_q)
+                        );
+
+    instruction_decode instruction_decoder 
+                        (
+                            .clk_i,
+                            .rst_i,
+                            .instruction_i(instruction_q),
+
+                            .MAC_op_o(MAC_op),
+                            .V_dim_o(V_dim),
+                            .U_dim_o(U_dim),
+                            .ITER_dim_o(ITER_dim),
+                            .V_dim1_o(V_dim1),
+                            .U_dim1_o(U_dim1),
+                            .ITER_dim1_o(ITER_dim1),
+                            .unified_buffer_addr_start_rd_o(unified_buffer_addr_start_wr),
+                            .unified_buffer_addr_start_wr_o(unified_buffer_addr_start_wr) 
+                        );
 
     MAC_systolic_array MAC_Array(   .clk_i,
                                     .rst_i,
@@ -98,8 +134,8 @@ module main
                         .addr_wr_i(accumulator_addr_wr),
                         .addr_rd_i(accumulator_addr_rd),
                         .accum_addr_mask_i(accum_addr_mask),
-                        .HEIGHT,
-                        .WIDTH,
+                        //.HEIGHT,
+                        //.WIDTH,
 
                         .data_o()//.data_o(unified_buffer_in)
                         );
@@ -121,10 +157,12 @@ module main
                             .rst_i,
                             .instruction_i,
                             .weight_fifo_valid_output,
-                            .H_DIM_i,
-                            .W_DIM_i,
-                            .HEIGHT,
-                            .WIDTH,
+                            .V_dim_i(V_dim),
+                            .U_dim_i(U_dim),
+                            .ITER_dim_i(ITER_dim),
+                            .V_dim1_i(V_dim1),
+                            .U_dim1_i(U_dim1),
+                            .ITER_dim1_i(ITER_dim1),
                             .unified_buffer_start_addr_rd_i('0),
 
                             .compute_weight_sel_o(compute_weight_sel),

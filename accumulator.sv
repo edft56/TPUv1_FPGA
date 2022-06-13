@@ -15,8 +15,8 @@ module accumulator
                     input   logic [9:0] addr_wr_i,
                     input   logic [9:0] addr_rd_i,
                     input   logic [MUL_SIZE-1:0] accum_addr_mask_i,
-                    input   logic [8:0] HEIGHT,
-                    input   logic [8:0] WIDTH,
+                    //input   logic [8:0] HEIGHT,
+                    //input   logic [8:0] WIDTH,
 
                     output  logic [RES_WIDTH:0] data_o [MUL_SIZE]
                     );

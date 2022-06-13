@@ -11,8 +11,8 @@ module unified_buffer_control_unit
                   (input clk_i,rst_i,
                     input instruction_i,
                     input compute_weights_rdy_i,
-                    input [8:0] H_DIM_i,
-                    input [8:0] W_DIM_i,
+                    input [6:0] V_dim1_i,
+                    input [6:0] ITER_dim1_i,
                     input [11:0] unified_buffer_start_addr_rd_i,
 
                     output logic unified_buffer_read_en_o,
@@ -34,11 +34,21 @@ module unified_buffer_control_unit
     initial tile_x_q = '0;
     initial tile_y_q = '0;
 
-    always_comb begin
-        next_tile = unified_buffer_addr_rd_o[5:0] == H_DIM_i; //hardcoded 5 will cause problems later
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    // I want to use weight tiles just once. This means that input tiles are going to be used multiple times.
+    // To achieve this, tiled outer products are calculated. The output tile residing in the accumulator is filled entirely with partial products.
+    // Then, these products are added upon until the final output tile is computed.
+    // What does this mean for the reading pattern of the unified buffer?
+    // First all (y,0) input tiles are read weight_tiles_x times. The remaining input tiles in the x dimension are read accordingly. 
+    //
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        done_tiles_y = (tile_y_q == 4'(H_DIM_i>>5)) & next_tile;
-        done_tiles_x = (tile_x_q == 4'(W_DIM_i>>5)) & done_tiles_y;
+    always_comb begin
+        next_tile = unified_buffer_addr_rd_o[5:0] == V_dim1_i; //hardcoded 5 will cause problems later
+
+        done_tiles_y = (tile_y_q == 4'(V_dim1_i>>5)) & next_tile;
+        done_tiles_x = (tile_x_q == 4'(ITER_dim1_i>>5)) & done_tiles_y;
 
         tile_y = (done_tiles_y) ? '0 : ( next_tile    ? tile_y_q + 1 : tile_y_q );
         tile_x = (done_tiles_x) ? '0 : ( done_tiles_y ? tile_x_q + 1 : tile_x_q );
@@ -60,7 +70,7 @@ module unified_buffer_control_unit
             READ: begin
                 unified_buffer_read_en_o <= '1;
 
-                if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + (tile_x)*(((H_DIM_i>>5)+1)<<5);
+                if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + (tile_x)*(((V_dim1_i>>5)+1)<<5);
                 else unified_buffer_addr_rd_o <= unified_buffer_addr_rd_o + 1;
             end
         endcase

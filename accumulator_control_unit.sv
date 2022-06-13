@@ -9,10 +9,10 @@
 module accumulator_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
-                    input [8:0] H_DIM_i,
-                    input [8:0] W_DIM_i,
-                    input [8:0] HEIGHT,
-                    input [8:0] WIDTH,
+                    //input [8:0] H_DIM_i,
+                    //input [8:0] W_DIM_i,
+                    input [6:0] V_dim_i,
+                    input [6:0] U_dim_i,
                     input MAC_compute_i,
                     input load_activations_to_MAC_i,
 
@@ -46,7 +46,7 @@ module accumulator_control_unit
     always_comb begin
         //next_accum_cntr = (next_weight_tile_o) ? '0 : accum_cntr_q + 1;
 
-        upper_bound = ( (HEIGHT>>5) * (WIDTH>>5) ) << 5;
+        upper_bound = ( (V_dim_i>>5) * (U_dim_i>>5) ) << 5;
     end
     
 

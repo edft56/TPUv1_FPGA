@@ -10,8 +10,8 @@ module compute_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
                     input instruction_i,
-                    input [8:0] H_DIM_i,
-                    input [8:0] W_DIM_i,
+                    input [6:0] V_dim1_i,
+                    //input [8:0] W_DIM_i,
                     input compute_weights_rdy_i,
 
                     output logic [MUL_SIZE-1 : 0] compute_weight_sel_o [MUL_SIZE],
@@ -40,7 +40,7 @@ module compute_control_unit
     initial wait_act_q = 0;
 
     always_comb begin
-        next_weight_tile_o = compute_cntr_q == H_DIM_i;
+        next_weight_tile_o = compute_cntr_q == V_dim1_i;
 
         next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
 
@@ -98,7 +98,7 @@ module compute_control_unit
                     //done_o                  <= 1'b1;
                     compute_state           <= STALL;
                 end
-                if(compute_cntr_q == H_DIM_i) begin
+                if(compute_cntr_q == V_dim1_i) begin
                     compute_state           <= COMPUTE_WEIGHT_CHANGE;
                     compute_weight_sel_o[0] <= compute_weight_sel_o[0] ^ (32'h80000000);
                     weight_change_cntr_q    <= weight_change_cntr_q + 1;
