@@ -9,7 +9,7 @@
 module compute_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
-                    input instruction_i,
+                    input [2:0] MAC_op_i,
                     input [6:0] V_dim1_i,
                     //input [8:0] W_DIM_i,
                     input compute_weights_rdy_i,
@@ -21,7 +21,7 @@ module compute_control_unit
                     output logic next_weight_tile_o
                     );
 
-    enum logic [1:0] {STALL, LOAD_ACTIVATIONS, COMPUTE, COMPUTE_WEIGHT_CHANGE} compute_state;
+    enum logic [2:0] {RESET, STALL, LOAD_ACTIVATIONS, COMPUTE, COMPUTE_WEIGHT_CHANGE} compute_state;
 
     logic [ 5:0] weight_change_cntr_q;
     logic [ 9:0] compute_cntr_q;
@@ -32,7 +32,7 @@ module compute_control_unit
     
     logic wait_act_q;
 
-    initial compute_state = STALL;
+    initial compute_state = RESET;
     initial weight_change_cntr_q = 0;
     initial compute_cntr_q = 0;
     initial next_compute_cntr = 0;
@@ -53,13 +53,26 @@ module compute_control_unit
 
 
         case(compute_state)
+            RESET: begin
+                load_activations_to_MAC_o   <= 1'b0;
+                stall_compute_o             <= 1'b1;
+                MAC_compute_o               <= 1'b0;
+                wait_act_q                  <= '0;
+                compute_cntr_q              <= '0;
+                compute_weight_sel_o        <= '{default:'0};
+                done_compute                <= '0;
+                
+                if (!MAC_op_i[0]) begin
+                    compute_state <= STALL;
+                end
+            end
             STALL: begin
                 load_activations_to_MAC_o      <= 1'b0;
                 stall_compute_o         <= 1'b1;
                 MAC_compute_o           <= 1'b0;
                 
 
-                if (instruction_i & compute_weights_rdy_i) begin
+                if (compute_weights_rdy_i) begin
                     load_activations_to_MAC_o  <= 1'b1;
                     compute_state       <= LOAD_ACTIVATIONS;
                     for(int i=0; i<32; i++) begin

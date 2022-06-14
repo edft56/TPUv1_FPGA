@@ -27,7 +27,8 @@ module instruction_decode
     logic [ 6:0] ITER_dim                       = instruction_i[24:18];
     logic [11:0] unified_buffer_addr_start_rd   = instruction_i[36:25];
     logic [11:0] unified_buffer_addr_start_wr   = instruction_i[48:37];
- 
+    
+    initial MAC_op_o = '0;
 
     always_ff @( posedge clk_i ) begin
         case(op)

@@ -10,7 +10,7 @@ module weight_control_unit
                         import tpu_package::*;    
                         (   
                             input clk_i,rst_i,
-                            input instruction_i,
+                            input [2:0] MAC_op_i,
                             input weight_fifo_valid_output,
                             input next_weight_tile_i,
                             input done_i,
@@ -21,12 +21,12 @@ module weight_control_unit
                         );
 
 
-    enum logic [1:0] {STALL, LOAD_WEIGHTS, DOUBLE_BUFFER, FULL} weight_state;
+    enum logic [2:0] {RESET, STALL, LOAD_WEIGHTS, DOUBLE_BUFFER, FULL} weight_state;
 
     logic [ 4:0] load_weights_cntr_q;
     logic        next_tile_flag_q;
 
-    initial weight_state = STALL;
+    initial weight_state = RESET;
 
 
     always_comb begin
@@ -42,11 +42,18 @@ module weight_control_unit
     always_ff @( posedge clk_i ) begin
         
         case(weight_state)
+            RESET: begin
+                load_weights_cntr_q <= '0;
+                load_weights_o      <= '0;
 
+                if (!MAC_op_i[0]) begin
+                    weight_state <= STALL;
+                end
+            end
             STALL: begin
                 load_weights_o                  <= '0;
 
-                if (instruction_i) begin
+                if (!MAC_op_i[0]) begin
                     weight_state                <= LOAD_WEIGHTS;
                 end
             end
@@ -102,6 +109,8 @@ module weight_control_unit
                 if(done_i) begin
                     weight_state                <= STALL;
                 end
+            end
+            default: begin
             end
 
         endcase

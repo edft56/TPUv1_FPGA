@@ -20,26 +20,10 @@ module memory_general
 
     logic [ACT_WIDTH:0] mem_storage_q [4096][MUL_SIZE];
 
-    logic [4:0] times_read;
 
     initial begin
-        // for(int i=0; i<4096; i++) begin
-        //     //mem_storage_q[i] = '{default:(ACT_WIDTH+1)'(1)};//'{default:16'(i%5)};
-        //     for(int j=0; j<32; j++) begin
-        //         mem_storage_q[i][j] = j%4;
-        //     end
-        // end
         $readmemh("V_matrix.dat", mem_storage_q);
 
-        // int fd;
-
-        // fd = $fopen("V_matrix.dat", "rb");
-        // for (int i=0; i<64; i++) begin
-        //     for (int j=0; j<64; j++) begin
-        //         $fscanf(fd, "%b", mem_storage_q[i][j]);
-        //     end
-        // end
-        // $fclose(fd);
     end
 
     always_ff @(posedge clk_i) begin
@@ -49,8 +33,6 @@ module memory_general
 
         if (port2_rd_i) begin
             data_o                  <= mem_storage_q[addr_rd_i];
-            //data_o                  <= mem_storage_q[times_read];
-            //times_read <= times_read + 1;
         end
         else begin
             data_o                  <= data_o;

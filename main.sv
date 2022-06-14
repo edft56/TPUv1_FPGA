@@ -70,7 +70,7 @@ module main
                             .rst_i,
                             .instruction_i,
                             .write_i(write_instruction_i),
-                            .read_i(done_o),
+                            .read_i('1),//(done_o),
 
                             .iq_full_o(instruction_queue_full_o),
                             .instruction_o(instruction_q)
@@ -106,7 +106,7 @@ module main
                                     .data_o(MAC_output)
                                     );
 
-    unified_buffer Uni_Buf(.clk_i,
+    unified_buffer Uni_Buf(     .clk_i,
                                 .rst_i,
                                 .read_i(unified_buffer_read), 
                                 .write_i(unified_buffer_write),
@@ -155,7 +155,7 @@ module main
 
     control_unit ctrl_unit( .clk_i,
                             .rst_i,
-                            .instruction_i,
+                            .MAC_op_i(MAC_op),
                             .weight_fifo_valid_output,
                             .V_dim_i(V_dim),
                             .U_dim_i(U_dim),
@@ -163,7 +163,7 @@ module main
                             .V_dim1_i(V_dim1),
                             .U_dim1_i(U_dim1),
                             .ITER_dim1_i(ITER_dim1),
-                            .unified_buffer_start_addr_rd_i('0),
+                            .unified_buffer_start_addr_rd_i(unified_buffer_addr_start_rd),
 
                             .compute_weight_sel_o(compute_weight_sel),
                             .compute_weights_buffered_o(compute_weights_buffered),

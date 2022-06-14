@@ -11,7 +11,7 @@ module control_unit
                     (
                         input clk_i,
                         input rst_i,
-                        input instruction_i,
+                        input [2:0] MAC_op_i,
                         input [6:0] V_dim_i,
                         input [6:0] U_dim_i,
                         input [6:0] ITER_dim_i,
@@ -43,7 +43,7 @@ module control_unit
     compute_control_unit comp_ctrl_unit(
                                         .clk_i,
                                         .rst_i,
-                                        .instruction_i,
+                                        .MAC_op_i,
                                         .V_dim1_i,
                                         //.W_DIM_i,
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
@@ -58,6 +58,7 @@ module control_unit
     accumulator_control_unit accum_ctrl_unit(
                                         .clk_i,
                                         .rst_i,
+                                        .MAC_op_i,
                                         //.H_DIM_i,
                                         //.W_DIM_i,
                                         .V_dim_i,
@@ -77,7 +78,7 @@ module control_unit
     weight_control_unit weight_ctrl_unit(   
                                             .clk_i,
                                             .rst_i,
-                                            .instruction_i,
+                                            .MAC_op_i,
                                             .weight_fifo_valid_output,
                                             .next_weight_tile_i(next_weight_tile_o),
                                             .done_i(done_o),
@@ -90,7 +91,7 @@ module control_unit
     unified_buffer_control_unit buf_ctrl(
                                     .clk_i,
                                     .rst_i,
-                                    .instruction_i,
+                                    .MAC_op_i,
                                     .compute_weights_rdy_i(compute_weights_rdy_o),
                                     .V_dim1_i,
                                     .ITER_dim1_i,

@@ -27,7 +27,7 @@ module instruction_queue
     always_comb begin
         case ({write_i,read_i})
             2'b00:  next_index_write = index_write_q;
-            2'b01:  next_index_write = index_write_q - 1;
+            2'b01:  next_index_write = (index_write_q != '0) ? index_write_q - 1 : index_write_q;
             2'b10:  next_index_write = index_write_q + 1;
             2'b11:  next_index_write = index_write_q;
         endcase

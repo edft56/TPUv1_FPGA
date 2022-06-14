@@ -9,6 +9,7 @@
 module accumulator_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
+                    input [2:0] MAC_op_i,
                     //input [8:0] H_DIM_i,
                     //input [8:0] W_DIM_i,
                     input [6:0] V_dim_i,
@@ -27,7 +28,7 @@ module accumulator_control_unit
                     );
 
 
-    enum logic [2:0] {STALL, NO_OUTPUT, PARTIAL_OUTPUT, FULL_OUTPUT, REVERSE_PARTIAL} accum_output_state;
+    enum logic [2:0] {RESET, STALL, NO_OUTPUT, PARTIAL_OUTPUT, FULL_OUTPUT, REVERSE_PARTIAL} accum_output_state;
 
 
     logic [ 9:0] accum_cntr_q;
@@ -36,7 +37,7 @@ module accumulator_control_unit
 
     logic [8:0] upper_bound;
 
-    initial accum_output_state = STALL;
+    initial accum_output_state = RESET;
     
     initial accum_cntr_q = 0;
     initial accumulator_add_o = 0;
@@ -54,6 +55,21 @@ module accumulator_control_unit
         done_o <= '0;
         
         case (accum_output_state)
+            RESET: begin    
+                accum_cntr_q            <= '0;
+                rev_partial_cntr_q      <= '0;
+                accumulator_add_o       <= '0;
+                done_o                  <= '0;
+                accum_addr_mask_o       <= '0;
+                accumulator_addr_wr_o   <= '0;
+                accumulator_addr_rd_o   <= '0;
+                write_accumulator_o     <= '0;
+                read_accumulator_o      <= '0;
+
+                if (!MAC_op_i[0]) begin
+                    accum_output_state <= STALL;
+                end
+            end 
             STALL: begin
                 if(load_activations_to_MAC_i) begin
                     accum_output_state <= NO_OUTPUT;

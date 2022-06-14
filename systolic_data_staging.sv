@@ -9,7 +9,6 @@ module systolic_data_staging(   input clk_i,
                                 );
     
     logic [15:0] register_array [31][31]; //half of them are used
-    logic write_en_q;
 
     initial begin
         for(int i=0; i<31; i++) begin
@@ -26,12 +25,10 @@ module systolic_data_staging(   input clk_i,
     end
 
     always_ff @(posedge clk_i) begin
-        write_en_q <= read_i;
 
         for(int i=0; i<31; i++) begin
             register_array[i][i] <= (read_i) ? data_i[i+1] :  'd0;
         end
-        
 
         for(int i=0; i<30; i++) begin
             for(int j=i; j<31; j++) begin

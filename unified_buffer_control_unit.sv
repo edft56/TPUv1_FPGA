@@ -9,7 +9,7 @@
 module unified_buffer_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
-                    input instruction_i,
+                    input [2:0] MAC_op_i,
                     input compute_weights_rdy_i,
                     input [6:0] V_dim1_i,
                     input [6:0] ITER_dim1_i,
@@ -19,7 +19,7 @@ module unified_buffer_control_unit
                     output logic [11:0] unified_buffer_addr_rd_o
                     );
 
-    enum logic {STALL, READ} unified_buffer_state;
+    enum logic [1:0] {RESET, STALL, READ} unified_buffer_state;
 
     logic [1:0] tile_x;
     logic [1:0] tile_y;
@@ -33,6 +33,7 @@ module unified_buffer_control_unit
     initial unified_buffer_addr_rd_o = unified_buffer_start_addr_rd_i;
     initial tile_x_q = '0;
     initial tile_y_q = '0;
+    initial unified_buffer_state = RESET;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -61,8 +62,18 @@ module unified_buffer_control_unit
         tile_x_q <= tile_x;
 
         case(unified_buffer_state)
+            RESET: begin
+                unified_buffer_read_en_o    <= '0;
+                unified_buffer_addr_rd_o    <= '0;
+                tile_x_q                    <= '0;
+                tile_y_q                    <= '0;
+
+                if (!MAC_op_i[0]) begin
+                    unified_buffer_state <= STALL;
+                end
+            end
             STALL: begin
-                if (instruction_i & compute_weights_rdy_i) begin
+                if (compute_weights_rdy_i) begin
                     unified_buffer_state <= READ;
                     unified_buffer_read_en_o <= '1;
                 end
@@ -72,6 +83,8 @@ module unified_buffer_control_unit
 
                 if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + (tile_x)*(((V_dim1_i>>5)+1)<<5);
                 else unified_buffer_addr_rd_o <= unified_buffer_addr_rd_o + 1;
+            end
+            default: begin
             end
         endcase
 
