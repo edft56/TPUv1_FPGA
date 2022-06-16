@@ -143,10 +143,6 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
     top->instruction_i = 0;
     
 
-    for(int i=0; i<32; i++){
-        top->weight_fifo_data_in[i] = 1;
-    }
-
     top->eval();            // Evaluate model
     if (trace) tfp->dump(time*2);
     

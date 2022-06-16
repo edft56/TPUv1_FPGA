@@ -33,12 +33,15 @@ module accumulator_control_unit
 
     logic [ 9:0] accum_cntr_q;
     logic [ 5:0] rev_partial_cntr_q;
+    logic [ 2:0] tile_x_q;
+    logic [ 2:0] next_tile_x;
+    logic [ 2:0] max_tiles_x;
     
 
     logic [8:0] upper_bound;
 
     initial accum_output_state = RESET;
-    
+    initial tile_x_q = 0;
     initial accum_cntr_q = 0;
     initial accumulator_add_o = 0;
 
@@ -46,13 +49,14 @@ module accumulator_control_unit
 
     always_comb begin
         //next_accum_cntr = (next_weight_tile_o) ? '0 : accum_cntr_q + 1;
-
+        max_tiles_x = U_dim_i >> 5;
         upper_bound = ( (V_dim_i>>5) * (U_dim_i>>5) ) << 5;
     end
     
 
     always_ff @( posedge clk_i ) begin
         done_o <= '0;
+        tile_x_q <= (accum_cntr_q == upper_bound) ? tile_x_q + 1 : 0;
         
         case (accum_output_state)
             RESET: begin    
@@ -98,22 +102,27 @@ module accumulator_control_unit
                 accum_cntr_q <= accum_cntr_q + 1;
 
                 if (accum_cntr_q == (MUL_SIZE-1)) begin
-                    accum_output_state <= FULL_OUTPUT;
+                    if( (accum_cntr_q + 1) != V_dim_i ) begin
+                        accum_output_state <= FULL_OUTPUT;
+                    end
+                    else begin
+                        accum_output_state <= REVERSE_PARTIAL;
+                    end
                 end
             end
             FULL_OUTPUT: begin
                 write_accumulator_o     <= 1'b1;
                 accum_addr_mask_o       <= '1;
 
-                accumulator_add_o       <= (accum_cntr_q + 1 > upper_bound) ? '1 : '0;
-                read_accumulator_o      <= (accum_cntr_q + 1 > upper_bound) ? '1 : '0;
+                accumulator_add_o       <= (accum_cntr_q + 1 == upper_bound) ? '1 : accumulator_add_o;
+                read_accumulator_o      <= (accum_cntr_q + 1 == upper_bound) ? '1 : read_accumulator_o;
 
-                accumulator_addr_rd_o   <= (accum_cntr_q + 1 > upper_bound) ? accumulator_addr_rd_o + 1 : '0;
+                accumulator_addr_rd_o   <= (accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1;
                 accumulator_addr_wr_o   <= accum_cntr_q;
 
-                accum_cntr_q <= accum_cntr_q + 1;
+                accum_cntr_q <= (accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1;
 
-                if(accumulator_addr_rd_o + 1 == upper_bound) begin
+                if( (accum_cntr_q + 1 == upper_bound) & (tile_x_q + 1 == max_tiles_x) ) begin
                     accum_output_state <= REVERSE_PARTIAL;
                 end
             end

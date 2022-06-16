@@ -35,14 +35,14 @@ module compute_control_unit
     initial compute_state = RESET;
     initial weight_change_cntr_q = 0;
     initial compute_cntr_q = 0;
-    initial next_compute_cntr = 0;
+    //initial next_compute_cntr = 0;
     initial compute_weight_sel_o = '{default:'0};
     initial wait_act_q = 0;
 
     always_comb begin
         next_weight_tile_o = compute_cntr_q == V_dim1_i;
 
-        next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
+        //next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
 
         //done_compute            = done_weight_tiles_x;
     end
@@ -91,7 +91,7 @@ module compute_control_unit
                 if(wait_act_q) begin
                     compute_state <= COMPUTE;
                     wait_act_q <= '0;
-                    compute_cntr_q              <= next_compute_cntr;
+                    compute_cntr_q              <= compute_cntr_q + 1;
                 end
             end
             COMPUTE: begin
@@ -99,7 +99,7 @@ module compute_control_unit
                 stall_compute_o             <= 1'b0;
                 MAC_compute_o               <= 1'b1;
 
-                compute_cntr_q              <= next_compute_cntr;
+                compute_cntr_q              <= compute_cntr_q + 1;
 
                 if(compute_weights_rdy_i == '0) begin
                     compute_state           <= STALL;
@@ -111,7 +111,7 @@ module compute_control_unit
                     //done_o                  <= 1'b1;
                     compute_state           <= STALL;
                 end
-                if(compute_cntr_q == V_dim1_i) begin
+                if(next_weight_tile_o) begin
                     compute_state           <= COMPUTE_WEIGHT_CHANGE;
                     compute_weight_sel_o[0] <= compute_weight_sel_o[0] ^ (32'h80000000);
                     weight_change_cntr_q    <= weight_change_cntr_q + 1;
@@ -121,7 +121,7 @@ module compute_control_unit
             COMPUTE_WEIGHT_CHANGE: begin
                 weight_change_cntr_q        <= weight_change_cntr_q + 1;
 
-                compute_cntr_q              <= next_compute_cntr;
+                compute_cntr_q              <= compute_cntr_q + 1;
 
                 compute_weight_sel_o[0]     <= compute_weight_sel_o[0] ^ (32'h80000000 >> weight_change_cntr_q);
                 compute_weight_sel_o[1:31]  <= compute_weight_sel_o[0:30];

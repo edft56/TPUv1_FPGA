@@ -130,6 +130,8 @@ module main
                         .port1_rd_en_i(1'b1),
                         .port2_wr_en_i(accumulator_write_enable),
                         .add_i(accumulator_add),
+                        .V_dim_i(V_dim),
+                        .U_dim_i(U_dim),
                         .data_i(MAC_output),
                         .addr_wr_i(accumulator_addr_wr),
                         .addr_rd_i(accumulator_addr_rd),
