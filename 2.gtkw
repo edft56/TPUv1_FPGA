@@ -1,40 +1,140 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Fri Jun 17 19:38:51 2022
+[*] Sat Jun 18 18:41:28 2022
 [*]
-[dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.vcd"
-[dumpfile_mtime] "Fri Jun 17 19:33:32 2022"
-[dumpfile_size] 44348000
+[dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.fst"
+[dumpfile_mtime] "Sat Jun 18 18:41:01 2022"
+[dumpfile_size] 191181
 [savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/2.gtkw"
-[timestart] 609
+[timestart] 480
 [size] 2560 1322
-[pos] -39 -39
-*-4.000000 648 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -189 -189
+*-5.000000 650 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
-[sst_width] 292
-[signals_width] 238
+[sst_width] 355
+[signals_width] 270
 [sst_expanded] 1
-[sst_vpaned_height] 395
+[sst_vpaned_height] 835
 @22
+TOP.main.ctrl_unit.accum_ctrl_unit.U_dim_i[7:0]
+TOP.main.ctrl_unit.accum_ctrl_unit.V_dim_i[7:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_addr_mask_o[31:0]
-@24
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_cntr_q[9:0]
+@100000028
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_output_state[2:0]
+@28
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_add_o
+@24
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_addr_rd_o[9:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_addr_wr_o[9:0]
-TOP.main.accum.bank_addr_array_wr[0][6:0]
-TOP.main.accum.bank_addr_array_wr[1][6:0]
+@28
+TOP.main.ctrl_unit.accum_ctrl_unit.done_o
 TOP.main.ctrl_unit.accum_ctrl_unit.max_tiles_x[2:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.next_tile_x[2:0]
-@25
 TOP.main.ctrl_unit.accum_ctrl_unit.read_accumulator_o
-@24
+@22
 TOP.main.ctrl_unit.accum_ctrl_unit.rev_partial_cntr_q[5:0]
+@28
 TOP.main.ctrl_unit.accum_ctrl_unit.tile_x_q[2:0]
-TOP.main.ctrl_unit.accum_ctrl_unit.upper_bound[8:0]
+@22
+TOP.main.ctrl_unit.accum_ctrl_unit.upper_bound[9:0]
+@28
 TOP.main.ctrl_unit.accum_ctrl_unit.write_accumulator_o
+@200
+-
+-
+@22
+TOP.main.ctrl_unit.buf_ctrl.ITER_dim1_i[6:0]
+TOP.main.ctrl_unit.buf_ctrl.V_dim1_i[6:0]
+TOP.main.ctrl_unit.buf_ctrl.V_dim_i[7:0]
+@28
+TOP.main.ctrl_unit.buf_ctrl.done_tiles_x
+TOP.main.ctrl_unit.buf_ctrl.done_tiles_y
+@22
+TOP.main.ctrl_unit.buf_ctrl.mask[6:0]
+@28
+TOP.main.ctrl_unit.buf_ctrl.next_tile
+TOP.main.ctrl_unit.buf_ctrl.tile_x[2:0]
+TOP.main.ctrl_unit.buf_ctrl.tile_x_q[2:0]
+TOP.main.ctrl_unit.buf_ctrl.tile_y[2:0]
+TOP.main.ctrl_unit.buf_ctrl.tile_y_q[2:0]
+@22
+TOP.main.ctrl_unit.buf_ctrl.unified_buffer_addr_rd_o[11:0]
+@28
+TOP.main.ctrl_unit.buf_ctrl.unified_buffer_read_en_o
+@100000028
+TOP.main.ctrl_unit.buf_ctrl.unified_buffer_state[1:0]
+@200
+-
+-
+@24
+TOP.main.ctrl_unit.comp_ctrl_unit.MAC_compute_o
+TOP.main.ctrl_unit.comp_ctrl_unit.V_dim1_i[6:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_cntr_q[9:0]
+@100000028
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_state[2:0]
+@24
+TOP.main.ctrl_unit.comp_ctrl_unit.done_compute
+TOP.main.ctrl_unit.comp_ctrl_unit.load_activations_to_MAC_o
+TOP.main.ctrl_unit.comp_ctrl_unit.next_weight_tile_o
+@800024
+TOP.main.ctrl_unit.comp_ctrl_unit.weight_change_cntr_q[5:0]
+@1001200
+-group_end
+@200
+-
+-
+@28
+TOP.main.ctrl_unit.weight_ctrl_unit.compute_weights_buffered_o
+TOP.main.ctrl_unit.weight_ctrl_unit.compute_weights_rdy_o
+@22
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_cntr_q[4:0]
+@28
+TOP.main.ctrl_unit.weight_ctrl_unit.next_tile_flag_q
+TOP.main.ctrl_unit.weight_ctrl_unit.next_weight_tile_i
+@100000028
+TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[2:0]
+@200
+-
+-
+@24
+TOP.main.accum.adder_input[0][31:0]
+TOP.main.accum.adder_input[1][31:0]
+TOP.main.accum.adder_input[2][31:0]
+TOP.main.accum.adder_input[3][31:0]
+TOP.main.accum.adder_input[4][31:0]
+TOP.main.accum.adder_input[5][31:0]
+TOP.main.accum.adder_input[6][31:0]
+TOP.main.accum.adder_input[7][31:0]
+TOP.main.accum.adder_input[8][31:0]
+TOP.main.accum.adder_input[9][31:0]
+TOP.main.accum.adder_input[10][31:0]
+TOP.main.accum.adder_input[11][31:0]
+TOP.main.accum.adder_input[12][31:0]
+TOP.main.accum.adder_input[13][31:0]
+TOP.main.accum.adder_input[14][31:0]
+TOP.main.accum.adder_input[15][31:0]
+TOP.main.accum.adder_input[16][31:0]
+TOP.main.accum.adder_input[17][31:0]
+TOP.main.accum.adder_input[18][31:0]
+TOP.main.accum.adder_input[19][31:0]
+TOP.main.accum.adder_input[20][31:0]
+TOP.main.accum.adder_input[21][31:0]
+TOP.main.accum.adder_input[22][31:0]
+TOP.main.accum.adder_input[23][31:0]
+TOP.main.accum.adder_input[24][31:0]
+TOP.main.accum.adder_input[25][31:0]
+TOP.main.accum.adder_input[26][31:0]
+TOP.main.accum.adder_input[27][31:0]
+TOP.main.accum.adder_input[28][31:0]
+TOP.main.accum.adder_input[29][31:0]
+TOP.main.accum.adder_input[30][31:0]
+TOP.main.accum.adder_input[31][31:0]
+@200
+-
+@23
+TOP.main.ctrl_unit.accum_ctrl_unit.accum_addr_mask_rd_o[31:0]
 [pattern_trace] 1
 [pattern_trace] 0

@@ -42,6 +42,7 @@ module main
     wire [9:0] accumulator_addr_rd;
     wire [9:0] accumulator_addr_wr;
     wire [31:0] accum_addr_mask;
+    wire [31:0] accum_addr_mask_rd;
     wire weight_fifo_write;
 
     wire weight_fifo_full;
@@ -127,7 +128,7 @@ module main
 
     accumulator accum(  .clk_i,
                         .rst_i,
-                        .port1_rd_en_i(1'b1),
+                        .port1_rd_en_i(accumulator_read_enable),
                         .port2_wr_en_i(accumulator_write_enable),
                         .add_i(accumulator_add),
                         .V_dim_i(V_dim),
@@ -136,6 +137,7 @@ module main
                         .addr_wr_i(accumulator_addr_wr),
                         .addr_rd_i(accumulator_addr_rd),
                         .accum_addr_mask_i(accum_addr_mask),
+                        .accum_addr_mask_rd_i(accum_addr_mask_rd),
                         //.HEIGHT,
                         //.WIDTH,
 
@@ -181,6 +183,7 @@ module main
                             .accumulator_addr_wr_o(accumulator_addr_wr),
                             .accumulator_addr_rd_o(accumulator_addr_rd),
                             .accum_addr_mask_o(accum_addr_mask),
+                            .accum_addr_mask_rd_o(accum_addr_mask_rd),
                             .accumulator_add_o(accumulator_add),
                             .unified_buffer_read_en_o(unified_buffer_read),
                             .done_o

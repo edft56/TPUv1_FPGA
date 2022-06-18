@@ -15,9 +15,9 @@
 const bool trace = true;
 //const bool trace = false;
 
-const uint32_t V_DIM = 128; 
+const uint32_t V_DIM = 127; 
 const uint32_t U_DIM = 128; 
-const uint32_t ITER_DIM = 128; 
+const uint32_t ITER_DIM = 128;
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 

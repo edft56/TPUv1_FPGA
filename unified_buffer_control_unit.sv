@@ -11,6 +11,7 @@ module unified_buffer_control_unit
                   (input clk_i,rst_i,
                     input [2:0] MAC_op_i,
                     input compute_weights_rdy_i,
+                    input [7:0] V_dim_i,
                     input [6:0] V_dim1_i,
                     input [6:0] ITER_dim1_i,
                     input [11:0] unified_buffer_start_addr_rd_i,
@@ -26,6 +27,7 @@ module unified_buffer_control_unit
     logic next_tile;
     logic done_tiles_y;
     logic done_tiles_x;
+    logic [11:0] next_tile_cntr_q;
 
     logic [2:0] tile_x_q;
     logic [2:0] tile_y_q;
@@ -47,17 +49,18 @@ module unified_buffer_control_unit
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     always_comb begin
-        case (V_dim1_i) inside
-            7'b1??????: mask = 7'b1111111;
-            7'b01?????: mask = 7'b0111111;
-            7'b001????: mask = 7'b0011111;
-            7'b0001???: mask = 7'b0001111;
-            7'b00001??: mask = 7'b0000111;
-            7'b000001?: mask = 7'b0000011;
-            7'b0000001: mask = 7'b0000001;
-            default   : mask = 7'b0000000;
-        endcase
-        next_tile = (unified_buffer_addr_rd_o & mask) == V_dim1_i; //hardcoded 5 will cause problems later
+        // case (V_dim1_i) inside
+        //     7'b1??????: mask = 7'b1111111;
+        //     7'b01?????: mask = 7'b0111111;
+        //     7'b001????: mask = 7'b0011111;
+        //     7'b0001???: mask = 7'b0001111;
+        //     7'b00001??: mask = 7'b0000111;
+        //     7'b000001?: mask = 7'b0000011;
+        //     7'b0000001: mask = 7'b0000001;
+        //     default   : mask = 7'b0000000;
+        // endcase
+        // next_tile = (unified_buffer_addr_rd_o & mask) == V_dim1_i;
+        next_tile = (next_tile_cntr_q) == V_dim1_i;
 
         done_tiles_y = (tile_y_q == 4'(V_dim1_i>>5)) & next_tile;
         done_tiles_x = (tile_x_q == 4'(ITER_dim1_i>>5)) & done_tiles_y;
@@ -92,7 +95,9 @@ module unified_buffer_control_unit
             READ: begin
                 unified_buffer_read_en_o <= '1;
 
-                if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + (tile_x)*(((V_dim1_i>>5)+1)<<5);
+                next_tile_cntr_q <= (next_tile) ? '0 : next_tile_cntr_q + 1;
+
+                if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_i + (tile_x)*V_dim_i;
                 else unified_buffer_addr_rd_o <= unified_buffer_addr_rd_o + 1;
             end
             default: begin

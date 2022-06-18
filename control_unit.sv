@@ -34,6 +34,7 @@ module control_unit
                         output logic [9:0] accumulator_addr_wr_o,
                         output logic [9:0] accumulator_addr_rd_o,
                         output logic [MUL_SIZE-1:0] accum_addr_mask_o,
+                        output logic [MUL_SIZE-1:0] accum_addr_mask_rd_o,
                         output logic accumulator_add_o,
                         output logic [MUL_SIZE-1:0] load_weights_o,
                         output logic unified_buffer_read_en_o,
@@ -71,6 +72,7 @@ module control_unit
                                         .accumulator_addr_wr_o,
                                         .accumulator_addr_rd_o,
                                         .accum_addr_mask_o,
+                                        .accum_addr_mask_rd_o,
                                         .accumulator_add_o,
                                         .done_o
                                         );
@@ -93,6 +95,7 @@ module control_unit
                                     .rst_i,
                                     .MAC_op_i,
                                     .compute_weights_rdy_i(compute_weights_rdy_o),
+                                    .V_dim_i,
                                     .V_dim1_i,
                                     .ITER_dim1_i,
                                     .unified_buffer_start_addr_rd_i,

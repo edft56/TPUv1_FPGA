@@ -17,6 +17,7 @@ module accumulator
                     input   logic [9:0] addr_wr_i,
                     input   logic [9:0] addr_rd_i,
                     input   logic [MUL_SIZE-1:0] accum_addr_mask_i,
+                    input   logic [MUL_SIZE-1:0] accum_addr_mask_rd_i,
                     //input   logic [8:0] HEIGHT,
                     //input   logic [8:0] WIDTH,
 
@@ -39,11 +40,11 @@ module accumulator
     //logic [8:0] upper_bound;
     //logic [9:0] acc_addr_wr;
 
-    initial bank_addr_array_wr_q = '{default:'0};
-    initial bank_addr_array_rd_q = '{default:'0};
+    initial bank_addr_array_wr_q = '{default:0};
+    initial bank_addr_array_rd_q = '{default:0};
 
     always_comb begin
-        max_acc_addr = V_dim_i * (U_dim_i>>5) - 1; 
+        max_acc_addr = V_dim_i * ( ((U_dim_i>>5) - 1 > 0) ? (U_dim_i>>5) - 1 : 1 ); 
         adder_input  = (add_i) ? accumulator_output : '{default:0};
         data_o       = (add_i) ? '{default:0} : accumulator_output;
 
@@ -60,11 +61,13 @@ module accumulator
     always_ff @(posedge clk_i) begin
         if(port1_rd_en_i) begin
             for(int i=MUL_SIZE-1; i>=0; i--) begin
-                accumulator_output[MUL_SIZE-1-i]   <= accumulator_storage[bank_addr_array_rd[MUL_SIZE-1-i]][MUL_SIZE-1-i]; //need a read mask
+                if (accum_addr_mask_rd_i[i]) begin
+                    accumulator_output[MUL_SIZE-1-i]   <= accumulator_storage[bank_addr_array_rd[MUL_SIZE-1-i]][MUL_SIZE-1-i]; //need a read mask
+                end
             end
         end
         else begin
-            accumulator_output = '{default:0};
+            accumulator_output <= '{default:0};
         end
 
         if(port2_wr_en_i) begin

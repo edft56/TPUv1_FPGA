@@ -23,6 +23,7 @@ module accumulator_control_unit
                     output logic [9:0] accumulator_addr_wr_o,
                     output logic [9:0] accumulator_addr_rd_o,
                     output logic [MUL_SIZE-1:0] accum_addr_mask_o,
+                    output logic [MUL_SIZE-1:0] accum_addr_mask_rd_o,
                     output logic accumulator_add_o,
                     output logic done_o
                     );
@@ -36,7 +37,7 @@ module accumulator_control_unit
     logic [ 2:0] tile_x_q;
     logic [ 2:0] next_tile_x;
     logic [ 2:0] max_tiles_x;
-    
+    logic first_pass_q;
 
     logic [9:0] upper_bound;
 
@@ -50,7 +51,7 @@ module accumulator_control_unit
     always_comb begin
         //next_accum_cntr = (next_weight_tile_o) ? '0 : accum_cntr_q + 1;
         max_tiles_x = U_dim_i >> 5;
-        upper_bound = ( (V_dim_i>>5) * (U_dim_i>>5) ) << 5;
+        upper_bound = (15'( (V_dim_i) * (U_dim_i) ) >> 5);
     end
     
 
@@ -68,6 +69,7 @@ module accumulator_control_unit
                 accumulator_addr_rd_o   <= '0;
                 write_accumulator_o     <= '0;
                 read_accumulator_o      <= '0;
+                accum_addr_mask_rd_o    <= 32'h80000000;
 
                 if (!MAC_op_i[0]) begin
                     accum_output_state <= STALL;
@@ -100,12 +102,13 @@ module accumulator_control_unit
 
                 accum_cntr_q <= accum_cntr_q + 1;
 
-                if (accum_cntr_q == (MUL_SIZE-1)) begin
-                    if( (accum_cntr_q + 1) != V_dim_i ) begin
-                        accum_output_state <= FULL_OUTPUT;
+                if (accum_cntr_q == (MUL_SIZE-1) | accum_cntr_q + 1 == V_dim_i) begin
+                    if( (accum_cntr_q + 1) == V_dim_i & (tile_x_q + 1 == max_tiles_x) ) begin
+                        accum_output_state <= REVERSE_PARTIAL;
+                        accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
                     end
                     else begin
-                        accum_output_state <= REVERSE_PARTIAL;
+                        accum_output_state <= FULL_OUTPUT;
                     end
                 end
             end
@@ -115,24 +118,31 @@ module accumulator_control_unit
 
                 tile_x_q <= (accum_cntr_q + 1 == upper_bound) ? tile_x_q + 1 : tile_x_q;
 
-                accumulator_add_o       <= (accum_cntr_q + 1 == upper_bound) ? '1 : accumulator_add_o;
-                read_accumulator_o      <= (accum_cntr_q + 1 == upper_bound) ? '1 : read_accumulator_o;
+                accumulator_add_o       <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) ? '1 : accumulator_add_o;
+                read_accumulator_o      <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) ? '1 : read_accumulator_o;
 
                 accumulator_addr_rd_o   <= (accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1;
                 accumulator_addr_wr_o   <= accum_cntr_q;
+
+                //first_pass_q   <= (accum_cntr_q + 1 == upper_bound) ? 1 : first_pass_q ;
+
+                accum_addr_mask_rd_o <= ( ((accum_cntr_q + 1 == upper_bound & tile_x_q =='0) | tile_x_q == 'd1) & accum_addr_mask_rd_o != '1 ) ? signed'(signed'(32'h80000000)>>>((accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1)) : accum_addr_mask_rd_o;
 
                 accum_cntr_q <= (accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1;
 
                 if( (accum_cntr_q + 1 == upper_bound) & (tile_x_q + 1 == max_tiles_x) ) begin
                     accum_output_state <= REVERSE_PARTIAL;
+                    accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
                 end
             end
             REVERSE_PARTIAL: begin
                 write_accumulator_o     <= 1'b1;
 
-                accumulator_addr_rd_o   <= (accum_cntr_q + 1 > upper_bound) ? accumulator_addr_rd_o + 1 : '0;
+                //accumulator_addr_rd_o   <= (accum_cntr_q + 1 > upper_bound) ? accumulator_addr_rd_o + 1 : '0;
                 accumulator_addr_wr_o   <= accum_cntr_q;
-                accum_addr_mask_o       <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+                accum_addr_mask_o       <= accum_addr_mask_rd_o;
+
+                accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q + 1;
 
                 rev_partial_cntr_q      <= rev_partial_cntr_q + 1;
                 accum_cntr_q            <= accum_cntr_q + 1;
@@ -150,3 +160,11 @@ module accumulator_control_unit
 
     end
 endmodule
+
+
+// accumulator_add_o       <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) ? '1 : accumulator_add_o;
+// read_accumulator_o      <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) ? '1 : read_accumulator_o;
+
+// accumulator_addr_rd_o   <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x) | accumulator_add_o) ? ((accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1) : '0;
+// accumulator_addr_wr_o   <= accum_cntr_q;
+//accumulator_addr_rd_o   <= ( (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) | accumulator_add_o) ? ((accum_cntr_q + 1 == upper_bound ) ? '0 : accum_cntr_q + 1) : accumulator_addr_rd_o;
