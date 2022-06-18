@@ -54,9 +54,9 @@ module main
     wire compute_weights_rdy;
 
     wire [INSTR_SIZE-1:0] instruction_q;
-    wire [6:0] V_dim;
-    wire [6:0] U_dim;
-    wire [6:0] ITER_dim;
+    wire [7:0] V_dim;
+    wire [7:0] U_dim;
+    wire [7:0] ITER_dim;
     wire [6:0] V_dim1;
     wire [6:0] U_dim1;
     wire [6:0] ITER_dim1;

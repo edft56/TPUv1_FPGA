@@ -12,8 +12,8 @@ module accumulator_control_unit
                     input [2:0] MAC_op_i,
                     //input [8:0] H_DIM_i,
                     //input [8:0] W_DIM_i,
-                    input [6:0] V_dim_i,
-                    input [6:0] U_dim_i,
+                    input [7:0] V_dim_i,
+                    input [7:0] U_dim_i,
                     input MAC_compute_i,
                     input load_activations_to_MAC_i,
 
@@ -38,7 +38,7 @@ module accumulator_control_unit
     logic [ 2:0] max_tiles_x;
     
 
-    logic [8:0] upper_bound;
+    logic [9:0] upper_bound;
 
     initial accum_output_state = RESET;
     initial tile_x_q = 0;
@@ -56,7 +56,6 @@ module accumulator_control_unit
 
     always_ff @( posedge clk_i ) begin
         done_o <= '0;
-        tile_x_q <= (accum_cntr_q == upper_bound) ? tile_x_q + 1 : 0;
         
         case (accum_output_state)
             RESET: begin    
@@ -113,6 +112,8 @@ module accumulator_control_unit
             FULL_OUTPUT: begin
                 write_accumulator_o     <= 1'b1;
                 accum_addr_mask_o       <= '1;
+
+                tile_x_q <= (accum_cntr_q + 1 == upper_bound) ? tile_x_q + 1 : tile_x_q;
 
                 accumulator_add_o       <= (accum_cntr_q + 1 == upper_bound) ? '1 : accumulator_add_o;
                 read_accumulator_o      <= (accum_cntr_q + 1 == upper_bound) ? '1 : read_accumulator_o;

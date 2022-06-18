@@ -101,6 +101,7 @@ module weight_control_unit
                     load_weights_cntr_q         <= load_weights_cntr_q + 1;
 
                     if (load_weights_cntr_q == MUL_SIZE-1) begin
+                        next_tile_flag_q        <= 0;
                         weight_state            <= DOUBLE_BUFFER;
                         load_weights_o                  <= signed'(signed'(32'h80000000)>>>5'(load_weights_cntr_q + 1));
                     end

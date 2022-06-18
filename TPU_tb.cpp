@@ -2,6 +2,7 @@
 #include <iostream>             // Need std::cout
 #include "Vmain.h"               // From Verilating "top.v"
 #include "verilated_vcd_c.h"
+#include "verilated_fst_c.h"
 #include "Vmain_main.h"
 #include "Vmain_accumulator.h"
 #include <iomanip>
@@ -14,9 +15,9 @@
 const bool trace = true;
 //const bool trace = false;
 
-const uint32_t V_DIM = 64; 
-const uint32_t U_DIM = 64; 
-const uint32_t ITER_DIM = 64; 
+const uint32_t V_DIM = 128; 
+const uint32_t U_DIM = 128; 
+const uint32_t ITER_DIM = 128; 
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 
@@ -24,7 +25,7 @@ const uint32_t u_buf_start_rd = 0;
 uint64_t assemble_MAC_instruction(uint64_t u_buf_start_rd, uint64_t u_buf_start_wr, uint64_t V_DIM, uint64_t U_DIM, uint64_t ITER_DIM){
     uint64_t assembled_instruction = 0;
 
-    assembled_instruction = (u_buf_start_wr<<37) | (u_buf_start_rd<<25) | (U_DIM<<18) | (U_DIM<<11) | (V_DIM<<4) | 1;
+    assembled_instruction = (u_buf_start_wr<<40) | (u_buf_start_rd<<28) | (U_DIM<<20) | (U_DIM<<12) | (V_DIM<<4) | 1;
 
     return assembled_instruction;
 }
@@ -53,7 +54,7 @@ void matrix_multiply(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t* out_matri
     }
 }
 
-void clock_tick(Vmain* top, vluint64_t& time, VerilatedVcdC* tfp){
+void clock_tick(Vmain* top, vluint64_t& time, VerilatedFstC* tfp){
     top->clk_i ^= 1;
     top->eval();
     if (trace) tfp->dump(time);
@@ -123,13 +124,13 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t* out_cpu){
     Vmain* top = new Vmain;
 
-    vluint64_t sim_time = 500;
+    vluint64_t sim_time = 3000;
     
     Verilated::traceEverOn(true);
-    VerilatedVcdC* tfp = new VerilatedVcdC;
+    VerilatedFstC* tfp = new VerilatedFstC;
     if (trace){
         top->trace(tfp, 99);  // Trace 99 levels of hierarchy
-        tfp->open("top_sim.vcd");
+        tfp->open("top_sim.fst");
     }
 
 
@@ -172,7 +173,7 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
 
     
     std::cout<<"\n";
-    for(int i=0; i<128; i++){
+    for(int i=0; i<512; i++){
         std::cout<<std::setw(3)<<i<<": ";
         for(int j=0; j<32; j++){
             std::cout<<(uint32_t)(top->main->accum->accumulator_storage[i][j])<<" ";
@@ -182,11 +183,13 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
     
     //std::cout<<(top->H_DIM_i);
 
+    if (trace)tfp->close();
+
     check_correct(out_cpu, (uint32_t*)(&(top->main->accum->accumulator_storage[0][0])), V_DIM, U_DIM);
 
     delete top;
     
-    if (trace)tfp->close();
+    
 }
 
 

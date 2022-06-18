@@ -127,7 +127,7 @@ module compute_control_unit
                 compute_weight_sel_o[1:31]  <= compute_weight_sel_o[0:30];
                 
 
-                if(weight_change_cntr_q == (MUL_SIZE<<2)-1) begin
+                if(weight_change_cntr_q == (MUL_SIZE*2)-1) begin
                     compute_state           <= COMPUTE;
                 end
             end
