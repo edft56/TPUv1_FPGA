@@ -11,6 +11,7 @@ module compute_control_unit
                   (input clk_i,rst_i,
                     input [2:0] MAC_op_i,
                     input [6:0] V_dim1_i,
+                    input [7:0] U_dim_i,
                     //input [8:0] W_DIM_i,
                     input compute_weights_rdy_i,
 
@@ -25,42 +26,49 @@ module compute_control_unit
 
     logic [ 5:0] weight_change_cntr_q;
     logic [ 9:0] compute_cntr_q;
-
+    logic [ 2:0] current_weight_tile_q;
+    logic wait_act_q;
 
     logic [ 9:0] next_compute_cntr;
     logic        done_compute;
-    
-    logic wait_act_q;
+    logic [ 2:0] max_tiles_x;
 
-    initial compute_state = RESET;
-    initial weight_change_cntr_q = 0;
-    initial compute_cntr_q = 0;
-    //initial next_compute_cntr = 0;
-    initial compute_weight_sel_o = '{default:'0};
-    initial wait_act_q = 0;
+
+    initial compute_state               = RESET;
+    initial weight_change_cntr_q        = '0;
+    initial compute_cntr_q              = 0;
+    initial load_activations_to_MAC_o   = '0;
+    initial stall_compute_o             = '1;
+    initial MAC_compute_o               = '0;
+    initial compute_weight_sel_o        = '{default:'0};
+    initial wait_act_q                  = '0;
+    initial current_weight_tile_q       = '0;
 
     always_comb begin
-        next_weight_tile_o = compute_cntr_q == V_dim1_i;
+        next_weight_tile_o  = compute_cntr_q == V_dim1_i;
+        max_tiles_x         = U_dim_i >> 5;
 
         //next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
 
-        //done_compute            = done_weight_tiles_x;
+        done_compute            = (current_weight_tile_q + 1 == max_tiles_x) & next_weight_tile_o;
     end
     
 
     always_ff @( posedge clk_i ) begin
         //done_o                   <= 1'b0;
-
+        current_weight_tile_q <= (done_compute) ? '0 : (next_weight_tile_o) ? current_weight_tile_q + 1 : current_weight_tile_q;
 
         case(compute_state)
             RESET: begin
-                load_activations_to_MAC_o   <= 1'b0;
-                stall_compute_o             <= 1'b1;
-                MAC_compute_o               <= 1'b0;
+                load_activations_to_MAC_o   <= '0;
+                stall_compute_o             <= '1;
+                MAC_compute_o               <= '0;
                 wait_act_q                  <= '0;
                 compute_cntr_q              <= '0;
                 compute_weight_sel_o        <= '{default:'0};
-                done_compute                <= '0;
+                weight_change_cntr_q        <= '0;
+                current_weight_tile_q       <= '0;
+                
                 
                 if (!MAC_op_i[0]) begin
                     compute_state <= STALL;

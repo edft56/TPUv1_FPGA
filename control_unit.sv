@@ -46,6 +46,7 @@ module control_unit
                                         .rst_i,
                                         .MAC_op_i,
                                         .V_dim1_i,
+                                        .U_dim_i,
                                         //.W_DIM_i,
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
 

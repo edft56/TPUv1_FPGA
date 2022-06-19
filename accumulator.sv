@@ -44,12 +44,12 @@ module accumulator
     initial bank_addr_array_rd_q = '{default:0};
 
     always_comb begin
-        max_acc_addr = V_dim_i * ( ((U_dim_i>>5) - 1 > 0) ? (U_dim_i>>5) - 1 : 1 ); 
+        //max_acc_addr = V_dim_i * ( ((U_dim_i>>5) - 1 > 0) ? (U_dim_i>>5) - 1 : 1 ); 
         adder_input  = (add_i) ? accumulator_output : '{default:0};
         data_o       = (add_i) ? '{default:0} : accumulator_output;
 
-        addr_rd      = addr_rd_i & max_acc_addr; //maybe think of another way
-        addr_wr      = addr_wr_i & max_acc_addr; //maybe think of another way
+        addr_rd      = addr_rd_i;// & max_acc_addr; //maybe think of another way
+        addr_wr      = addr_wr_i;// & max_acc_addr; //maybe think of another way
         //upper_bound = ( (HEIGHT>>5) * (WIDTH>>5) ) << 5;
 
         bank_addr_array_wr[0] = addr_wr_i;

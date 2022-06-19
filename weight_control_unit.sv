@@ -26,8 +26,8 @@ module weight_control_unit
     logic [ 4:0] load_weights_cntr_q;
     logic        next_tile_flag_q;
 
-    initial weight_state = RESET;
-
+    initial weight_state        = RESET;
+    initial next_tile_flag_q    = '0;
 
     always_comb begin
         compute_weights_rdy_o       = ( (weight_state == DOUBLE_BUFFER | weight_state == FULL) |
@@ -45,6 +45,7 @@ module weight_control_unit
             RESET: begin
                 load_weights_cntr_q <= '0;
                 load_weights_o      <= '0;
+                next_tile_flag_q    <= '0;
 
                 if (!MAC_op_i[0]) begin
                     weight_state <= STALL;

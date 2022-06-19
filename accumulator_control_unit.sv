@@ -35,11 +35,9 @@ module accumulator_control_unit
     logic [ 9:0] accum_cntr_q;
     logic [ 5:0] rev_partial_cntr_q;
     logic [ 2:0] tile_x_q;
-    logic [ 2:0] next_tile_x;
-    logic [ 2:0] max_tiles_x;
-    logic first_pass_q;
 
-    logic [9:0] upper_bound;
+    logic [ 2:0] max_tiles_x;
+    logic [ 9:0] upper_bound;
 
     initial accum_output_state = RESET;
     initial tile_x_q = 0;
@@ -70,6 +68,7 @@ module accumulator_control_unit
                 write_accumulator_o     <= '0;
                 read_accumulator_o      <= '0;
                 accum_addr_mask_rd_o    <= 32'h80000000;
+                tile_x_q                <= '0;
 
                 if (!MAC_op_i[0]) begin
                     accum_output_state <= STALL;
@@ -124,7 +123,6 @@ module accumulator_control_unit
                 accumulator_addr_rd_o   <= (accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1;
                 accumulator_addr_wr_o   <= accum_cntr_q;
 
-                //first_pass_q   <= (accum_cntr_q + 1 == upper_bound) ? 1 : first_pass_q ;
 
                 accum_addr_mask_rd_o <= ( ((accum_cntr_q + 1 == upper_bound & tile_x_q =='0) | tile_x_q == 'd1) & accum_addr_mask_rd_o != '1 ) ? signed'(signed'(32'h80000000)>>>((accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1)) : accum_addr_mask_rd_o;
 
@@ -161,10 +159,3 @@ module accumulator_control_unit
     end
 endmodule
 
-
-// accumulator_add_o       <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) ? '1 : accumulator_add_o;
-// read_accumulator_o      <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) ? '1 : read_accumulator_o;
-
-// accumulator_addr_rd_o   <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x) | accumulator_add_o) ? ((accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1) : '0;
-// accumulator_addr_wr_o   <= accum_cntr_q;
-//accumulator_addr_rd_o   <= ( (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) | accumulator_add_o) ? ((accum_cntr_q + 1 == upper_bound ) ? '0 : accum_cntr_q + 1) : accumulator_addr_rd_o;

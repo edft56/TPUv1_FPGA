@@ -28,16 +28,16 @@ module unified_buffer_control_unit
     logic next_tile;
     logic done_tiles_y;
     logic done_tiles_x;
-    logic [11:0] next_tile_cntr_q;
 
+    logic [11:0] next_tile_cntr_q;
     logic [2:0] tile_x_q;
     logic [2:0] tile_y_q;
-    logic [6:0] mask;
 
-    initial unified_buffer_addr_rd_o = unified_buffer_start_addr_rd_i;
-    initial tile_x_q = '0;
-    initial tile_y_q = '0;
-    initial unified_buffer_state = RESET;
+    initial unified_buffer_addr_rd_o    = unified_buffer_start_addr_rd_i;
+    initial tile_x_q                    = '0;
+    initial tile_y_q                    = '0;
+    initial next_tile_cntr_q            = 0;
+    initial unified_buffer_state        = RESET;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     //
@@ -50,17 +50,6 @@ module unified_buffer_control_unit
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     always_comb begin
-        // case (V_dim1_i) inside
-        //     7'b1??????: mask = 7'b1111111;
-        //     7'b01?????: mask = 7'b0111111;
-        //     7'b001????: mask = 7'b0011111;
-        //     7'b0001???: mask = 7'b0001111;
-        //     7'b00001??: mask = 7'b0000111;
-        //     7'b000001?: mask = 7'b0000011;
-        //     7'b0000001: mask = 7'b0000001;
-        //     default   : mask = 7'b0000000;
-        // endcase
-        // next_tile = (unified_buffer_addr_rd_o & mask) == V_dim1_i;
         next_tile = (next_tile_cntr_q) == V_dim1_i;
 
         done_tiles_y = (tile_y_q == 4'(U_dim1_i>>5)) & next_tile;
@@ -82,6 +71,7 @@ module unified_buffer_control_unit
                 unified_buffer_addr_rd_o    <= '0;
                 tile_x_q                    <= '0;
                 tile_y_q                    <= '0;
+                next_tile_cntr_q            <= '0;
 
                 if (!MAC_op_i[0]) begin
                     unified_buffer_state <= STALL;
