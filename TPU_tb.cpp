@@ -12,12 +12,12 @@
 #include <cmath>
 #include <bitset>
 
-const bool trace = true;
-//const bool trace = false;
+//const bool trace = true;
+const bool trace = false;
 
-const uint32_t V_DIM = 127; 
-const uint32_t U_DIM = 128; 
-const uint32_t ITER_DIM = 128;
+const uint32_t V_DIM = 128; 
+const uint32_t U_DIM = 64; 
+const uint32_t ITER_DIM = 64;
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 
@@ -94,8 +94,8 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
     for(int i=0; i<V_DIM; i++){
         for(int j=0; j<ITER_DIM; j++){
             //V_matrix[i*ITER_DIM + j] = 1;
-            //V_matrix[i*ITER_DIM + j] = (j)%5;
-            V_matrix[i*ITER_DIM + j] = rand()%10;
+            V_matrix[i*ITER_DIM + j] = (j)%5;
+            //V_matrix[i*ITER_DIM + j] = rand()%10;
             //OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
         }
     }

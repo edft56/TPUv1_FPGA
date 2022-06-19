@@ -97,6 +97,7 @@ module control_unit
                                     .compute_weights_rdy_i(compute_weights_rdy_o),
                                     .V_dim_i,
                                     .V_dim1_i,
+                                    .U_dim1_i,
                                     .ITER_dim1_i,
                                     .unified_buffer_start_addr_rd_i,
 

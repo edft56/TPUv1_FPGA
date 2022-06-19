@@ -13,6 +13,7 @@ module unified_buffer_control_unit
                     input compute_weights_rdy_i,
                     input [7:0] V_dim_i,
                     input [6:0] V_dim1_i,
+                    input [6:0] U_dim1_i,
                     input [6:0] ITER_dim1_i,
                     input [11:0] unified_buffer_start_addr_rd_i,
 
@@ -62,7 +63,7 @@ module unified_buffer_control_unit
         // next_tile = (unified_buffer_addr_rd_o & mask) == V_dim1_i;
         next_tile = (next_tile_cntr_q) == V_dim1_i;
 
-        done_tiles_y = (tile_y_q == 4'(V_dim1_i>>5)) & next_tile;
+        done_tiles_y = (tile_y_q == 4'(U_dim1_i>>5)) & next_tile;
         done_tiles_x = (tile_x_q == 4'(ITER_dim1_i>>5)) & done_tiles_y;
 
         tile_y = (done_tiles_y) ? '0 : ( next_tile    ? tile_y_q + 1 : tile_y_q );
