@@ -11,6 +11,18 @@ package tpu_package;
     localparam MUL_SIZE = 32;
     localparam INSTR_SIZE = 52;
 
+    typedef struct packed{
+        logic [2:0] MAC_op;
+        logic [7:0] V_dim;
+        logic [7:0] U_dim;
+        logic [7:0] ITER_dim;
+        logic [6:0] V_dim1;
+        logic [6:0] U_dim1;
+        logic [6:0] ITER_dim1;
+        logic [11:0] unified_buffer_addr_start_rd;
+        logic [11:0] unified_buffer_addr_start_wr;
+    } decode_registers_t;
+
     typedef logic [ 7:0] weight_t;
     typedef logic [ 8:0] weight_valid_t;
     typedef logic [15:0] act_t;

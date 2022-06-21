@@ -1,22 +1,22 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sat Jun 18 18:41:28 2022
+[*] Tue Jun 21 06:09:56 2022
 [*]
 [dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.fst"
-[dumpfile_mtime] "Sat Jun 18 18:41:01 2022"
-[dumpfile_size] 191181
+[dumpfile_mtime] "Mon Jun 20 19:02:00 2022"
+[dumpfile_size] 64920
 [savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/2.gtkw"
-[timestart] 480
+[timestart] 0
 [size] 2560 1322
-[pos] -189 -189
-*-5.000000 650 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -39 -39
+*-3.000000 7 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
-[sst_width] 355
-[signals_width] 270
+[sst_width] 419
+[signals_width] 450
 [sst_expanded] 1
-[sst_vpaned_height] 835
+[sst_vpaned_height] 430
 @22
 TOP.main.ctrl_unit.accum_ctrl_unit.U_dim_i[7:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.V_dim_i[7:0]
@@ -32,7 +32,6 @@ TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_addr_wr_o[9:0]
 @28
 TOP.main.ctrl_unit.accum_ctrl_unit.done_o
 TOP.main.ctrl_unit.accum_ctrl_unit.max_tiles_x[2:0]
-TOP.main.ctrl_unit.accum_ctrl_unit.next_tile_x[2:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.read_accumulator_o
 @22
 TOP.main.ctrl_unit.accum_ctrl_unit.rev_partial_cntr_q[5:0]
@@ -52,9 +51,6 @@ TOP.main.ctrl_unit.buf_ctrl.V_dim_i[7:0]
 @28
 TOP.main.ctrl_unit.buf_ctrl.done_tiles_x
 TOP.main.ctrl_unit.buf_ctrl.done_tiles_y
-@22
-TOP.main.ctrl_unit.buf_ctrl.mask[6:0]
-@28
 TOP.main.ctrl_unit.buf_ctrl.next_tile
 TOP.main.ctrl_unit.buf_ctrl.tile_x[2:0]
 TOP.main.ctrl_unit.buf_ctrl.tile_x_q[2:0]
@@ -111,7 +107,9 @@ TOP.main.accum.adder_input[7][31:0]
 TOP.main.accum.adder_input[8][31:0]
 TOP.main.accum.adder_input[9][31:0]
 TOP.main.accum.adder_input[10][31:0]
+@25
 TOP.main.accum.adder_input[11][31:0]
+@24
 TOP.main.accum.adder_input[12][31:0]
 TOP.main.accum.adder_input[13][31:0]
 TOP.main.accum.adder_input[14][31:0]
@@ -134,7 +132,23 @@ TOP.main.accum.adder_input[30][31:0]
 TOP.main.accum.adder_input[31][31:0]
 @200
 -
-@23
+@22
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_addr_mask_rd_o[31:0]
+@28
+TOP.main.instr_unit.decoded_instruction_cache[0][71:0]
+@22
+TOP.main.ctrl_unit.decoded_instruction_i[71:0]
+TOP.main.instr_unit.decoded_instruction_cache[1][71:0]
+TOP.main.instr_unit.decoded_instruction_o[71:0]
+TOP.main.instr_unit.index_write_q[4:0]
+TOP.main.instr_unit.instruction_i[51:0]
+TOP.main.instr_unit.instruction_input_register_q[51:0]
+@28
+TOP.main.instr_unit.iq_full_o
+@22
+TOP.main.instr_unit.next_index_write[4:0]
+@28
+TOP.main.instr_unit.read_i
+TOP.main.instr_unit.write_i
 [pattern_trace] 1
 [pattern_trace] 0

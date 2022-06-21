@@ -11,15 +11,8 @@ module control_unit
                     (
                         input clk_i,
                         input rst_i,
-                        input [2:0] MAC_op_i,
-                        input [7:0] V_dim_i,
-                        input [7:0] U_dim_i,
-                        input [7:0] ITER_dim_i,
-                        input [6:0] V_dim1_i,
-                        input [6:0] U_dim1_i,
-                        input [6:0] ITER_dim1_i,
                         input weight_fifo_valid_output,
-                        input [11:0] unified_buffer_start_addr_rd_i,
+                        input decode_registers_t decoded_instruction_i,
                         
                         output [MUL_SIZE-1 : 0] compute_weight_sel_o [MUL_SIZE],
                         output compute_weights_buffered_o,
@@ -38,8 +31,19 @@ module control_unit
                         output logic accumulator_add_o,
                         output logic [MUL_SIZE-1:0] load_weights_o,
                         output logic unified_buffer_read_en_o,
+                        output logic read_decoded_instruction_o,
                         output logic done_o
                     );
+
+    logic [2:0] MAC_op_i = decoded_instruction_i.MAC_op;
+    logic [7:0] V_dim_i = decoded_instruction_i.V_dim;
+    logic [7:0] U_dim_i = decoded_instruction_i.U_dim;
+    logic [7:0] ITER_dim_i = decoded_instruction_i.ITER_dim;
+    logic [6:0] V_dim1_i = decoded_instruction_i.V_dim1;
+    logic [6:0] U_dim1_i = decoded_instruction_i.U_dim1;
+    logic [6:0] ITER_dim1_i = decoded_instruction_i.ITER_dim1;
+    logic [11:0] unified_buffer_start_addr_rd_i = decoded_instruction_i.unified_buffer_addr_start_rd;
+    logic [11:0] unified_buffer_start_addr_wr_i = decoded_instruction_i.unified_buffer_addr_start_wr;
 
     compute_control_unit comp_ctrl_unit(
                                         .clk_i,
@@ -50,6 +54,7 @@ module control_unit
                                         //.W_DIM_i,
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
 
+                                        .read_instruction_o(read_decoded_instruction_o),
                                         .compute_weight_sel_o,
                                         .load_activations_to_MAC_o,
                                         .stall_compute_o,

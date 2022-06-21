@@ -73,7 +73,7 @@ module unified_buffer_control_unit
                 tile_y_q                    <= '0;
                 next_tile_cntr_q            <= '0;
 
-                if (!MAC_op_i[0]) begin
+                if (MAC_op_i[1]) begin
                     unified_buffer_state <= STALL;
                 end
             end

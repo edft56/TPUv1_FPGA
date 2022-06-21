@@ -81,34 +81,20 @@ module main
     wire [11:0] unified_buffer_addr_start_wr;
     wire [11:0] unified_buffer_addr_start_rd;
 
+    wire read_decoded_instruction;
+    wire decode_registers_t decoded_instruction;
 
-    instruction_queue instruction_queue 
+
+    instruction_unit instr_unit
                         (
                             .clk_i,
                             .rst_i,
                             .instruction_i,
                             .write_i(write_instruction_i),
-                            .read_i('1),//(done_o),
+                            .read_i(read_decoded_instruction),
 
                             .iq_full_o(instruction_queue_full_o),
-                            .instruction_o(instruction_q)
-                        );
-
-    instruction_decode instruction_decoder 
-                        (
-                            .clk_i,
-                            .rst_i,
-                            .instruction_i(instruction_q),
-
-                            .MAC_op_o(MAC_op),
-                            .V_dim_o(V_dim),
-                            .U_dim_o(U_dim),
-                            .ITER_dim_o(ITER_dim),
-                            .V_dim1_o(V_dim1),
-                            .U_dim1_o(U_dim1),
-                            .ITER_dim1_o(ITER_dim1),
-                            .unified_buffer_addr_start_rd_o(unified_buffer_addr_start_wr),
-                            .unified_buffer_addr_start_wr_o(unified_buffer_addr_start_wr) 
+                            .decoded_instruction_o(decoded_instruction)
                         );
 
     MAC_systolic_array MAC_Array(   .clk_i,
@@ -176,15 +162,8 @@ module main
 
     control_unit ctrl_unit( .clk_i,
                             .rst_i,
-                            .MAC_op_i(MAC_op),
                             .weight_fifo_valid_output,
-                            .V_dim_i(V_dim),
-                            .U_dim_i(U_dim),
-                            .ITER_dim_i(ITER_dim),
-                            .V_dim1_i(V_dim1),
-                            .U_dim1_i(U_dim1),
-                            .ITER_dim1_i(ITER_dim1),
-                            .unified_buffer_start_addr_rd_i(unified_buffer_addr_start_rd),
+                            .decoded_instruction_i(decoded_instruction),
 
                             .compute_weight_sel_o(compute_weight_sel),
                             .compute_weights_buffered_o(compute_weights_buffered),
@@ -203,6 +182,7 @@ module main
                             .accum_addr_mask_rd_o(accum_addr_mask_rd),
                             .accumulator_add_o(accumulator_add),
                             .unified_buffer_read_en_o(unified_buffer_read),
+                            .read_decoded_instruction_o(read_decoded_instruction),
                             .done_o
                             );
 

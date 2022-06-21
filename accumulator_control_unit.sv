@@ -70,7 +70,7 @@ module accumulator_control_unit
                 accum_addr_mask_rd_o    <= 32'h80000000;
                 tile_x_q                <= '0;
 
-                if (!MAC_op_i[0]) begin
+                if (MAC_op_i[1]) begin
                     accum_output_state <= STALL;
                 end
             end 

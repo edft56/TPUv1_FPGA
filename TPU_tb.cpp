@@ -12,12 +12,12 @@
 #include <cmath>
 #include <bitset>
 
-const bool trace = true;
-//const bool trace = false;
+//const bool trace = true;
+const bool trace = false;
 
-const uint32_t V_DIM = 64; 
-const uint32_t U_DIM = 64; 
-const uint32_t ITER_DIM = 64;
+const uint32_t V_DIM = 89; 
+const uint32_t U_DIM = 32; 
+const uint32_t ITER_DIM = 32;
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 

@@ -47,7 +47,7 @@ module weight_control_unit
                 load_weights_o      <= '0;
                 next_tile_flag_q    <= '0;
 
-                if (!MAC_op_i[0]) begin
+                if (MAC_op_i[1]) begin
                     weight_state <= STALL;
                 end
             end
