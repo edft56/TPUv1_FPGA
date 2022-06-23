@@ -12,8 +12,8 @@
 #include <cmath>
 #include <bitset>
 
-//const bool trace = true;
-const bool trace = false;
+const bool trace = true;
+//const bool trace = false;
 
 const uint32_t V_DIM = 32; 
 const uint32_t U_DIM = 32; 
@@ -136,6 +136,8 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
 
     vluint64_t time = 0;
     uint64_t positive_edges = 0;
+    int done_count = 0;
+    int tiles_to_check = 2;
 
 
     top->clk_i = 0;
@@ -151,7 +153,7 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
         handle_inputs(top,positive_edges,U_matrix,ITER_DIM,U_DIM);
         top->instruction_i = 1;
 
-        if(positive_edges==1){
+        if( !(top->instruction_queue_full_o) ){
             top->write_instruction_i = 1;
             top->instruction_i = assemble_MAC_instruction(u_buf_start_rd,u_buf_start_wr,V_DIM,U_DIM,ITER_DIM);
         }
@@ -165,7 +167,11 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
 
         clock_tick(top,time,tfp);
         
-        if(top->done_o==1) break;
+        if(top->done_o==1) {
+            done_count++;
+            check_correct(out_cpu, (uint32_t*)(&(top->main->accum->accumulator_storage[0][0])), V_DIM, U_DIM);
+        }
+        if(done_count == tiles_to_check) break;
     }
 
     

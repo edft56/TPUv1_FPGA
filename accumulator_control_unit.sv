@@ -35,6 +35,7 @@ module accumulator_control_unit
     logic [7:0] V_dim_q;
 
     logic [ 9:0] accum_cntr_q;
+    logic [ 9:0] base_addr_q;
     logic [ 5:0] rev_partial_cntr_q;
     logic [ 2:0] tile_x_q;
 
@@ -103,15 +104,27 @@ module accumulator_control_unit
             PARTIAL_OUTPUT: begin
                 write_accumulator_o     <= 1'b1;
 
-                accumulator_addr_wr_o   <= accum_cntr_q;
+                accumulator_addr_wr_o   <= base_addr_q + accum_cntr_q;
                 accum_addr_mask_o       <= signed'(signed'(32'h80000000)>>>accum_cntr_q);
 
                 accum_cntr_q <= accum_cntr_q + 1;
 
                 if (accum_cntr_q == (MUL_SIZE-1) | accum_cntr_q + 1 == V_dim_q) begin
                     if( (accum_cntr_q + 1) == V_dim_q & (tile_x_q + 1 == max_tiles_x) ) begin
-                        accum_output_state <= REVERSE_PARTIAL;
-                        accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+                        if(MAC_op_i[1]) begin
+                            //accum_cntr_q            <= '0; //needs to select the 2nd accum
+                            //accum_addr_mask_o       <= '0;
+                            accum_addr_mask_rd_o    <= 32'h80000000;
+                            tile_x_q                <= '0;
+                            instruction_read_o      <= '1;
+
+                            accum_output_state      <= REVERSE_PARTIAL_CONTINUE;
+                            accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+                        end
+                        else begin
+                            accum_output_state <= REVERSE_PARTIAL;
+                            accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+                        end
                     end
                     else begin
                         accum_output_state <= FULL_OUTPUT;
@@ -128,7 +141,7 @@ module accumulator_control_unit
                 read_accumulator_o      <= (accum_cntr_q + 1 == upper_bound & !(tile_x_q + 1 == max_tiles_x)) ? '1 : read_accumulator_o;
 
                 accumulator_addr_rd_o   <= (accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1;
-                accumulator_addr_wr_o   <= accum_cntr_q;
+                accumulator_addr_wr_o   <= base_addr_q + accum_cntr_q;
 
 
                 accum_addr_mask_rd_o <= ( ((accum_cntr_q + 1 == upper_bound & tile_x_q =='0) | tile_x_q == 'd1) & accum_addr_mask_rd_o != '1 ) ? signed'(signed'(32'h80000000)>>>((accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1)) : accum_addr_mask_rd_o;
@@ -156,7 +169,7 @@ module accumulator_control_unit
                 write_accumulator_o     <= 1'b1;
 
                 //accumulator_addr_rd_o   <= (accum_cntr_q + 1 > upper_bound) ? accumulator_addr_rd_o + 1 : '0;
-                accumulator_addr_wr_o   <= accum_cntr_q;
+                accumulator_addr_wr_o   <= base_addr_q + accum_cntr_q;
                 accum_addr_mask_o       <= accum_addr_mask_rd_o;
 
                 accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q + 1;
@@ -172,7 +185,7 @@ module accumulator_control_unit
             REVERSE_PARTIAL_CONTINUE: begin //its like reverse partial for prev instruction but also computes new instruction
                 write_accumulator_o     <= 1'b1;
 
-                accumulator_addr_wr_o   <= accum_cntr_q;
+                accumulator_addr_wr_o   <= base_addr_q + accum_cntr_q;
 
                 accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q + 1;
 
@@ -180,7 +193,10 @@ module accumulator_control_unit
                 accum_cntr_q            <= accum_cntr_q + 1;
 
                 if (rev_partial_cntr_q == MUL_SIZE-1) begin
+                    done_o              <= '1;
                     accum_output_state  <= FULL_OUTPUT;
+                    base_addr_q         <= accum_cntr_q;
+                    accum_cntr_q        <= '0;
                 end
             end
             default: begin
