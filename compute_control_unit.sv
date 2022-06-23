@@ -15,7 +15,7 @@ module compute_control_unit
                     //input [8:0] W_DIM_i,
                     input compute_weights_rdy_i,
 
-                    output logic read_instruction_o,
+                    //output logic read_instruction_o,
                     output logic [MUL_SIZE-1 : 0] compute_weight_sel_o [MUL_SIZE],
                     output logic load_activations_to_MAC_o,
                     output logic stall_compute_o,
@@ -60,7 +60,7 @@ module compute_control_unit
     always_ff @( posedge clk_i ) begin
         //done_o                   <= 1'b0;
         current_weight_tile_q       <= (done_compute) ? '0 : (next_weight_tile_o) ? current_weight_tile_q + 1 : current_weight_tile_q;
-        read_instruction_o          <= (compute_state == RESET) ? '1 : done_compute;
+        //read_instruction_o          <= (compute_state == RESET) ? '1 : done_compute;
 
         case(compute_state)
             RESET: begin

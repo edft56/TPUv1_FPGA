@@ -54,7 +54,7 @@ module weight_control_unit
             STALL: begin
                 load_weights_o                  <= '0;
 
-                if (!MAC_op_i[0]) begin
+                if (MAC_op_i[1]) begin
                     weight_state                <= LOAD_WEIGHTS;
                 end
             end
@@ -81,8 +81,8 @@ module weight_control_unit
                     weight_state                <= LOAD_WEIGHTS;
                 end
 
-                if(done_i) begin
-                    weight_state                <= STALL;
+                if(done_i & !MAC_op_i[1]) begin
+                    weight_state                <= RESET;
                 end
 
                 if (load_weights_cntr_q == MUL_SIZE-1) begin

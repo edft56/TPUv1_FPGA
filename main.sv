@@ -91,7 +91,7 @@ module main
                             .rst_i,
                             .instruction_i,
                             .write_i(write_instruction_i),
-                            .read_i(read_decoded_instruction),
+                            .instruction_read_i(read_decoded_instruction),
 
                             .iq_full_o(instruction_queue_full_o),
                             .decoded_instruction_o(decoded_instruction)

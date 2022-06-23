@@ -15,7 +15,7 @@
 //const bool trace = true;
 const bool trace = false;
 
-const uint32_t V_DIM = 89; 
+const uint32_t V_DIM = 32; 
 const uint32_t U_DIM = 32; 
 const uint32_t ITER_DIM = 32;
 const uint32_t u_buf_start_wr = 0;
@@ -93,8 +93,8 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 
     for(int i=0; i<V_DIM; i++){
         for(int j=0; j<ITER_DIM; j++){
-            //V_matrix[i*ITER_DIM + j] = 1;
-            V_matrix[i*ITER_DIM + j] = (j)%5;
+            V_matrix[i*ITER_DIM + j] = 1;
+            //V_matrix[i*ITER_DIM + j] = (j)%5;
             //V_matrix[i*ITER_DIM + j] = rand()%10;
             //OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
         }
@@ -112,9 +112,9 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 
     for(int i=0; i<ITER_DIM; i++){
         for(int j=0; j<U_DIM; j++){
-            //U_matrix[i*U_DIM + j] = 1;
+            U_matrix[i*U_DIM + j] = 1;
             //U_matrix[i*U_DIM + j] = j;
-            U_matrix[i*U_DIM + j] = rand()%10;
+            //U_matrix[i*U_DIM + j] = rand()%10;
         }
     }
 }
@@ -124,7 +124,7 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
 void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t* out_cpu){
     Vmain* top = new Vmain;
 
-    vluint64_t sim_time = 3000;
+    vluint64_t sim_time = 500;
     
     Verilated::traceEverOn(true);
     VerilatedFstC* tfp = new VerilatedFstC;

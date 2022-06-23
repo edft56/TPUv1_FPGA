@@ -137,10 +137,14 @@ module accumulator_control_unit
 
                 if( (accum_cntr_q + 1 == upper_bound) & (tile_x_q + 1 == max_tiles_x) ) begin
                     if(MAC_op_i[1]) begin
-                        accum_cntr_q            <= '0; //needs to select the 2nd accum
+                        //accum_cntr_q            <= '0; //needs to select the 2nd accum
                         accum_addr_mask_o       <= '0;
                         accum_addr_mask_rd_o    <= 32'h80000000;
                         tile_x_q                <= '0;
+                        instruction_read_o      <= '1;
+
+                        accum_output_state      <= REVERSE_PARTIAL_CONTINUE;
+                        accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
                     end
                     else begin
                         accum_output_state      <= REVERSE_PARTIAL;
@@ -161,7 +165,7 @@ module accumulator_control_unit
                 accum_cntr_q            <= accum_cntr_q + 1;
 
                 if (rev_partial_cntr_q == MUL_SIZE-1) begin
-                    accum_output_state  <= STALL;
+                    accum_output_state  <= RESET;
                     done_o              <= '1;
                 end
             end

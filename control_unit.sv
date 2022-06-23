@@ -54,7 +54,7 @@ module control_unit
                                         //.W_DIM_i,
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
 
-                                        .read_instruction_o(read_decoded_instruction_o),
+                                        //.read_instruction_o(read_decoded_instruction_o),
                                         .compute_weight_sel_o,
                                         .load_activations_to_MAC_o,
                                         .stall_compute_o,
@@ -73,6 +73,7 @@ module control_unit
                                         .MAC_compute_i(MAC_compute_o),
                                         .load_activations_to_MAC_i(load_activations_to_MAC_o),
 
+                                        .instruction_read_o(read_decoded_instruction_o),
                                         .read_accumulator_o,
                                         .write_accumulator_o,
                                         .accumulator_addr_wr_o,
