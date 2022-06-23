@@ -28,7 +28,9 @@ module compute_control_unit
     logic [ 5:0] weight_change_cntr_q;
     logic [ 9:0] compute_cntr_q;
     logic [ 2:0] current_weight_tile_q;
-    logic wait_act_q;
+    logic        wait_act_q;
+    logic [ 7:0] U_dim_q;
+    logic [ 6:0] V_dim1_q;
 
     logic [ 9:0] next_compute_cntr;
     logic        done_compute;
@@ -37,7 +39,7 @@ module compute_control_unit
 
     initial compute_state               = RESET;
     initial weight_change_cntr_q        = '0;
-    initial compute_cntr_q              = 0;
+    initial compute_cntr_q              = '0;
     initial load_activations_to_MAC_o   = '0;
     initial stall_compute_o             = '1;
     initial MAC_compute_o               = '0;
@@ -46,8 +48,8 @@ module compute_control_unit
     initial current_weight_tile_q       = '0;
 
     always_comb begin
-        next_weight_tile_o  = compute_cntr_q == V_dim1_i;
-        max_tiles_x         = U_dim_i >> 5;
+        next_weight_tile_o  = compute_cntr_q == V_dim1_q;
+        max_tiles_x         = U_dim_q >> 5;
 
         //next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
 
@@ -57,7 +59,7 @@ module compute_control_unit
 
     always_ff @( posedge clk_i ) begin
         //done_o                   <= 1'b0;
-        current_weight_tile_q <= (done_compute) ? '0 : (next_weight_tile_o) ? current_weight_tile_q + 1 : current_weight_tile_q;
+        current_weight_tile_q       <= (done_compute) ? '0 : (next_weight_tile_o) ? current_weight_tile_q + 1 : current_weight_tile_q;
         read_instruction_o          <= (compute_state == RESET) ? '1 : done_compute;
 
         case(compute_state)
@@ -73,18 +75,20 @@ module compute_control_unit
                 
                 
                 if (MAC_op_i[1]) begin
-                    compute_state <= STALL;
+                    compute_state           <= STALL;
+                    U_dim_q                 <= U_dim_i;
+                    V_dim1_q                <= V_dim1_i;
                 end
             end
             STALL: begin
-                load_activations_to_MAC_o      <= 1'b0;
-                stall_compute_o         <= 1'b1;
-                MAC_compute_o           <= 1'b0;
+                load_activations_to_MAC_o   <= 1'b0;
+                stall_compute_o             <= 1'b1;
+                MAC_compute_o               <= 1'b0;
                 
 
                 if (compute_weights_rdy_i) begin
-                    load_activations_to_MAC_o  <= 1'b1;
-                    compute_state       <= LOAD_ACTIVATIONS;
+                    load_activations_to_MAC_o   <= 1'b1;
+                    compute_state               <= LOAD_ACTIVATIONS;
                     for(int i=0; i<32; i++) begin
                         compute_weight_sel_o[i] <= ~compute_weight_sel_o[i];
                     end
@@ -117,11 +121,7 @@ module compute_control_unit
                     MAC_compute_o           <= 1'b0;
                 end
 
-                if(done_compute) begin
-                    //done_o                  <= 1'b1;
-                    compute_state           <= STALL;
-                end
-                if(next_weight_tile_o) begin
+                if(next_weight_tile_o & !done_compute) begin
                     compute_state           <= COMPUTE_WEIGHT_CHANGE;
                     compute_weight_sel_o[0] <= compute_weight_sel_o[0] ^ (32'h80000000);
                     weight_change_cntr_q    <= weight_change_cntr_q + 1;
@@ -145,6 +145,18 @@ module compute_control_unit
             end
 
         endcase
+
+        if(done_compute) begin
+            //done_o                  <= 1'b1;
+            if (MAC_op_i[1]) begin
+                compute_state               <= COMPUTE_WEIGHT_CHANGE;
+                compute_cntr_q              <= '0;
+                weight_change_cntr_q        <= weight_change_cntr_q + 1;
+                compute_weight_sel_o[0]     <= compute_weight_sel_o[0] ^ (32'h80000000);
+                current_weight_tile_q       <= '0;
+            end
+            else compute_state              <= RESET;
+        end
         
     end
 endmodule

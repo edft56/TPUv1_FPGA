@@ -12,7 +12,7 @@ module instruction_unit
                             input  clk_i,rst_i,
                             input [INSTR_SIZE-1:0] instruction_i,
                             input  write_i,
-                            input  read_i,
+                            input  instruction_read_i,
 
                             output logic iq_full_o,
                             decode_registers_t decoded_instruction_o
@@ -27,7 +27,7 @@ module instruction_unit
     initial index_write_q = '0;
 
     always_comb begin
-        case ({write_i,read_i})
+        case ({write_i,instruction_read_i})
             2'b00:  next_index_write = index_write_q;
             2'b01:  next_index_write = (index_write_q != '0) ? index_write_q - 1 : index_write_q;
             2'b10:  next_index_write = index_write_q + 1;
@@ -40,9 +40,9 @@ module instruction_unit
 
         iq_full_o <= (next_index_write == 'd16) ? '1 : '0;
 
-        if(read_i) begin
-            decoded_instruction_o <= decoded_instruction_cache[0];
-        end
+        
+        decoded_instruction_o <= decoded_instruction_cache[0];
+        
 
         if(write_i & !iq_full_o) begin
             instruction_input_register_q <= instruction_i;
