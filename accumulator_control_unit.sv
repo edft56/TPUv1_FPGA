@@ -197,6 +197,7 @@ module accumulator_control_unit
                     accum_output_state  <= FULL_OUTPUT;
                     base_addr_q         <= accum_cntr_q;
                     accum_cntr_q        <= '0;
+                    rev_partial_cntr_q  <= '0;
                 end
             end
             default: begin

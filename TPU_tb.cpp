@@ -138,6 +138,7 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
     uint64_t positive_edges = 0;
     int done_count = 0;
     int tiles_to_check = 2;
+    int issued_instructions = 0;
 
 
     top->clk_i = 0;
@@ -153,9 +154,10 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM, uint32_t
         handle_inputs(top,positive_edges,U_matrix,ITER_DIM,U_DIM);
         top->instruction_i = 1;
 
-        if( !(top->instruction_queue_full_o) ){
+        if( !(top->instruction_queue_full_o) & issued_instructions<tiles_to_check ){
             top->write_instruction_i = 1;
             top->instruction_i = assemble_MAC_instruction(u_buf_start_rd,u_buf_start_wr,V_DIM,U_DIM,ITER_DIM);
+            issued_instructions++;
         }
         else{
             top->write_instruction_i = 0;
