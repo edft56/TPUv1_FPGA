@@ -182,7 +182,7 @@ module accumulator_control_unit
                     done_o              <= '1;
                 end
             end
-            REVERSE_PARTIAL_CONTINUE: begin //its like reverse partial for prev instruction but also computes new instruction
+            REVERSE_PARTIAL_CONTINUE: begin //its like reverse partial for prev instruction but also computes new instruction so actually full output
                 write_accumulator_o     <= 1'b1;
 
                 accumulator_addr_wr_o   <= base_addr_q + accum_cntr_q;
@@ -193,11 +193,19 @@ module accumulator_control_unit
                 accum_cntr_q            <= accum_cntr_q + 1;
 
                 if (rev_partial_cntr_q == MUL_SIZE-1) begin
-                    done_o              <= '1;
-                    accum_output_state  <= FULL_OUTPUT;
-                    base_addr_q         <= accum_cntr_q;
-                    accum_cntr_q        <= '0;
-                    rev_partial_cntr_q  <= '0;
+                    if( (rev_partial_cntr_q + 1 == upper_bound) & (tile_x_q + 1 == max_tiles_x) ) begin
+                        accum_output_state      <= REVERSE_PARTIAL;
+                        accum_addr_mask_rd_o    <= (32'h7FFFFFFF);
+                        rev_partial_cntr_q      <= '0;
+                         done_o                 <= '1;
+                    end
+                    else begin
+                        done_o              <= '1;
+                        accum_output_state  <= FULL_OUTPUT;
+                        base_addr_q         <= accum_cntr_q;
+                        accum_cntr_q        <= '0;
+                        rev_partial_cntr_q  <= '0;
+                    end
                 end
             end
             default: begin
