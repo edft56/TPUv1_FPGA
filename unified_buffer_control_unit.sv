@@ -9,19 +9,15 @@
 module unified_buffer_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
-                    input [2:0] MAC_op_i,
                     input compute_weights_rdy_i,
-                    input [7:0] V_dim_i,
-                    input [6:0] V_dim1_i,
-                    input [6:0] U_dim1_i,
-                    input [6:0] ITER_dim1_i,
-                    input [11:0] unified_buffer_start_addr_rd_i,
+                    input decoded_instr_t instruction_i,
 
                     output logic unified_buffer_read_en_o,
                     output logic [11:0] unified_buffer_addr_rd_o
                     );
 
     enum logic [1:0] {RESET, STALL, READ} unified_buffer_state;
+
 
     logic [2:0] tile_x;
     logic [2:0] tile_y;
@@ -34,14 +30,13 @@ module unified_buffer_control_unit
     logic [ 2:0] tile_y_q;
     logic [ 6:0] U_dim1_q;
     logic [ 7:0] V_dim_q;
-    logic [ 6:0] V_dim1_q;
     logic [ 6:0] ITER_dim1_q;
     logic [11:0] unified_buffer_start_addr_rd_q;
 
-    initial unified_buffer_addr_rd_o    = unified_buffer_start_addr_rd_i;
+    initial unified_buffer_addr_rd_o    = '0;
     initial tile_x_q                    = '0;
     initial tile_y_q                    = '0;
-    initial next_tile_cntr_q            = 0;
+    initial next_tile_cntr_q            = '0;
     initial unified_buffer_state        = RESET;
 
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -55,7 +50,7 @@ module unified_buffer_control_unit
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     always_comb begin
-        next_tile = (next_tile_cntr_q) == V_dim1_q;
+        next_tile = (next_tile_cntr_q + 1) == V_dim_q;
 
         done_tiles_y = (tile_y_q == 4'(U_dim1_q>>5)) & next_tile;
         done_tiles_x = (tile_x_q == 4'(ITER_dim1_q>>5)) & done_tiles_y;
@@ -78,13 +73,12 @@ module unified_buffer_control_unit
                 tile_y_q                    <= '0;
                 next_tile_cntr_q            <= '0;
 
-                if (MAC_op_i[1]) begin
-                    unified_buffer_start_addr_rd_q  <= unified_buffer_start_addr_rd_i;
+                if (instruction_i.MAC_op[1]) begin
+                    unified_buffer_start_addr_rd_q  <= instruction_i.unified_buffer_start_addr_rd;
                     unified_buffer_state            <= STALL;
-                    U_dim1_q                        <= U_dim1_i;
-                    V_dim1_q                        <= V_dim1_i;
-                    V_dim_q                         <= V_dim_i;
-                    ITER_dim1_q                     <= ITER_dim1_i;
+                    U_dim1_q                        <= instruction_i.U_dim1;
+                    V_dim_q                         <= instruction_i.V_dim;
+                    ITER_dim1_q                     <= instruction_i.ITER_dim1;
                 end
             end
             STALL: begin
@@ -98,16 +92,21 @@ module unified_buffer_control_unit
 
                 next_tile_cntr_q <= (next_tile) ? '0 : next_tile_cntr_q + 1;
 
-                if(done_tiles_x & MAC_op_i[1]) begin
-                    unified_buffer_start_addr_rd_q  <= unified_buffer_start_addr_rd_i;
-                    unified_buffer_state            <= STALL;
-                    U_dim1_q                        <= U_dim1_i;
-                    V_dim1_q                        <= V_dim1_i;
-                    V_dim_q                         <= V_dim_i;
-                    ITER_dim1_q                     <= ITER_dim1_i;
-                    unified_buffer_addr_rd_o        <= unified_buffer_start_addr_rd_i + (tile_x)*V_dim_q; //i dont like this. maybe buffer start address???
+                if(done_tiles_x) begin
+                    if(instruction_i.MAC_op[1]) begin
+                        unified_buffer_start_addr_rd_q  <= instruction_i.unified_buffer_start_addr_rd;
+                        unified_buffer_state            <= READ;
+                        U_dim1_q                        <= instruction_i.U_dim1;
+                        V_dim_q                         <= instruction_i.V_dim;
+                        ITER_dim1_q                     <= instruction_i.ITER_dim1;
+                        unified_buffer_addr_rd_o        <= instruction_i.unified_buffer_start_addr_rd + (tile_x)*V_dim_q; //i dont like this. maybe buffer start address???
+                    end
+                    else begin
+                        unified_buffer_state            <= RESET;
+                        unified_buffer_read_en_o        <= '0;
+                    end
                 end
-                else if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_q + (tile_x)*V_dim_q;
+                if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_q + (tile_x)*V_dim_q;
                 else unified_buffer_addr_rd_o               <= unified_buffer_addr_rd_o + 1;
             end
             default: begin

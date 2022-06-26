@@ -19,9 +19,9 @@ package tpu_package;
         logic [6:0] V_dim1;
         logic [6:0] U_dim1;
         logic [6:0] ITER_dim1;
-        logic [11:0] unified_buffer_addr_start_rd;
-        logic [11:0] unified_buffer_addr_start_wr;
-    } decode_registers_t;
+        logic [11:0] unified_buffer_start_addr_rd;
+        logic [11:0] unified_buffer_start_addr_wr;
+    } decoded_instr_t; //72 bits
 
     typedef logic [ 7:0] weight_t;
     typedef logic [ 8:0] weight_valid_t;

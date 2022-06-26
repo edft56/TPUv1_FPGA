@@ -35,7 +35,7 @@ module memory_general
             data_o                  <= mem_storage_q[addr_rd_i];
         end
         else begin
-            data_o                  <= data_o;
+            data_o                  <= '{default:'0};
         end
 
     end

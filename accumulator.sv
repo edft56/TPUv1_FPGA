@@ -24,7 +24,7 @@ module accumulator
                     output  logic [RES_WIDTH:0] data_o [MUL_SIZE]
                     );
 
-    logic [RES_WIDTH:0] accumulator_storage [512][MUL_SIZE] /* verilator public */;  //acc size should be 1024*32. enough to double buffer a 128x128 tile
+    logic [RES_WIDTH:0] accumulator_storage [1024][MUL_SIZE] /* verilator public */;  //acc size should be 1024*32. enough to double buffer a 128x128 tile
 
     logic [RES_WIDTH:0] accumulator_output [MUL_SIZE];
     logic [RES_WIDTH:0] adder_input [MUL_SIZE];
@@ -63,6 +63,9 @@ module accumulator
             for(int i=MUL_SIZE-1; i>=0; i--) begin
                 if (accum_addr_mask_rd_i[i]) begin
                     accumulator_output[MUL_SIZE-1-i]   <= accumulator_storage[bank_addr_array_rd[MUL_SIZE-1-i]][MUL_SIZE-1-i]; //need a read mask
+                end
+                else begin
+                    accumulator_output[MUL_SIZE-1-i]    <= 0;
                 end
             end
         end

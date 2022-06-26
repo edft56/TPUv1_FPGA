@@ -9,10 +9,7 @@
 module compute_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
-                    input [2:0] MAC_op_i,
-                    input [6:0] V_dim1_i,
-                    input [7:0] U_dim_i,
-                    //input [8:0] W_DIM_i,
+                    input decoded_instr_t instruction_i,
                     input compute_weights_rdy_i,
 
                     //output logic read_instruction_o,
@@ -23,18 +20,20 @@ module compute_control_unit
                     output logic next_weight_tile_o
                     );
 
-    enum logic [2:0] {RESET, STALL, LOAD_ACTIVATIONS, COMPUTE, COMPUTE_WEIGHT_CHANGE} compute_state;
+    enum logic [2:0] {RESET, STALL, LOAD_ACTIVATIONS, COMPUTE, COMPUTE_WEIGHT_CHANGE, COOLOFF} compute_state;
 
     logic [ 5:0] weight_change_cntr_q;
     logic [ 9:0] compute_cntr_q;
-    logic [ 2:0] current_weight_tile_q;
+    logic [ 4:0] current_weight_tile_q;
     logic        wait_act_q;
-    logic [ 7:0] U_dim_q;
-    logic [ 6:0] V_dim1_q;
+    logic [7:0] U_dim_q;                
+    logic [6:0] V_dim1_q;
+    logic [7:0] ITER_dim_q;              
+
 
     logic [ 9:0] next_compute_cntr;
     logic        done_compute;
-    logic [ 2:0] max_tiles_x;
+    logic [ 4:0] max_tiles_x;
 
 
     initial compute_state               = RESET;
@@ -49,17 +48,21 @@ module compute_control_unit
 
     always_comb begin
         next_weight_tile_o  = compute_cntr_q == V_dim1_q;
-        max_tiles_x         = U_dim_q >> 5;
+        max_tiles_x         = (U_dim_q >> 5) * (ITER_dim_q >> 5);
 
         //next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
 
         done_compute            = (current_weight_tile_q + 1 == max_tiles_x) & next_weight_tile_o;
     end
+
+    always_ff @( posedge clk_i ) begin
+
+    end
     
 
     always_ff @( posedge clk_i ) begin
         //done_o                   <= 1'b0;
-        current_weight_tile_q       <= (done_compute) ? '0 : (next_weight_tile_o) ? current_weight_tile_q + 1 : current_weight_tile_q;
+        current_weight_tile_q       <= (done_compute) ? '0 : ( (next_weight_tile_o & compute_state != RESET) ? current_weight_tile_q + 1 : current_weight_tile_q );
         //read_instruction_o          <= (compute_state == RESET) ? '1 : done_compute;
 
         case(compute_state)
@@ -74,10 +77,11 @@ module compute_control_unit
                 current_weight_tile_q       <= '0;
                 
                 
-                if (MAC_op_i[1]) begin
+                if (instruction_i.MAC_op[1]) begin
                     compute_state           <= STALL;
-                    U_dim_q                 <= U_dim_i;
-                    V_dim1_q                <= V_dim1_i;
+                    U_dim_q                 <= instruction_i.U_dim;
+                    V_dim1_q                <= instruction_i.V_dim1;
+                    ITER_dim_q              <= instruction_i.ITER_dim;
                 end
             end
             STALL: begin
@@ -141,6 +145,15 @@ module compute_control_unit
                     compute_state           <= COMPUTE;
                 end
             end
+            COOLOFF: begin
+                compute_cntr_q              <= compute_cntr_q + 1;
+                if(compute_cntr_q == MUL_SIZE-1) begin
+                    compute_state           <= RESET;
+                    load_activations_to_MAC_o   <= '0;
+                    stall_compute_o             <= '1;
+                    MAC_compute_o               <= '0;
+                end
+            end
             default: begin
             end
 
@@ -148,14 +161,22 @@ module compute_control_unit
 
         if(done_compute) begin
             //done_o                  <= 1'b1;
-            if (MAC_op_i[1]) begin
+            if (instruction_i.MAC_op[1]) begin
                 compute_state               <= COMPUTE_WEIGHT_CHANGE;
                 compute_cntr_q              <= '0;
                 weight_change_cntr_q        <= weight_change_cntr_q + 1;
                 compute_weight_sel_o[0]     <= compute_weight_sel_o[0] ^ (32'h80000000);
                 current_weight_tile_q       <= '0;
+
+                U_dim_q                 <= instruction_i.U_dim;
+                V_dim1_q                <= instruction_i.V_dim1;
+                ITER_dim_q              <= instruction_i.ITER_dim;
             end
-            else compute_state              <= RESET;
+            else begin
+                compute_state               <= COOLOFF;
+                load_activations_to_MAC_o   <= '0;
+                compute_cntr_q              <= '0;
+            end
         end
         
     end

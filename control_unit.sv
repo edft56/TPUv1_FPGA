@@ -12,7 +12,8 @@ module control_unit
                         input clk_i,
                         input rst_i,
                         input weight_fifo_valid_output,
-                        input decode_registers_t decoded_instruction_i,
+                        input decoded_instr_t decoded_instruction_i,
+                        input iq_empty_i,
                         
                         output [MUL_SIZE-1 : 0] compute_weight_sel_o [MUL_SIZE],
                         output compute_weights_buffered_o,
@@ -31,27 +32,28 @@ module control_unit
                         output logic accumulator_add_o,
                         output logic [MUL_SIZE-1:0] load_weights_o,
                         output logic unified_buffer_read_en_o,
-                        output logic read_decoded_instruction_o,
+                        output logic read_instruction_o,
                         output logic done_o
                     );
 
-    logic [2:0] MAC_op_i = decoded_instruction_i.MAC_op;
-    logic [7:0] V_dim_i = decoded_instruction_i.V_dim;
-    logic [7:0] U_dim_i = decoded_instruction_i.U_dim;
-    logic [7:0] ITER_dim_i = decoded_instruction_i.ITER_dim;
-    logic [6:0] V_dim1_i = decoded_instruction_i.V_dim1;
-    logic [6:0] U_dim1_i = decoded_instruction_i.U_dim1;
-    logic [6:0] ITER_dim1_i = decoded_instruction_i.ITER_dim1;
-    logic [11:0] unified_buffer_start_addr_rd_i = decoded_instruction_i.unified_buffer_addr_start_rd;
-    logic [11:0] unified_buffer_start_addr_wr_i = decoded_instruction_i.unified_buffer_addr_start_wr;
+    // logic [2:0] MAC_op_i = decoded_instruction_i.MAC_op;
+    // logic [7:0] V_dim_i = decoded_instruction_i.V_dim;
+    // logic [7:0] U_dim_i = decoded_instruction_i.U_dim;
+    // logic [7:0] ITER_dim_i = decoded_instruction_i.ITER_dim;
+    // logic [6:0] V_dim1_i = decoded_instruction_i.V_dim1;
+    // logic [6:0] U_dim1_i = decoded_instruction_i.U_dim1;
+    // logic [6:0] ITER_dim1_i = decoded_instruction_i.ITER_dim1;
+    // logic [11:0] unified_buffer_start_addr_rd_i = decoded_instruction_i.unified_buffer_addr_start_rd;
+    // logic [11:0] unified_buffer_start_addr_wr_i = decoded_instruction_i.unified_buffer_addr_start_wr;
+
+    decoded_instr_t instruction_WEIT_UNI;
+    decoded_instr_t instruction_UNI_COMP;
+    decoded_instr_t instruction_COMP_ACCUM;
 
     compute_control_unit comp_ctrl_unit(
                                         .clk_i,
                                         .rst_i,
-                                        .MAC_op_i,
-                                        .V_dim1_i,
-                                        .U_dim_i,
-                                        //.W_DIM_i,
+                                        .instruction_i(instruction_UNI_COMP),
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
 
                                         //.read_instruction_o(read_decoded_instruction_o),
@@ -65,15 +67,11 @@ module control_unit
     accumulator_control_unit accum_ctrl_unit(
                                         .clk_i,
                                         .rst_i,
-                                        .MAC_op_i,
-                                        //.H_DIM_i,
-                                        //.W_DIM_i,
-                                        .V_dim_i,
-                                        .U_dim_i,
+                                        .instruction_i(instruction_COMP_ACCUM),
                                         .MAC_compute_i(MAC_compute_o),
                                         .load_activations_to_MAC_i(load_activations_to_MAC_o),
 
-                                        .instruction_read_o(read_decoded_instruction_o),
+                                        //.instruction_read_o(read_decoded_instruction_o),
                                         .read_accumulator_o,
                                         .write_accumulator_o,
                                         .accumulator_addr_wr_o,
@@ -87,11 +85,12 @@ module control_unit
     weight_control_unit weight_ctrl_unit(   
                                             .clk_i,
                                             .rst_i,
-                                            .MAC_op_i,
+                                            .instruction_i(decoded_instruction_i),
                                             .weight_fifo_valid_output,
                                             .next_weight_tile_i(next_weight_tile_o),
-                                            .done_i(done_o),
+                                            .iq_empty_i,
 
+                                            .read_instruction_o,
                                             .compute_weights_rdy_o,
                                             .compute_weights_buffered_o,
                                             .load_weights_o
@@ -100,16 +99,16 @@ module control_unit
     unified_buffer_control_unit buf_ctrl(
                                     .clk_i,
                                     .rst_i,
-                                    .MAC_op_i,
                                     .compute_weights_rdy_i(compute_weights_rdy_o),
-                                    .V_dim_i,
-                                    .V_dim1_i,
-                                    .U_dim1_i,
-                                    .ITER_dim1_i,
-                                    .unified_buffer_start_addr_rd_i,
+                                    .instruction_i(instruction_WEIT_UNI),
 
                                     .unified_buffer_read_en_o,
                                     .unified_buffer_addr_rd_o
                                     );
 
+    always_ff @(posedge clk_i) begin
+        instruction_WEIT_UNI    <= decoded_instruction_i;
+        instruction_UNI_COMP    <= instruction_WEIT_UNI;
+        instruction_COMP_ACCUM  <= instruction_UNI_COMP;
+    end
 endmodule

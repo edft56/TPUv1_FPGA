@@ -81,8 +81,9 @@ module main
     wire [11:0] unified_buffer_addr_start_wr;
     wire [11:0] unified_buffer_addr_start_rd;
 
-    wire read_decoded_instruction;
-    wire decode_registers_t decoded_instruction;
+    wire instruction_read;
+    wire decoded_instr_t decoded_instruction;
+    wire iq_empty;
 
 
     instruction_unit instr_unit
@@ -91,8 +92,9 @@ module main
                             .rst_i,
                             .instruction_i,
                             .write_i(write_instruction_i),
-                            .instruction_read_i(read_decoded_instruction),
+                            .read_i(instruction_read),
 
+                            .iq_empty_o(iq_empty),
                             .iq_full_o(instruction_queue_full_o),
                             .decoded_instruction_o(decoded_instruction)
                         );
@@ -141,8 +143,7 @@ module main
                         .addr_rd_i(accumulator_addr_rd),
                         .accum_addr_mask_i(accum_addr_mask),
                         .accum_addr_mask_rd_i(accum_addr_mask_rd),
-                        //.HEIGHT,
-                        //.WIDTH,
+                        
 
                         .data_o()//.data_o(unified_buffer_in)
                         );
@@ -164,6 +165,7 @@ module main
                             .rst_i,
                             .weight_fifo_valid_output,
                             .decoded_instruction_i(decoded_instruction),
+                            .iq_empty_i(iq_empty),
 
                             .compute_weight_sel_o(compute_weight_sel),
                             .compute_weights_buffered_o(compute_weights_buffered),
@@ -182,7 +184,7 @@ module main
                             .accum_addr_mask_rd_o(accum_addr_mask_rd),
                             .accumulator_add_o(accumulator_add),
                             .unified_buffer_read_en_o(unified_buffer_read),
-                            .read_decoded_instruction_o(read_decoded_instruction),
+                            .read_instruction_o(instruction_read),
                             .done_o
                             );
 

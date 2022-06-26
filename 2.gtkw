@@ -1,36 +1,120 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Tue Jun 21 06:09:56 2022
+[*] Sun Jun 26 19:48:35 2022
 [*]
 [dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.fst"
-[dumpfile_mtime] "Mon Jun 20 19:02:00 2022"
-[dumpfile_size] 64920
+[dumpfile_mtime] "Sun Jun 26 19:40:09 2022"
+[dumpfile_size] 843119
 [savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/2.gtkw"
-[timestart] 0
+[timestart] 825
 [size] 2560 1322
-[pos] -39 -39
-*-3.000000 7 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -101 -101
+*-4.000000 966 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
-[sst_width] 419
-[signals_width] 450
+[sst_width] 368
+[signals_width] 318
 [sst_expanded] 1
-[sst_vpaned_height] 430
+[sst_vpaned_height] 395
 @22
-TOP.main.ctrl_unit.accum_ctrl_unit.U_dim_i[7:0]
-TOP.main.ctrl_unit.accum_ctrl_unit.V_dim_i[7:0]
-TOP.main.ctrl_unit.accum_ctrl_unit.accum_addr_mask_o[31:0]
-TOP.main.ctrl_unit.accum_ctrl_unit.accum_cntr_q[9:0]
+TOP.main.instr_unit.decoded_instruction_o[71:0]
+TOP.main.instr_unit.instruction_i[51:0]
+@28
+TOP.main.instr_unit.iq_empty_o
+TOP.main.instr_unit.iq_full_o
+@100000028
+TOP.main.instr_unit.iq_state[1:0]
+@28
+TOP.main.instr_unit.read_i
+@22
+TOP.main.instr_unit.read_idx_q[4:0]
+@28
+TOP.main.instr_unit.write_i
+@22
+TOP.main.instr_unit.write_idx_q[4:0]
+@200
+-
+-
+@22
+TOP.main.ctrl_unit.weight_ctrl_unit.current_weight_tile_q[4:0]
+@28
+TOP.main.ctrl_unit.weight_ctrl_unit.done_q
+@22
+TOP.main.ctrl_unit.weight_ctrl_unit.instruction_i[71:0]
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_cntr_q[4:0]
+TOP.main.ctrl_unit.weight_ctrl_unit.max_tiles[4:0]
+@28
+TOP.main.ctrl_unit.weight_ctrl_unit.next_tile
+TOP.main.ctrl_unit.weight_ctrl_unit.read_instruction_o
+@100000028
+TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[2:0]
+@200
+-
+-
+@28
+TOP.main.ctrl_unit.buf_ctrl.done_tiles_x
+@22
+TOP.main.ctrl_unit.buf_ctrl.instruction_i[71:0]
+@28
+TOP.main.ctrl_unit.buf_ctrl.next_tile
+@22
+TOP.main.ctrl_unit.buf_ctrl.next_tile_cntr_q[11:0]
+@28
+TOP.main.ctrl_unit.buf_ctrl.tile_x_q[2:0]
+TOP.main.ctrl_unit.buf_ctrl.tile_y_q[2:0]
+@24
+TOP.main.ctrl_unit.buf_ctrl.unified_buffer_addr_rd_o[11:0]
+@28
+TOP.main.ctrl_unit.buf_ctrl.unified_buffer_read_en_o
+@22
+TOP.main.ctrl_unit.buf_ctrl.unified_buffer_start_addr_rd_q[11:0]
+@100000028
+TOP.main.ctrl_unit.buf_ctrl.unified_buffer_state[1:0]
+@200
+-
+-
+@100000028
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_state[2:0]
+@24
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_cntr_q[9:0]
+@28
+TOP.main.ctrl_unit.comp_ctrl_unit.done_compute
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weights_rdy_i
+@22
+TOP.main.ctrl_unit.comp_ctrl_unit.current_weight_tile_q[4:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.instruction_i[71:0]
+@28
+TOP.main.ctrl_unit.comp_ctrl_unit.load_activations_to_MAC_o
+@22
+TOP.main.ctrl_unit.comp_ctrl_unit.max_tiles_x[4:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.next_compute_cntr[9:0]
+@28
+TOP.main.ctrl_unit.comp_ctrl_unit.next_weight_tile_o
+@22
+TOP.main.ctrl_unit.comp_ctrl_unit.weight_change_cntr_q[5:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[0][31:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[31][31:0]
+@200
+-
+-
 @100000028
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_output_state[2:0]
 @28
+TOP.main.ctrl_unit.accum_ctrl_unit.done_o
+@22
+TOP.main.ctrl_unit.accum_ctrl_unit.accum_addr_mask_o[31:0]
+TOP.main.ctrl_unit.accum_ctrl_unit.accum_addr_mask_rd_o[31:0]
+TOP.main.ctrl_unit.accum_ctrl_unit.accum_cntr_q[9:0]
+@28
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_add_o
-@24
+@25
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_addr_rd_o[9:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_addr_wr_o[9:0]
+@22
+TOP.main.ctrl_unit.accum_ctrl_unit.base_addr_q[9:0]
+TOP.main.ctrl_unit.accum_ctrl_unit.instruction_i[71:0]
 @28
-TOP.main.ctrl_unit.accum_ctrl_unit.done_o
 TOP.main.ctrl_unit.accum_ctrl_unit.max_tiles_x[2:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.read_accumulator_o
 @22
@@ -41,114 +125,5 @@ TOP.main.ctrl_unit.accum_ctrl_unit.tile_x_q[2:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.upper_bound[9:0]
 @28
 TOP.main.ctrl_unit.accum_ctrl_unit.write_accumulator_o
-@200
--
--
-@22
-TOP.main.ctrl_unit.buf_ctrl.ITER_dim1_i[6:0]
-TOP.main.ctrl_unit.buf_ctrl.V_dim1_i[6:0]
-TOP.main.ctrl_unit.buf_ctrl.V_dim_i[7:0]
-@28
-TOP.main.ctrl_unit.buf_ctrl.done_tiles_x
-TOP.main.ctrl_unit.buf_ctrl.done_tiles_y
-TOP.main.ctrl_unit.buf_ctrl.next_tile
-TOP.main.ctrl_unit.buf_ctrl.tile_x[2:0]
-TOP.main.ctrl_unit.buf_ctrl.tile_x_q[2:0]
-TOP.main.ctrl_unit.buf_ctrl.tile_y[2:0]
-TOP.main.ctrl_unit.buf_ctrl.tile_y_q[2:0]
-@22
-TOP.main.ctrl_unit.buf_ctrl.unified_buffer_addr_rd_o[11:0]
-@28
-TOP.main.ctrl_unit.buf_ctrl.unified_buffer_read_en_o
-@100000028
-TOP.main.ctrl_unit.buf_ctrl.unified_buffer_state[1:0]
-@200
--
--
-@24
-TOP.main.ctrl_unit.comp_ctrl_unit.MAC_compute_o
-TOP.main.ctrl_unit.comp_ctrl_unit.V_dim1_i[6:0]
-TOP.main.ctrl_unit.comp_ctrl_unit.compute_cntr_q[9:0]
-@100000028
-TOP.main.ctrl_unit.comp_ctrl_unit.compute_state[2:0]
-@24
-TOP.main.ctrl_unit.comp_ctrl_unit.done_compute
-TOP.main.ctrl_unit.comp_ctrl_unit.load_activations_to_MAC_o
-TOP.main.ctrl_unit.comp_ctrl_unit.next_weight_tile_o
-@800024
-TOP.main.ctrl_unit.comp_ctrl_unit.weight_change_cntr_q[5:0]
-@1001200
--group_end
-@200
--
--
-@28
-TOP.main.ctrl_unit.weight_ctrl_unit.compute_weights_buffered_o
-TOP.main.ctrl_unit.weight_ctrl_unit.compute_weights_rdy_o
-@22
-TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_cntr_q[4:0]
-@28
-TOP.main.ctrl_unit.weight_ctrl_unit.next_tile_flag_q
-TOP.main.ctrl_unit.weight_ctrl_unit.next_weight_tile_i
-@100000028
-TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[2:0]
-@200
--
--
-@24
-TOP.main.accum.adder_input[0][31:0]
-TOP.main.accum.adder_input[1][31:0]
-TOP.main.accum.adder_input[2][31:0]
-TOP.main.accum.adder_input[3][31:0]
-TOP.main.accum.adder_input[4][31:0]
-TOP.main.accum.adder_input[5][31:0]
-TOP.main.accum.adder_input[6][31:0]
-TOP.main.accum.adder_input[7][31:0]
-TOP.main.accum.adder_input[8][31:0]
-TOP.main.accum.adder_input[9][31:0]
-TOP.main.accum.adder_input[10][31:0]
-@25
-TOP.main.accum.adder_input[11][31:0]
-@24
-TOP.main.accum.adder_input[12][31:0]
-TOP.main.accum.adder_input[13][31:0]
-TOP.main.accum.adder_input[14][31:0]
-TOP.main.accum.adder_input[15][31:0]
-TOP.main.accum.adder_input[16][31:0]
-TOP.main.accum.adder_input[17][31:0]
-TOP.main.accum.adder_input[18][31:0]
-TOP.main.accum.adder_input[19][31:0]
-TOP.main.accum.adder_input[20][31:0]
-TOP.main.accum.adder_input[21][31:0]
-TOP.main.accum.adder_input[22][31:0]
-TOP.main.accum.adder_input[23][31:0]
-TOP.main.accum.adder_input[24][31:0]
-TOP.main.accum.adder_input[25][31:0]
-TOP.main.accum.adder_input[26][31:0]
-TOP.main.accum.adder_input[27][31:0]
-TOP.main.accum.adder_input[28][31:0]
-TOP.main.accum.adder_input[29][31:0]
-TOP.main.accum.adder_input[30][31:0]
-TOP.main.accum.adder_input[31][31:0]
-@200
--
-@22
-TOP.main.ctrl_unit.accum_ctrl_unit.accum_addr_mask_rd_o[31:0]
-@28
-TOP.main.instr_unit.decoded_instruction_cache[0][71:0]
-@22
-TOP.main.ctrl_unit.decoded_instruction_i[71:0]
-TOP.main.instr_unit.decoded_instruction_cache[1][71:0]
-TOP.main.instr_unit.decoded_instruction_o[71:0]
-TOP.main.instr_unit.index_write_q[4:0]
-TOP.main.instr_unit.instruction_i[51:0]
-TOP.main.instr_unit.instruction_input_register_q[51:0]
-@28
-TOP.main.instr_unit.iq_full_o
-@22
-TOP.main.instr_unit.next_index_write[4:0]
-@28
-TOP.main.instr_unit.read_i
-TOP.main.instr_unit.write_i
 [pattern_trace] 1
 [pattern_trace] 0

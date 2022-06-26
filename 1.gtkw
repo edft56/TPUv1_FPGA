@@ -1,15 +1,15 @@
 [*]
-[*] GTKWave Analyzer v3.3.103 (w)1999-2019 BSI
-[*] Fri Jun 24 09:28:53 2022
+[*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
+[*] Sat Jun 25 08:21:39 2022
 [*]
-[dumpfile] "/home/stefan/Desktop/Verilog/TPUv1_FPGA/top_sim.fst"
-[dumpfile_mtime] "Fri Jun 24 09:14:05 2022"
-[dumpfile_size] 97546
-[savefile] "/home/stefan/Desktop/Verilog/TPUv1_FPGA/1.gtkw"
-[timestart] 339
-[size] 1920 962
+[dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.fst"
+[dumpfile_mtime] "Sat Jun 25 08:17:58 2022"
+[dumpfile_size] 117641
+[savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/1.gtkw"
+[timestart] 0
+[size] 2560 1322
 [pos] -39 -39
-*-4.000000 456 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-8.000000 970 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
@@ -52,6 +52,7 @@ TOP.main.ctrl_unit.comp_ctrl_unit.weight_change_cntr_q[5:0]
 TOP.main.ctrl_unit.comp_ctrl_unit.next_compute_cntr[9:0]
 @28
 TOP.main.ctrl_unit.comp_ctrl_unit.MAC_op_i[2:0]
+TOP.main.ctrl_unit.comp_ctrl_unit.compute_weights_rdy_i
 @200
 -
 @22
@@ -59,15 +60,29 @@ TOP.main.instr_unit.decoded_instruction_cache[0][71:0]
 TOP.main.instr_unit.decoded_instruction_cache[1][71:0]
 TOP.main.instr_unit.decoded_instruction_cache[2][71:0]
 TOP.main.instr_unit.decoded_instruction_cache[3][71:0]
-@23
 TOP.main.instr_unit.decoded_instruction_o[71:0]
 TOP.main.instr_unit.index_write_q[4:0]
 TOP.main.instr_unit.instruction_i[51:0]
 TOP.main.instr_unit.instruction_input_register_q[51:0]
-@29
+@28
 TOP.main.instr_unit.instruction_read_i
 TOP.main.instr_unit.iq_full_o
-@23
+@22
 TOP.main.instr_unit.next_index_write[4:0]
+@200
+-
+@29
+TOP.main.ctrl_unit.weight_ctrl_unit.MAC_op_i[2:0]
+TOP.main.ctrl_unit.weight_ctrl_unit.compute_weights_buffered_o
+TOP.main.ctrl_unit.weight_ctrl_unit.compute_weights_rdy_o
+@23
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_cntr_q[4:0]
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_o[31:0]
+@29
+TOP.main.ctrl_unit.weight_ctrl_unit.next_tile_flag_q
+TOP.main.ctrl_unit.weight_ctrl_unit.next_weight_tile_i
+TOP.main.ctrl_unit.weight_ctrl_unit.weight_fifo_valid_output
+@100000029
+TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[2:0]
 [pattern_trace] 1
 [pattern_trace] 0
