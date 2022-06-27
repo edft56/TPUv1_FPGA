@@ -55,7 +55,7 @@ module weight_control_unit
     
 
     always_ff @( posedge clk_i ) begin
-        current_weight_tile_q       <= (done) ? '0 : ( (next_tile & weight_state != RESET) ? current_weight_tile_q + 1 : current_weight_tile_q );
+        current_weight_tile_q       <= (done_q) ? '0 : ( (next_tile & weight_state != RESET) ? current_weight_tile_q + 1 : current_weight_tile_q );
         done_q                      <= done;
         read_instruction_o          <= (!iq_empty_i) & (current_weight_tile_q + 1 == max_tiles) & (load_weights_cntr_q + 1 == MUL_SIZE-1);
 

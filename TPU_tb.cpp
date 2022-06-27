@@ -15,13 +15,13 @@
 const bool trace = true;
 //const bool trace = false;
 
-const uint32_t V_DIM = 64; 
-const uint32_t U_DIM = 64; 
-const uint32_t ITER_DIM = 64;
+const uint32_t V_DIM = 32; 
+const uint32_t U_DIM = 32; 
+const uint32_t ITER_DIM = 32;
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 
-const int tiles_to_check = 1;
+const int tiles_to_check = 2;
 
 
 uint32_t* V_matrix;
@@ -166,7 +166,9 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM){
     
     for(uint i=0; i<sim_time; i++){ //
         handle_inputs(top,positive_edges,U_matrix,ITER_DIM,U_DIM*tiles_to_check);
-        top->instruction_i = 1;
+
+        clock_tick(top,time,tfp);
+        positive_edges++;
 
         if( !(top->instruction_queue_full_o) & issued_instructions<tiles_to_check & positive_edges>1){
             top->write_instruction_i = 1;
@@ -177,9 +179,6 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM){
             top->write_instruction_i = 0;
             top->instruction_i = 0;
         }
-
-        clock_tick(top,time,tfp);
-        positive_edges++;
 
         clock_tick(top,time,tfp);
         

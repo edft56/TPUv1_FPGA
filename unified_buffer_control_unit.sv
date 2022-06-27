@@ -103,7 +103,7 @@ module unified_buffer_control_unit
                     end
                     else begin
                         unified_buffer_state            <= RESET;
-                        unified_buffer_read_en_o        <= '0;
+                        //unified_buffer_read_en_o        <= '0;
                     end
                 end
                 if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_q + (tile_x)*V_dim_q;
