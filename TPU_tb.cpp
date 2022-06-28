@@ -21,7 +21,7 @@ const uint32_t ITER_DIM = 32;
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 
-const int tiles_to_check = 2;
+const int tiles_to_check = 5;
 
 
 uint32_t* V_matrix;

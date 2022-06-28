@@ -10,9 +10,11 @@ module accumulator_control_unit
                     import tpu_package::*;    
                   (input clk_i,rst_i,
                     input decoded_instr_t instruction_i,
+                    input instruction_valid_i,
                     input MAC_compute_i,
                     input load_activations_to_MAC_i,
 
+                    output invalidate_instruction_o,
                     output logic read_accumulator_o,
                     output logic write_accumulator_o,
                     output logic [9:0] accumulator_addr_wr_o,
@@ -53,6 +55,7 @@ module accumulator_control_unit
 
     always_ff @( posedge clk_i ) begin
         done_o              <= '0;
+        invalidate_instruction_o    <= (invalidate_instruction_o) ? '0 : invalidate_instruction_o;
         
         case (accum_output_state)
             RESET: begin    
@@ -68,11 +71,13 @@ module accumulator_control_unit
                 accum_addr_mask_rd_o    <= 32'h80000000;
                 tile_x_q                <= '0;
 
-                if (instruction_i.MAC_op[1]) begin
+                if (instruction_valid_i & instruction_i.MAC_op[1]) begin
                     accum_output_state      <= STALL;
                     U_dim_q                 <= instruction_i.U_dim;
                     V_dim_q                 <= instruction_i.V_dim;
+
                 end
+                if (instruction_valid_i) invalidate_instruction_o<= '1;
             end 
             STALL: begin
 
@@ -104,7 +109,7 @@ module accumulator_control_unit
 
                 if (accum_cntr_q == (MUL_SIZE-1) | accum_cntr_q + 1 == V_dim_q) begin
                     if( (accum_cntr_q + 1) == V_dim_q & (tile_x_q + 1 == max_tiles_x) ) begin
-                        if(instruction_i.MAC_op[1]) begin
+                        if(instruction_valid_i & instruction_i.MAC_op[1]) begin
                             //accum_cntr_q            <= '0; //needs to select the 2nd accum
                             //accum_addr_mask_o       <= '0;
                             accum_addr_mask_rd_o    <= 32'h80000000;
@@ -117,6 +122,8 @@ module accumulator_control_unit
 
                             accum_output_state      <= REVERSE_PARTIAL_CONTINUE;
                             accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+
+                            invalidate_instruction_o<= '1;
                         end
                         else begin
                             accum_output_state <= REVERSE_PARTIAL;
@@ -146,7 +153,7 @@ module accumulator_control_unit
                 accum_cntr_q <= (accum_cntr_q + 1 == upper_bound) ? '0 : accum_cntr_q + 1;
 
                 if( (accum_cntr_q + 1 == upper_bound) & (tile_x_q + 1 == max_tiles_x) ) begin
-                    if(instruction_i.MAC_op[1]) begin
+                    if(instruction_valid_i & instruction_i.MAC_op[1]) begin
                         //accum_cntr_q            <= '0; //needs to select the 2nd accum
                         //accum_addr_mask_o       <= '0;
                         accum_addr_mask_rd_o    <= 32'h80000000;
@@ -159,6 +166,8 @@ module accumulator_control_unit
 
                         accum_output_state      <= REVERSE_PARTIAL_CONTINUE;
                         accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
+
+                        invalidate_instruction_o<= '1;
                     end
                     else begin
                         accum_output_state      <= REVERSE_PARTIAL;

@@ -46,17 +46,35 @@ module control_unit
     // logic [11:0] unified_buffer_start_addr_rd_i = decoded_instruction_i.unified_buffer_addr_start_rd;
     // logic [11:0] unified_buffer_start_addr_wr_i = decoded_instruction_i.unified_buffer_addr_start_wr;
 
+    wire invalidate_instruction_COMP;
+    wire invalidate_instruction_ACCUM;
+    wire invalidate_instruction_UNI;
+
+    logic valid_instruction_WEIT;
+    logic valid_instruction_COMP;
+    logic valid_instruction_ACCUM;
+    logic valid_instruction_UNI;
+
+    decoded_instr_t instruction_WEIT;
     decoded_instr_t instruction_WEIT_UNI;
     decoded_instr_t instruction_UNI_COMP;
     decoded_instr_t instruction_COMP_ACCUM;
+
+    initial valid_instruction_WEIT = '0;
+    initial valid_instruction_ACCUM = '0;
+    initial valid_instruction_COMP = '0;
+    initial valid_instruction_UNI = '0;
+
 
     compute_control_unit comp_ctrl_unit(
                                         .clk_i,
                                         .rst_i,
                                         .instruction_i(instruction_UNI_COMP),
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
+                                        .instruction_valid_i(valid_instruction_COMP),
 
                                         //.read_instruction_o(read_decoded_instruction_o),
+                                        .invalidate_instruction_o(invalidate_instruction_COMP),
                                         .compute_weight_sel_o,
                                         .load_activations_to_MAC_o,
                                         .stall_compute_o,
@@ -70,8 +88,10 @@ module control_unit
                                         .instruction_i(instruction_COMP_ACCUM),
                                         .MAC_compute_i(MAC_compute_o),
                                         .load_activations_to_MAC_i(load_activations_to_MAC_o),
+                                        .instruction_valid_i(valid_instruction_ACCUM),
 
                                         //.instruction_read_o(read_decoded_instruction_o),
+                                        .invalidate_instruction_o(invalidate_instruction_ACCUM),
                                         .read_accumulator_o,
                                         .write_accumulator_o,
                                         .accumulator_addr_wr_o,
@@ -101,14 +121,22 @@ module control_unit
                                     .rst_i,
                                     .compute_weights_rdy_i(compute_weights_rdy_o),
                                     .instruction_i(instruction_WEIT_UNI),
+                                    .instruction_valid_i(valid_instruction_UNI),
 
+                                    .invalidate_instruction_o(invalidate_instruction_UNI),
                                     .unified_buffer_read_en_o,
                                     .unified_buffer_addr_rd_o
                                     );
 
     always_ff @(posedge clk_i) begin
-        instruction_WEIT_UNI    <= decoded_instruction_i;
-        instruction_UNI_COMP    <= instruction_WEIT_UNI;
-        instruction_COMP_ACCUM  <= instruction_UNI_COMP;
+        valid_instruction_WEIT   <= ( read_instruction_o )              ? '1 : ( (!valid_instruction_UNI)   ? '0 : valid_instruction_WEIT );
+        valid_instruction_UNI    <= ( invalidate_instruction_UNI )      ? '0 : ( (valid_instruction_WEIT)   ? '1 : valid_instruction_UNI );
+        valid_instruction_COMP   <= ( invalidate_instruction_COMP )     ? '0 : ( (valid_instruction_UNI)    ? '1 : valid_instruction_COMP );
+        valid_instruction_ACCUM  <= ( invalidate_instruction_ACCUM )    ? '0 : ( (valid_instruction_COMP)   ? '1 : valid_instruction_ACCUM );
+
+        instruction_WEIT        <= ( read_instruction_o ) ? decoded_instruction_i : instruction_WEIT;
+        instruction_WEIT_UNI    <= ( !valid_instruction_UNI ) ? instruction_WEIT : instruction_WEIT_UNI;
+        instruction_UNI_COMP    <= ( !valid_instruction_COMP ) ? instruction_WEIT_UNI  : instruction_UNI_COMP;
+        instruction_COMP_ACCUM  <= ( !valid_instruction_ACCUM ) ? instruction_UNI_COMP  : instruction_COMP_ACCUM;
     end
 endmodule

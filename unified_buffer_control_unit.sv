@@ -11,7 +11,9 @@ module unified_buffer_control_unit
                   (input clk_i,rst_i,
                     input compute_weights_rdy_i,
                     input decoded_instr_t instruction_i,
+                    input instruction_valid_i,
 
+                    output logic invalidate_instruction_o,
                     output logic unified_buffer_read_en_o,
                     output logic [11:0] unified_buffer_addr_rd_o
                     );
@@ -57,11 +59,13 @@ module unified_buffer_control_unit
 
         tile_y = (done_tiles_y) ? '0 : ( next_tile    ? tile_y_q + 1 : tile_y_q );
         tile_x = (done_tiles_x) ? '0 : ( done_tiles_y ? tile_x_q + 1 : tile_x_q );
+
     end
     
 
     //assume tiles are written to unified buffer in the required order
     always_ff @( posedge clk_i ) begin
+        invalidate_instruction_o    <= (invalidate_instruction_o) ? '0 : invalidate_instruction_o;
         tile_y_q <= tile_y;
         tile_x_q <= tile_x;
 
@@ -73,13 +77,15 @@ module unified_buffer_control_unit
                 tile_y_q                    <= '0;
                 next_tile_cntr_q            <= '0;
 
-                if (instruction_i.MAC_op[1]) begin
+                if (instruction_valid_i & instruction_i.MAC_op[1]) begin
                     unified_buffer_start_addr_rd_q  <= instruction_i.unified_buffer_start_addr_rd;
                     unified_buffer_state            <= STALL;
                     U_dim1_q                        <= instruction_i.U_dim1;
                     V_dim_q                         <= instruction_i.V_dim;
                     ITER_dim1_q                     <= instruction_i.ITER_dim1;
+
                 end
+                if (instruction_valid_i) invalidate_instruction_o        <= '1;
             end
             STALL: begin
                 if (compute_weights_rdy_i) begin
@@ -93,13 +99,15 @@ module unified_buffer_control_unit
                 next_tile_cntr_q <= (next_tile) ? '0 : next_tile_cntr_q + 1;
 
                 if(done_tiles_x) begin
-                    if(instruction_i.MAC_op[1]) begin
+                    if(instruction_valid_i & instruction_i.MAC_op[1]) begin
                         unified_buffer_start_addr_rd_q  <= instruction_i.unified_buffer_start_addr_rd;
                         unified_buffer_state            <= READ;
                         U_dim1_q                        <= instruction_i.U_dim1;
                         V_dim_q                         <= instruction_i.V_dim;
                         ITER_dim1_q                     <= instruction_i.ITER_dim1;
                         unified_buffer_addr_rd_o        <= instruction_i.unified_buffer_start_addr_rd + (tile_x)*V_dim_q; //i dont like this. maybe buffer start address???
+
+                        invalidate_instruction_o        <= '1;
                     end
                     else begin
                         unified_buffer_state            <= RESET;
