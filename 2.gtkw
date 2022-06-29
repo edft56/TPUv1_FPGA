@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Sun Jun 26 19:48:35 2022
+[*] Wed Jun 29 20:17:39 2022
 [*]
 [dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.fst"
-[dumpfile_mtime] "Sun Jun 26 19:40:09 2022"
-[dumpfile_size] 843119
+[dumpfile_mtime] "Tue Jun 28 20:54:03 2022"
+[dumpfile_size] 105523
 [savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/2.gtkw"
-[timestart] 825
+[timestart] 279
 [size] 2560 1322
-[pos] -101 -101
-*-4.000000 966 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[pos] -39 -39
+*-6.000000 369 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
@@ -17,6 +17,32 @@
 [signals_width] 318
 [sst_expanded] 1
 [sst_vpaned_height] 395
+@22
+TOP.main.ctrl_unit.decoded_instruction_i[71:0]
+TOP.main.ctrl_unit.instruction_WEIT[71:0]
+TOP.main.ctrl_unit.instruction_WEIT_UNI[71:0]
+TOP.main.ctrl_unit.instruction_UNI_COMP[71:0]
+TOP.main.ctrl_unit.instruction_COMP_ACCUM[71:0]
+@200
+-
+@28
+TOP.main.ctrl_unit.invalidate_instruction_UNI
+TOP.main.ctrl_unit.invalidate_instruction_COMP
+TOP.main.ctrl_unit.invalidate_instruction_ACCUM
+@200
+-
+@28
+TOP.main.ctrl_unit.read_instruction_o
+@200
+-
+@28
+TOP.main.ctrl_unit.valid_instruction_WEIT
+TOP.main.ctrl_unit.valid_instruction_UNI
+TOP.main.ctrl_unit.valid_instruction_COMP
+TOP.main.ctrl_unit.valid_instruction_ACCUM
+@200
+-
+-
 @22
 TOP.main.instr_unit.decoded_instruction_o[71:0]
 TOP.main.instr_unit.instruction_i[51:0]
@@ -98,6 +124,8 @@ TOP.main.ctrl_unit.comp_ctrl_unit.compute_weight_sel_o[31][31:0]
 @200
 -
 -
+@23
+TOP.main.ctrl_unit.accum_ctrl_unit.instruction_i[71:0]
 @100000028
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_output_state[2:0]
 @28
@@ -108,12 +136,11 @@ TOP.main.ctrl_unit.accum_ctrl_unit.accum_addr_mask_rd_o[31:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.accum_cntr_q[9:0]
 @28
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_add_o
-@25
+@24
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_addr_rd_o[9:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.accumulator_addr_wr_o[9:0]
 @22
 TOP.main.ctrl_unit.accum_ctrl_unit.base_addr_q[9:0]
-TOP.main.ctrl_unit.accum_ctrl_unit.instruction_i[71:0]
 @28
 TOP.main.ctrl_unit.accum_ctrl_unit.max_tiles_x[2:0]
 TOP.main.ctrl_unit.accum_ctrl_unit.read_accumulator_o

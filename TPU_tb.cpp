@@ -21,7 +21,7 @@ const uint32_t ITER_DIM = 32;
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 
-const int tiles_to_check = 5;
+const int tiles_to_check = 2;
 
 
 uint32_t* V_matrix;
@@ -107,8 +107,8 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
         for(int i=0; i<V_DIM; i++){
             for(int j=0; j<ITER_DIM; j++){
                 //V_matrix[n*V_DIM*ITER_DIM + i*ITER_DIM + j] = 1;
-                V_matrix[n*V_DIM*ITER_DIM + i*ITER_DIM + j] = (j)%5;
-                //V_matrix[n*V_DIM*ITER_DIM + i*ITER_DIM + j] = rand()%10;
+                //V_matrix[n*V_DIM*ITER_DIM + i*ITER_DIM + j] = (j)%5;
+                V_matrix[n*V_DIM*ITER_DIM + i*ITER_DIM + j] = rand()%10;
                 //OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
             }
         }
