@@ -34,9 +34,9 @@ module memory_general
         if (port2_rd_i) begin
             data_o                  <= mem_storage_q[addr_rd_i];
         end
-        else begin
-            data_o                  <= '{default:'0};
-        end
+        // else begin
+        //     data_o                  <= '{default:'0};
+        // end
 
     end
 

@@ -154,12 +154,18 @@ module compute_control_unit
                 end
             end
             COOLOFF: begin
+                weight_change_cntr_q        <= weight_change_cntr_q + 1;
+
                 compute_cntr_q              <= compute_cntr_q + 1;
-                if(compute_cntr_q == MUL_SIZE-1) begin
+
+                compute_weight_sel_o[0]     <= compute_weight_sel_o[0] ^ (32'h80000000 >> weight_change_cntr_q);
+                compute_weight_sel_o[1:31]  <= compute_weight_sel_o[0:30];
+                if(compute_cntr_q == (MUL_SIZE*2)-1) begin
                     compute_state           <= RESET;
                     load_activations_to_MAC_o   <= '0;
                     stall_compute_o             <= '1;
                     MAC_compute_o               <= '0;
+                    
                 end
             end
             default: begin
@@ -182,9 +188,9 @@ module compute_control_unit
 
                 invalidate_instruction_o    <= '1;
             end
-            else begin
+            else if(compute_state != COOLOFF) begin
                 compute_state               <= COOLOFF;
-                load_activations_to_MAC_o   <= '0;
+                //load_activations_to_MAC_o   <= '0;
                 compute_cntr_q              <= '0;
             end
         end
