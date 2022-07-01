@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Thu Jun 30 19:28:56 2022
+[*] Fri Jul  1 16:55:34 2022
 [*]
 [dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.fst"
-[dumpfile_mtime] "Thu Jun 30 19:17:20 2022"
-[dumpfile_size] 326577
+[dumpfile_mtime] "Fri Jul  1 16:53:01 2022"
+[dumpfile_size] 614164
 [savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/2.gtkw"
-[timestart] 511
+[timestart] 803
 [size] 2560 1322
 [pos] -39 -39
-*-3.000000 583 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-4.000000 904 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
@@ -75,6 +75,8 @@ TOP.main.ctrl_unit.weight_ctrl_unit.next_tile
 TOP.main.ctrl_unit.weight_ctrl_unit.read_instruction_o
 @100000028
 TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[2:0]
+@23
+TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_o[31:0]
 @200
 -
 -
@@ -191,7 +193,7 @@ TOP.main.MAC_Array.data_o[30][31:0]
 TOP.main.MAC_Array.data_o[31][31:0]
 @200
 -
-@25
+@24
 TOP.main.Uni_Buf.unified_buffer_out[0][15:0]
 TOP.main.Uni_Buf.unified_buffer_out[1][15:0]
 TOP.main.Uni_Buf.unified_buffer_out[2][15:0]
@@ -219,6 +221,42 @@ TOP.main.Uni_Buf.unified_buffer_out[23][15:0]
 TOP.main.Uni_Buf.unified_buffer_out[24][15:0]
 TOP.main.Uni_Buf.unified_buffer_out[25][15:0]
 TOP.main.Uni_Buf.unified_buffer_out[26][15:0]
+@200
+-
+@22
+TOP.main.MAC_Array.mem_weight_i[0][7:0]
+TOP.main.MAC_Array.mem_weight_i[1][7:0]
+TOP.main.MAC_Array.mem_weight_i[2][7:0]
+TOP.main.MAC_Array.mem_weight_i[3][7:0]
+TOP.main.MAC_Array.mem_weight_i[4][7:0]
+TOP.main.MAC_Array.mem_weight_i[5][7:0]
+TOP.main.MAC_Array.mem_weight_i[6][7:0]
+TOP.main.MAC_Array.mem_weight_i[7][7:0]
+TOP.main.MAC_Array.mem_weight_i[8][7:0]
+TOP.main.MAC_Array.mem_weight_i[9][7:0]
+TOP.main.MAC_Array.mem_weight_i[10][7:0]
+TOP.main.MAC_Array.mem_weight_i[11][7:0]
+TOP.main.MAC_Array.mem_weight_i[12][7:0]
+TOP.main.MAC_Array.mem_weight_i[13][7:0]
+TOP.main.MAC_Array.mem_weight_i[14][7:0]
+TOP.main.MAC_Array.mem_weight_i[15][7:0]
+TOP.main.MAC_Array.mem_weight_i[16][7:0]
+TOP.main.MAC_Array.mem_weight_i[17][7:0]
+TOP.main.MAC_Array.mem_weight_i[18][7:0]
+TOP.main.MAC_Array.mem_weight_i[19][7:0]
+TOP.main.MAC_Array.mem_weight_i[20][7:0]
+TOP.main.MAC_Array.mem_weight_i[21][7:0]
+TOP.main.MAC_Array.mem_weight_i[22][7:0]
+TOP.main.MAC_Array.mem_weight_i[23][7:0]
+TOP.main.MAC_Array.mem_weight_i[24][7:0]
+TOP.main.MAC_Array.mem_weight_i[25][7:0]
+TOP.main.MAC_Array.mem_weight_i[26][7:0]
+TOP.main.MAC_Array.mem_weight_i[27][7:0]
+TOP.main.MAC_Array.mem_weight_i[28][7:0]
+TOP.main.MAC_Array.mem_weight_i[29][7:0]
+TOP.main.MAC_Array.mem_weight_i[30][7:0]
+TOP.main.MAC_Array.mem_weight_i[31][7:0]
+@24
 TOP.main.Uni_Buf.unified_buffer_out[27][15:0]
 TOP.main.Uni_Buf.unified_buffer_out[28][15:0]
 TOP.main.Uni_Buf.unified_buffer_out[29][15:0]

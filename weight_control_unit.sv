@@ -40,10 +40,10 @@ module weight_control_unit
     initial next_tile_flag_q    = '0;
 
     always_comb begin
-        next_tile                   = load_weights_cntr_q == MUL_SIZE-1;
+        next_tile                   = load_weights_cntr_q == MUL_SIZE-1 & weight_state != FULL;
         max_tiles                   = (U_dim_q >> 5) * (ITER_dim_q >> 5);
 
-        done                        = (current_weight_tile_q + 1 == max_tiles) & load_weights_cntr_q + 1 == MUL_SIZE-1;
+        done                        = (current_weight_tile_q + 1 == max_tiles) & load_weights_cntr_q + 1 == MUL_SIZE-1 & weight_state != FULL;
 
         compute_weights_rdy_o       = ( (weight_state == DOUBLE_BUFFER | weight_state == FULL) |
                                         (weight_state == DOUBLE_BUFFER & next_weight_tile_i)   |
@@ -57,7 +57,7 @@ module weight_control_unit
     always_ff @( posedge clk_i ) begin
         current_weight_tile_q       <= (done_q) ? '0 : ( (next_tile & weight_state != RESET) ? current_weight_tile_q + 1 : current_weight_tile_q );
         done_q                      <= done;
-        read_instruction_o          <= (!iq_empty_i) & (current_weight_tile_q + 1 == max_tiles) & (load_weights_cntr_q + 1 == MUL_SIZE-1);
+        read_instruction_o          <= (!iq_empty_i) & done;
 
         case(weight_state)
             RESET: begin
@@ -137,6 +137,7 @@ module weight_control_unit
             end
             else begin
                 weight_state            <= RESET;
+                load_weights_o                  <= '0;
             end
         end
     end

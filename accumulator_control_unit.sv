@@ -159,8 +159,8 @@ module accumulator_control_unit
                         accum_addr_mask_rd_o    <= 32'h80000000;
                         tile_x_q                <= '0;
                         accum_cntr_q            <= '0;
-                        accumulator_addr_rd_o   <= upper_bound;
-                        base_addr_q             <= upper_bound;
+                        accumulator_addr_rd_o   <= base_addr_q + upper_bound; //THIS NEEDS TO CHANGE LATER. ONLY FOR TESTING
+                        base_addr_q             <= base_addr_q + upper_bound; //THIS NEEDS TO CHANGE LATER. ONLY FOR TESTING
                         U_dim_q                 <= instruction_i.U_dim;
                         V_dim_q                 <= instruction_i.V_dim;
 
@@ -210,8 +210,8 @@ module accumulator_control_unit
                             accum_addr_mask_rd_o    <= 32'h80000000;
                             tile_x_q                <= '0;
                             accum_cntr_q            <= '0;
-                            accumulator_addr_rd_o   <= upper_bound;
-                            base_addr_q             <= upper_bound;
+                            accumulator_addr_rd_o   <= base_addr_q + upper_bound; //THIS NEEDS TO CHANGE LATER. ONLY FOR TESTING
+                            base_addr_q             <= base_addr_q + upper_bound; //THIS NEEDS TO CHANGE LATER. ONLY FOR TESTING
                             U_dim_q                 <= instruction_i.U_dim;
                             V_dim_q                 <= instruction_i.V_dim;
                             rev_partial_cntr_q      <= '0;
