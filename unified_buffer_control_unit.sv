@@ -114,7 +114,7 @@ module unified_buffer_control_unit
                         //unified_buffer_read_en_o        <= '0;
                     end
                 end
-                if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_q + (tile_x)*V_dim_q;
+                else if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_q + (tile_x)*V_dim_q;
                 else unified_buffer_addr_rd_o               <= unified_buffer_addr_rd_o + 1;
             end
             default: begin

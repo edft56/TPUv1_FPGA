@@ -110,15 +110,15 @@ module compute_control_unit
                 MAC_compute_o           <= 1'b0;
                 
                 //compute_state <= COMPUTE;
-                //wait_act_q <= 1;
+                wait_act_q <= 1;
 
-                //if(wait_act_q) begin
+                if(wait_act_q) begin
                     compute_state <= COMPUTE;
-                    // wait_act_q <= '0;
-                    // compute_cntr_q              <= compute_cntr_q + 1;
-                    // stall_compute_o             <= 1'b0;
-                    // MAC_compute_o               <= 1'b1;
-                //end
+                    wait_act_q <= '0;
+                    compute_cntr_q              <= compute_cntr_q + 1;
+                    stall_compute_o             <= 1'b0;
+                    MAC_compute_o               <= 1'b1;
+                end
             end
             COMPUTE: begin
                 load_activations_to_MAC_o          <= 1'b1;

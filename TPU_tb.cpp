@@ -15,9 +15,9 @@
 const bool trace = true;
 //const bool trace = false;
 
-const uint32_t V_DIM = 32; 
-const uint32_t U_DIM = 32; 
-const uint32_t ITER_DIM = 32;
+const uint32_t V_DIM = 64; 
+const uint32_t U_DIM = 64; 
+const uint32_t ITER_DIM = 64;
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 
@@ -78,12 +78,13 @@ void handle_inputs(Vmain* top, uint64_t& positive_edges, uint32_t* U_matrix, uin
     static int tile_y = 0;
     static int col = 31;
     static int col_cnt = 0;
+    static int base = 0;
 
     if (positive_edges>2 && top->request_fifo_data_o){
         top->sending_fifo_data_i = 1;
 
         for(int i=0; i<32; i++){
-            top->weight_fifo_data_in[i] = U_matrix[tile_y*32*U_DIM + i*U_DIM + tile_x*32 + col]; //read each tile in reverse
+            top->weight_fifo_data_in[i] = U_matrix[base + tile_y*32*U_DIM + i*U_DIM + tile_x*32 + col]; //read each tile in reverse
             //top->weight_fifo_data_in[i] = 1;
         }
         // bool tile_y_up = ((col_cnt+1) % (32) == 0);
@@ -93,9 +94,21 @@ void handle_inputs(Vmain* top, uint64_t& positive_edges, uint32_t* U_matrix, uin
         
         col_cnt = (col_cnt+1) % (32);
         col = 31 - col_cnt;
+
+        if(tile_y == (ITER_DIM/32)-1 && tile_y_up){
+            base += ITER_DIM*U_DIM;
+            //std::cout<<tile_y<<" "<<tile_x<<" "<<"\n";
+            col_cnt = 0;
+            tile_x = 0;
+            tile_y = 0;
+        } 
+
         tile_y = ( tile_y == (ITER_DIM/32)-1 && tile_y_up ) ? 0 : ( tile_y_up ? tile_y + 1 : tile_y );
         tile_x = ( tile_x == (U_DIM/32)-1 && tile_x_up) ? 0 : ( tile_x_up ? tile_x + 1 : tile_x );
 
+        //std::cout<<(base + tile_y*32*U_DIM + tile_x*32 + col)<<"\n";
+
+        
     }
 }
 
@@ -126,8 +139,8 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
         for(int i=0; i<ITER_DIM; i++){
             for(int j=0; j<U_DIM; j++){
                 //U_matrix[n*U_DIM*ITER_DIM + i*U_DIM + j] = 1;
-                //U_matrix[n*U_DIM*ITER_DIM + i*U_DIM + j] = j;
-                U_matrix[n*U_DIM*ITER_DIM + i*U_DIM + j] = rand()%10;
+                U_matrix[n*U_DIM*ITER_DIM + i*U_DIM + j] = j%5;
+                //U_matrix[n*U_DIM*ITER_DIM + i*U_DIM + j] = rand()%10;
             }
         }
     }
@@ -165,7 +178,7 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM){
     if (trace) tfp->dump(time*2);
     
     for(uint i=0; i<sim_time; i++){ //
-        handle_inputs(top,positive_edges,U_matrix,ITER_DIM,U_DIM*tiles_to_check);
+        handle_inputs(top,positive_edges,U_matrix,ITER_DIM,U_DIM);
 
         clock_tick(top,time,tfp);
         positive_edges++;
