@@ -5,6 +5,8 @@
     `include "tpu_package.sv"
 `endif   // guard
 
+// need to rethink this fifo but works for now
+
 module weight_fifo
                     import tpu_package::*;    
                   ( input   clk_i, rst_i,

@@ -5,6 +5,7 @@
     `include "tpu_package.sv"
 `endif   // guard
 
+//needs to stall when weights are not loaded!
 
 module compute_control_unit
                     import tpu_package::*;    
@@ -33,7 +34,6 @@ module compute_control_unit
     logic [7:0] ITER_dim_q;              
 
 
-    logic [ 9:0] next_compute_cntr;
     logic        done_compute;
     logic [ 4:0] max_tiles_x;
 
@@ -52,21 +52,13 @@ module compute_control_unit
         next_weight_tile_o  = compute_cntr_q == V_dim1_q;
         max_tiles_x         = (U_dim_q >> 5) * (ITER_dim_q >> 5);
 
-        //next_compute_cntr = (next_weight_tile_o) ? '0 : compute_cntr_q + 1;
-
         done_compute            = (current_weight_tile_q + 1 == max_tiles_x) & next_weight_tile_o;
     end
 
-    always_ff @( posedge clk_i ) begin
-
-    end
-    
 
     always_ff @( posedge clk_i ) begin
-        //done_o                   <= 1'b0;
         invalidate_instruction_o    <= (invalidate_instruction_o) ? '0 : invalidate_instruction_o;
         current_weight_tile_q       <= (done_compute) ? '0 : ( (next_weight_tile_o & compute_state != RESET) ? current_weight_tile_q + 1 : current_weight_tile_q );
-        //read_instruction_o          <= (compute_state == RESET) ? '1 : done_compute;
 
         case(compute_state)
             RESET: begin
@@ -127,12 +119,6 @@ module compute_control_unit
 
                 compute_cntr_q              <= compute_cntr_q + 1;
 
-                // if(compute_weights_rdy_i == '0) begin
-                //     compute_state           <= STALL;
-                //     stall_compute_o         <= 1'b1;
-                //     MAC_compute_o           <= 1'b0;
-                // end
-
                 if(next_weight_tile_o & !done_compute) begin
                     compute_state           <= COMPUTE_WEIGHT_CHANGE;
                     compute_weight_sel_o[0] <= compute_weight_sel_o[0] ^ (32'h80000000);
@@ -160,6 +146,7 @@ module compute_control_unit
 
                 compute_weight_sel_o[0]     <= compute_weight_sel_o[0] ^ (32'h80000000 >> weight_change_cntr_q);
                 compute_weight_sel_o[1:31]  <= compute_weight_sel_o[0:30];
+
                 if(compute_cntr_q == (MUL_SIZE*2)-1) begin
                     compute_state           <= RESET;
                     load_activations_to_MAC_o   <= '0;
@@ -174,7 +161,6 @@ module compute_control_unit
         endcase
 
         if(done_compute) begin
-            //done_o                  <= 1'b1;
             if (instruction_valid_i & instruction_i.MAC_op[1]) begin
                 compute_state               <= COMPUTE_WEIGHT_CHANGE;
                 compute_cntr_q              <= '0;
@@ -190,7 +176,6 @@ module compute_control_unit
             end
             else if(compute_state != COOLOFF) begin
                 compute_state               <= COOLOFF;
-                //load_activations_to_MAC_o   <= '0;
                 compute_cntr_q              <= '0;
             end
         end

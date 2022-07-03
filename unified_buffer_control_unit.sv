@@ -101,17 +101,15 @@ module unified_buffer_control_unit
                 if(done_tiles_x) begin
                     if(instruction_valid_i & instruction_i.MAC_op[1]) begin
                         unified_buffer_start_addr_rd_q  <= instruction_i.unified_buffer_start_addr_rd;
-                        unified_buffer_state            <= READ;
                         U_dim1_q                        <= instruction_i.U_dim1;
                         V_dim_q                         <= instruction_i.V_dim;
                         ITER_dim1_q                     <= instruction_i.ITER_dim1;
-                        unified_buffer_addr_rd_o        <= instruction_i.unified_buffer_start_addr_rd + (tile_x)*V_dim_q; //i dont like this. maybe buffer start address???
+                        unified_buffer_addr_rd_o        <= instruction_i.unified_buffer_start_addr_rd;
 
                         invalidate_instruction_o        <= '1;
                     end
                     else begin
                         unified_buffer_state            <= RESET;
-                        //unified_buffer_read_en_o        <= '0;
                     end
                 end
                 else if(next_tile) unified_buffer_addr_rd_o <= unified_buffer_start_addr_rd_q + (tile_x)*V_dim_q;

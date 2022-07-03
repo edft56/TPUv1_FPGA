@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Fri Jul  1 16:55:34 2022
+[*] Sun Jul  3 07:41:44 2022
 [*]
 [dumpfile] "/home/stefan/Desktop/Verilog/Learning/TPU/top_sim.fst"
-[dumpfile_mtime] "Fri Jul  1 16:53:01 2022"
-[dumpfile_size] 614164
+[dumpfile_mtime] "Sun Jul  3 07:40:34 2022"
+[dumpfile_size] 157074
 [savefile] "/home/stefan/Desktop/Verilog/Learning/TPU/2.gtkw"
-[timestart] 803
+[timestart] 74
 [size] 2560 1322
 [pos] -39 -39
-*-4.000000 904 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-6.000000 904 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] TOP.
 [treeopen] TOP.main.
 [treeopen] TOP.main.ctrl_unit.
@@ -62,29 +62,28 @@ TOP.main.instr_unit.write_idx_q[4:0]
 @200
 -
 -
+@23
+TOP.main.ctrl_unit.weight_ctrl_unit.instruction_i[71:0]
 @22
 TOP.main.ctrl_unit.weight_ctrl_unit.current_weight_tile_q[4:0]
 @28
 TOP.main.ctrl_unit.weight_ctrl_unit.done_q
 @22
-TOP.main.ctrl_unit.weight_ctrl_unit.instruction_i[71:0]
 TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_cntr_q[4:0]
-TOP.main.ctrl_unit.weight_ctrl_unit.max_tiles[4:0]
 @28
 TOP.main.ctrl_unit.weight_ctrl_unit.next_tile
 TOP.main.ctrl_unit.weight_ctrl_unit.read_instruction_o
 @100000028
 TOP.main.ctrl_unit.weight_ctrl_unit.weight_state[2:0]
-@23
+@22
 TOP.main.ctrl_unit.weight_ctrl_unit.load_weights_o[31:0]
 @200
 -
 -
-@28
-TOP.main.ctrl_unit.buf_ctrl.done_tiles_x
 @22
 TOP.main.ctrl_unit.buf_ctrl.instruction_i[71:0]
 @28
+TOP.main.ctrl_unit.buf_ctrl.done_tiles_x
 TOP.main.ctrl_unit.buf_ctrl.next_tile
 @22
 TOP.main.ctrl_unit.buf_ctrl.next_tile_cntr_q[11:0]
@@ -102,6 +101,8 @@ TOP.main.ctrl_unit.buf_ctrl.unified_buffer_state[1:0]
 @200
 -
 -
+@22
+TOP.main.ctrl_unit.comp_ctrl_unit.instruction_i[71:0]
 @100000028
 TOP.main.ctrl_unit.comp_ctrl_unit.compute_state[2:0]
 @24
@@ -111,7 +112,6 @@ TOP.main.ctrl_unit.comp_ctrl_unit.done_compute
 TOP.main.ctrl_unit.comp_ctrl_unit.compute_weights_rdy_i
 @22
 TOP.main.ctrl_unit.comp_ctrl_unit.current_weight_tile_q[4:0]
-TOP.main.ctrl_unit.comp_ctrl_unit.instruction_i[71:0]
 @28
 TOP.main.ctrl_unit.comp_ctrl_unit.load_activations_to_MAC_o
 @22

@@ -12,8 +12,8 @@
 #include <cmath>
 #include <bitset>
 
-const bool trace = true;
-//const bool trace = false;
+//const bool trace = true;
+const bool trace = false;
 
 const uint32_t V_DIM = 64; 
 const uint32_t U_DIM = 64; 
@@ -21,7 +21,7 @@ const uint32_t ITER_DIM = 64;
 const uint32_t u_buf_start_wr = 0;
 const uint32_t u_buf_start_rd = 0;
 
-const int tiles_to_check = 3;
+const int tiles_to_check = 2;
 
 
 uint32_t* V_matrix;
@@ -52,7 +52,6 @@ void check_correct(uint32_t* out_cpu, uint32_t* out_tpu, uint32_t V_DIM, uint32_
         }
         if (incorrect) break;
     }
-    //if (incorrect) printf("*******Incorrect result.********* \n");
 }
 
 
@@ -86,10 +85,7 @@ void handle_inputs(Vmain* top, uint64_t& positive_edges, uint32_t* U_matrix, uin
 
         for(int i=0; i<32; i++){
             top->weight_fifo_data_in[i] = U_matrix[base + tile_y*32*U_DIM + i*U_DIM + tile_x*32 + col]; //read each tile in reverse
-            //top->weight_fifo_data_in[i] = 1;
         }
-        // bool tile_y_up = ((col_cnt+1) % (32) == 0);
-        // bool tile_x_up = (tile_y == (ITER_DIM/32)-1) && tile_y_up;
         //std::cout<<base + tile_y*32*U_DIM + tile_x*32 + col<<"  "<<tile_x<<" "<<tile_y<<"\n";
         bool tile_x_up = ((col_cnt+1) % (32) == 0);
         bool tile_y_up = (tile_x == (ITER_DIM/32)-1) && tile_x_up;
@@ -105,8 +101,6 @@ void handle_inputs(Vmain* top, uint64_t& positive_edges, uint32_t* U_matrix, uin
             //std::cout<<base<<"\n";
             col = 31;
             col_cnt = 0;
-            // tile_x = 0;
-            // tile_y = 0;
         } 
 
         tile_y = ( tile_y == (ITER_DIM/32)-1 && tile_y_up ) ? 0 : ( tile_y_up ? tile_y + 1 : tile_y );
@@ -128,7 +122,6 @@ void generate_inputs(uint32_t* V_matrix, uint32_t* U_matrix, uint32_t V_DIM, uin
                 //V_matrix[n*V_DIM*ITER_DIM + i*ITER_DIM + j] = 1;
                 //V_matrix[n*V_DIM*ITER_DIM + i*ITER_DIM + j] = (j)%5;
                 V_matrix[n*V_DIM*ITER_DIM + i*ITER_DIM + j] = rand()%10;
-                //OutFile << V_matrix[i*ITER_DIM + j] <<std::endl;
             }
         }
 
@@ -207,13 +200,13 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM){
             check_correct(out_cpu, (uint32_t*)(&(top->main->accum->accumulator_storage[done_count*(V_DIM)*(U_DIM/32)][0])), V_DIM, U_DIM);
             done_count++;
 
-            for(int i=0; i<V_DIM; i++){
-                for(int j=0; j<U_DIM; j++){
-                    std::cout<<out_cpu[i*U_DIM + j]<<" ";
-                }
-                std::cout<<"\n";
-            }
-            std::cout<<"\n";
+            // for(int i=0; i<V_DIM; i++){
+            //     for(int j=0; j<U_DIM; j++){
+            //         std::cout<<out_cpu[i*U_DIM + j]<<" ";
+            //     }
+            //     std::cout<<"\n";
+            // }
+            // std::cout<<"\n";
 
             free(out_cpu);
 
@@ -235,24 +228,20 @@ void simulate_DUT(uint32_t* U_matrix,uint32_t U_DIM, uint32_t ITER_DIM){
     top->final();               // Done simulating
 
     
-    std::cout<<"\n";
-    for(int i=0; i<512; i++){
-        std::cout<<std::setw(3)<<i<<": ";
-        for(int j=0; j<32; j++){
-            std::cout<<(uint32_t)(top->main->accum->accumulator_storage[i][j])<<" ";
-        }
-        std::cout<<"\n";
-    }
+    // std::cout<<"\n";
+    // for(int i=0; i<512; i++){
+    //     std::cout<<std::setw(3)<<i<<": ";
+    //     for(int j=0; j<32; j++){
+    //         std::cout<<(uint32_t)(top->main->accum->accumulator_storage[i][j])<<" ";
+    //     }
+    //     std::cout<<"\n";
+    // }
     
-    //std::cout<<(top->H_DIM_i);
 
     if (trace)tfp->close();
 
-    //check_correct(out_cpu, (uint32_t*)(&(top->main->accum->accumulator_storage[0][0])), V_DIM, U_DIM);
 
-    delete top;
-    
-    
+    delete top;    
 }
 
 

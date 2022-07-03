@@ -5,7 +5,7 @@
     `include "tpu_package.sv"
 `endif   // guard
 
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //  There are some constraints on matrix multiply inputs.
 //
@@ -15,11 +15,11 @@
 //
 //  It is possible to relax the V constraint to >= 32 but this requires even more complex control
 //  and a weight staging area so it is probably not worth it.
-//  Another possible solution to get V >= 32 is to triple buffer the weights. Might be worth pursuing. 
+//  Another possible solution to get V >= 32 is to triple buffer the weights. Probably not worth it as well. 
 //  Meanwhile, it is infeasible to relax the V constraint completely. This would require more 
 //  bandwidth between the weight fifo and the MAC array i.e. more connections.
 //
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 module main
