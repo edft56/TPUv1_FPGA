@@ -220,6 +220,8 @@ module accumulator_control_unit
                             accum_addr_mask_rd_o    <= (32'h7FFFFFFF)>>rev_partial_cntr_q;
 
                             invalidate_instruction_o<= '1;
+
+                            done_o                 <= '1;
                         end
                         else begin
                             accum_output_state      <= REVERSE_PARTIAL;
