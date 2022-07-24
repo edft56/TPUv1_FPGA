@@ -118,7 +118,7 @@ module control_unit
 
     unified_buffer_control_unit buf_ctrl(
                                     .clk_i,
-                                    .rst_i,
+                                    .rstN_i(rst_i),
                                     .compute_weights_rdy_i(compute_weights_rdy_o),
                                     .instruction_i(instruction_WEIT_UNI),
                                     .instruction_valid_i(valid_instruction_UNI),
