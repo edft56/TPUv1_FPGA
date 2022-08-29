@@ -104,7 +104,7 @@ module control_unit
 
     weight_control_unit weight_ctrl_unit(   
                                             .clk_i,
-                                            .rst_i,
+                                            .rstN_i(rst_i),
                                             .instruction_i(decoded_instruction_i),
                                             .weight_fifo_valid_output,
                                             .next_weight_tile_i(next_weight_tile_o),
