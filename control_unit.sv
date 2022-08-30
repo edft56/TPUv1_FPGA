@@ -68,7 +68,7 @@ module control_unit
 
     compute_control_unit comp_ctrl_unit(
                                         .clk_i,
-                                        .rst_i,
+                                        .rstN_i(rst_i),
                                         .instruction_i(instruction_UNI_COMP),
                                         .compute_weights_rdy_i(compute_weights_rdy_o),
                                         .instruction_valid_i(valid_instruction_COMP),
