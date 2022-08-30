@@ -89,7 +89,7 @@ module main
     instruction_unit instr_unit
                         (
                             .clk_i,
-                            .rst_i,
+                            .rstN_i(rst_i),
                             .instruction_i,
                             .write_i(write_instruction_i),
                             .read_i(instruction_read),
